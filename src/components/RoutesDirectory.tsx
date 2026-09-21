@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { RouteItem } from '../types';
 import { DTC_KNOWN_ROUTES } from '../data/dtcRoutes';
+import { DELHI_ROUTE_REGISTRY } from '../data/delhiRouteRegistry';
 import { Route as RouteIcon, Search, Zap, Bus, ArrowRight, X, MapPin } from 'lucide-react';
 
 interface RoutesDirectoryProps {
@@ -22,8 +23,13 @@ export const RoutesDirectory: React.FC<RoutesDirectoryProps> = ({
     return routes.filter((r) => {
       const matchId = r.routeId.toLowerCase().includes(q);
       const known = DTC_KNOWN_ROUTES[r.routeId];
-      const matchStart = known?.startPoint.toLowerCase().includes(q);
-      const matchLast = known?.lastPoint.toLowerCase().includes(q);
+      const registry = Object.values(DELHI_ROUTE_REGISTRY).find((v) => v.displayRoute === r.routeId);
+      const matchStart =
+        known?.startPoint.toLowerCase().includes(q) ||
+        registry?.startPoint.toLowerCase().includes(q);
+      const matchLast =
+        known?.lastPoint.toLowerCase().includes(q) ||
+        registry?.lastPoint.toLowerCase().includes(q);
       return matchId || matchStart || matchLast;
     });
   }, [routes, search]);
@@ -73,6 +79,9 @@ export const RoutesDirectory: React.FC<RoutesDirectoryProps> = ({
           const isSelected = selectedRoute === r.routeId;
           const hasEV = r.evCount > 0;
           const known = DTC_KNOWN_ROUTES[r.routeId];
+          const registry = Object.values(DELHI_ROUTE_REGISTRY).find((v) => v.displayRoute === r.routeId);
+          const start = known?.startPoint || registry?.startPoint;
+          const last = known?.lastPoint || registry?.lastPoint;
 
           return (
             <div
@@ -107,18 +116,18 @@ export const RoutesDirectory: React.FC<RoutesDirectoryProps> = ({
                 </div>
 
                 {/* Starting Point & Last Point */}
-                {known ? (
+                {start && last ? (
                   <div className="mt-2.5 space-y-1 text-xs">
                     <div className="flex items-center gap-1.5 text-slate-700">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                      <span className="text-[11px] font-medium truncate" title={known.startPoint}>
-                        {known.startPoint.replace(' Terminal', '')}
+                      <span className="text-[11px] font-medium truncate" title={start}>
+                        {start.replace(' Terminal', '')}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-slate-700">
                       <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
-                      <span className="text-[11px] font-medium truncate" title={known.lastPoint}>
-                        {known.lastPoint.replace(' Terminal', '')}
+                      <span className="text-[11px] font-medium truncate" title={last}>
+                        {last.replace(' Terminal', '')}
                       </span>
                     </div>
                   </div>

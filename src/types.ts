@@ -1,10 +1,12 @@
 export interface DTCBus {
   id: string; // vehicle plate e.g. "DL51EV2595"
-  routeId: string;
+  routeId: string; // commercial public display route e.g. "354", "502", "740", "840"
+  rawRouteId?: string; // internal GTFS ID e.g. "1707"
   tripId: string;
   lat: number;
   lng: number;
   speedKmH: number;
+  speed?: number; // In case raw speed property is passed or accessed in km/h
   bearing: number;
   timestamp: number;
   recordedAt: string;
@@ -15,6 +17,13 @@ export interface DTCBus {
   startDate?: string;
   scheduleRelationship?: string;
   isMoving: boolean;
+  originTerminal?: string;
+  destinationTerminal?: string;
+  depotName?: string;
+  crowdingStatus?: 'low' | 'moderate' | 'crowded';
+  busModel?: string;
+  fareInfo?: { acFare: string; nonAcFare: string; pinkPass: string };
+  oneDelhiVerified?: boolean;
 }
 
 export interface FleetSummary {

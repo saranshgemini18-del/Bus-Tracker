@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { TransitHub, RouteItem } from '../types';
 import { DELHI_HUBS } from '../data/terminals';
 import { DTC_KNOWN_ROUTES } from '../data/dtcRoutes';
+import { DELHI_ROUTE_REGISTRY } from '../data/delhiRouteRegistry';
 import {
   Search,
   X,
@@ -69,11 +70,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   // Filter routes matching user input
   const routeSuggestions = useMemo(() => {
     const q = routeSearchInput.trim().toLowerCase();
-    // Combine allRoutes or topRoutes with DTC_KNOWN_ROUTES
     const routeIdsSet = new Set<string>();
     allRoutes.forEach((r) => routeIdsSet.add(r.routeId));
     topRoutes.forEach((r) => routeIdsSet.add(r.routeId));
     Object.keys(DTC_KNOWN_ROUTES).forEach((id) => routeIdsSet.add(id));
+    Object.values(DELHI_ROUTE_REGISTRY).forEach((val) => {
+      if (val.displayRoute) routeIdsSet.add(val.displayRoute);
+    });
 
     const allList = Array.from(routeIdsSet);
     if (!q) {
@@ -81,10 +84,29 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     }
     return allList
       .filter((id) => id.toLowerCase().includes(q))
-      .slice(0, 12);
+      .slice(0, 15);
   }, [routeSearchInput, allRoutes, topRoutes]);
 
-  const activeRouteInfo = selectedRoute ? DTC_KNOWN_ROUTES[selectedRoute] : null;
+  const activeRouteInfo = useMemo(() => {
+    if (!selectedRoute) return null;
+    if (DTC_KNOWN_ROUTES[selectedRoute]) return DTC_KNOWN_ROUTES[selectedRoute];
+    // Find matching displayRoute in DELHI_ROUTE_REGISTRY
+    const found = Object.values(DELHI_ROUTE_REGISTRY).find((v) => v.displayRoute === selectedRoute);
+    if (found) {
+      return {
+        id: selectedRoute,
+        displayNumber: selectedRoute,
+        name: `Route ${selectedRoute}`,
+        startPoint: found.startPoint,
+        lastPoint: found.lastPoint,
+        viaStops: [],
+        description: found.description || `${found.startPoint} to ${found.lastPoint}`,
+        frequencyMins: 10,
+        fareSlab: '₹10 - ₹25',
+      };
+    }
+    return null;
+  }, [selectedRoute]);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 shadow-sm space-y-3">
@@ -181,7 +203,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 </div>
               ) : (
                 routeSuggestions.map((rId) => {
-                  const info = DTC_KNOWN_ROUTES[rId];
+                  const info =
+                    DTC_KNOWN_ROUTES[rId] ||
+                    Object.values(DELHI_ROUTE_REGISTRY).find((v) => v.displayRoute === rId);
                   const liveCount = topRoutes.find((t) => t.routeId === rId)?.count;
                   const isCur = selectedRoute === rId;
 
@@ -199,7 +223,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     >
                       <div>
                         <div className="flex items-center gap-1.5 font-black text-sm text-slate-900">
-                          <span className="px-1.5 py-0.5 rounded bg-slate-900 text-white text-[11px]">
+                          <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-amber-400 font-mono text-[11px] border border-amber-500/30">
                             Route {rId}
                           </span>
                           {liveCount !== undefined && (

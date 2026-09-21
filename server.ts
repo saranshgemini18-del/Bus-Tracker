@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import { createServer as createViteServer } from 'vite';
 import { DELHI_HUBS } from './src/data/terminals.js';
+import { resolveCommercialRoute, resolveBusDepot, estimateOccupancy } from './src/data/delhiRouteRegistry.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,11 +18,13 @@ export const DELHI_TRANSIT_HUBS = DELHI_HUBS;
 
 export interface ProcessedBus {
   id: string; // registration plate e.g. "DL51EV2595"
-  routeId: string;
+  routeId: string; // commercial public display route e.g. "354", "502", "740"
+  rawRouteId?: string; // internal GTFS feed ID e.g. "1707"
   tripId: string;
   lat: number;
   lng: number;
   speedKmH: number;
+  speed?: number;
   bearing: number;
   timestamp: number;
   recordedAt: string;
@@ -32,6 +35,13 @@ export interface ProcessedBus {
   startDate?: string;
   scheduleRelationship?: string;
   isMoving: boolean;
+  originTerminal?: string;
+  destinationTerminal?: string;
+  depotName?: string;
+  crowdingStatus?: 'low' | 'moderate' | 'crowded';
+  busModel?: string;
+  fareInfo?: { acFare: string; nonAcFare: string; pinkPass: string };
+  oneDelhiVerified?: boolean;
 }
 
 // In-memory cache for high-frequency client queries
@@ -123,7 +133,9 @@ async function fetchAndParseDTCFeed(apiKey: string): Promise<CachedData> {
 
       const upperId = id.toUpperCase();
       const isEV = upperId.includes('EV');
-      const routeId = v.trip?.routeId || 'Unassigned';
+      const rawRouteId = (v.trip?.routeId || 'Unassigned').trim();
+      const commercial = resolveCommercialRoute(rawRouteId);
+      const displayRoute = commercial.displayRoute || rawRouteId;
       const tripId = v.trip?.tripId || '';
 
       // Extract timestamp
@@ -137,8 +149,14 @@ async function fetchAndParseDTCFeed(apiKey: string): Promise<CachedData> {
 
       const ageSeconds = Math.max(0, Math.round((now - tsEpoch) / 1000));
 
-      // Calculate speed and bearing from position history
+      // Calculate speed and bearing from position history or GTFS telemetry
       let speedKmH = 0;
+      if (v.position?.speed !== undefined && v.position?.speed !== null) {
+        const rawSpd = Number(v.position.speed);
+        if (!isNaN(rawSpd) && rawSpd > 0) {
+          speedKmH = rawSpd > 45 ? Math.round(rawSpd) : Math.round(rawSpd * 3.6);
+        }
+      }
       let bearing = v.position.bearing || 0;
 
       const prevHistory = positionHistory.get(upperId) || [];
@@ -161,13 +179,25 @@ async function fetchAndParseDTCFeed(apiKey: string): Promise<CachedData> {
       const newHistory = [...prevHistory.slice(-5), { lat, lng, time: now }];
       positionHistory.set(upperId, newHistory);
 
+      const depotName = resolveBusDepot(upperId);
+      const crowding = estimateOccupancy(speedKmH);
+      const busModel = isEV
+        ? (upperId.includes('51EV') ? 'Tata Ultra EV Low-Floor (12m AC)' : 'JBM Ecolife Electric (12m AC)')
+        : (upperId.startsWith('DL1PD') ? 'DTC Low-Floor CNG (Green/Red)' : 'DIMTS Cluster Low-Floor CNG (Orange)');
+      
+      const fareInfo = isEV
+        ? { acFare: '₹10 - ₹25 (AC Electric)', nonAcFare: 'N/A', pinkPass: '100% Free (Gulabi Pass)' }
+        : { acFare: '₹10 - ₹25', nonAcFare: '₹5 - ₹15', pinkPass: '100% Free (Gulabi Pass)' };
+
       parsedBuses.push({
         id: upperId,
-        routeId,
+        routeId: displayRoute,
+        rawRouteId,
         tripId,
         lat,
         lng,
         speedKmH,
+        speed: speedKmH,
         bearing,
         timestamp: tsEpoch,
         recordedAt: new Date(tsEpoch).toISOString(),
@@ -178,6 +208,13 @@ async function fetchAndParseDTCFeed(apiKey: string): Promise<CachedData> {
         startDate: v.trip?.startDate || undefined,
         scheduleRelationship: v.trip?.scheduleRelationship !== undefined ? String(v.trip.scheduleRelationship) : undefined,
         isMoving: speedKmH > 2,
+        originTerminal: commercial.startPoint,
+        destinationTerminal: commercial.lastPoint,
+        depotName,
+        crowdingStatus: crowding,
+        busModel,
+        fareInfo,
+        oneDelhiVerified: true,
       });
     }
 

@@ -106,10 +106,16 @@ export const BusListView: React.FC<BusListViewProps> = ({
                           e.stopPropagation();
                           onFilterRoute(bus.routeId);
                         }}
-                        className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline px-2 py-1 bg-emerald-50 rounded border border-emerald-100 text-xs"
+                        className="font-mono font-black text-amber-400 bg-zinc-950 px-2.5 py-1 rounded border border-amber-500/30 text-xs shadow-inner hover:border-amber-400 transition cursor-pointer"
+                        title={`Filter buses on Route ${bus.routeId}`}
                       >
-                        Route {bus.routeId}
+                        {bus.routeId}
                       </button>
+                      {bus.rawRouteId && bus.rawRouteId !== bus.routeId && (
+                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          #{bus.rawRouteId}
+                        </div>
+                      )}
                     </td>
 
                     {/* Start -> Next -> Last */}

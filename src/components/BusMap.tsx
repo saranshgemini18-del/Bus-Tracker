@@ -233,8 +233,18 @@ export const BusMap: React.FC<BusMapProps> = ({
 
           ${routesBadgesHtml}
 
-          <div class="mt-3 pt-2 border-t border-slate-100 text-[10px] text-slate-400 font-mono">
-            GPS: ${hub.lat.toFixed(4)}, ${hub.lng.toFixed(4)}
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+            <a 
+              href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hub.name + ' Delhi')}" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="text-blue-600 hover:text-blue-800 font-bold hover:underline flex items-center gap-1"
+            >
+              Google Maps ↗
+            </a>
+            <span class="text-slate-400 font-mono text-[10px]">
+              ${hub.lat.toFixed(4)}, ${hub.lng.toFixed(4)}
+            </span>
           </div>
         </div>
       `;
@@ -279,23 +289,23 @@ export const BusMap: React.FC<BusMapProps> = ({
       const prog = resolveBusProgression(bus, buses);
 
       const tooltipContent = `
-        <div style="font-family: ui-sans-serif, system-ui, sans-serif; font-size: 11px; line-height: 1.4; padding: 2px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px;">
-            <strong style="font-size: 12px; color: #0f172a;">${bus.id}</strong>
-            <span style="background: ${isEV ? '#ecfdf5' : '#eef2ff'}; color: ${isEV ? '#065f46' : '#3730a3'}; font-weight: 700; padding: 1px 6px; border-radius: 4px; font-size: 10px;">
-              Route ${bus.routeId}
+        <div style="font-family: ui-sans-serif, system-ui, sans-serif; font-size: 11px; line-height: 1.4; padding: 3px; min-width: 220px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px;">
+            <strong style="font-size: 12px; color: #0f172a; font-family: monospace;">${bus.id}</strong>
+            <span style="background: #09090b; color: #fbbf24; font-family: monospace; font-weight: 900; padding: 2px 8px; border-radius: 4px; font-size: 11px; border: 1px solid rgba(251, 191, 36, 0.4); box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
+              ${bus.routeId}
             </span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 2px; border-top: 1px solid #f1f5f9; padding-top: 4px;">
-            <div style="color: #047857; font-weight: 600;">🟢 Origin: <span style="color: #1e293b; font-weight: 500;">${prog.startPoint}</span></div>
-            <div style="background: #fffbeb; padding: 2px 4px; border-radius: 4px; border: 1px solid #fde68a; color: #92400e; font-weight: 700;">
-              ⚡ Next: <span style="color: #0f172a;">${prog.nextPoint}</span> (${prog.nextPointFormattedDistance}, ~${prog.nextPointEtaMins}m)
+          <div style="display: flex; flex-direction: column; gap: 3px; margin-top: 2px; border-top: 1px solid #f1f5f9; padding-top: 4px;">
+            <div style="color: #047857; font-weight: 600;">🟢 Start: <span style="color: #1e293b; font-weight: 500;">${prog.startPoint}</span></div>
+            <div style="background: #fffbeb; padding: 3px 6px; border-radius: 5px; border: 1px solid #fde68a; color: #92400e; font-weight: 700;">
+              ⚡ Next Stand: <span style="color: #0f172a;">${prog.nextPoint}</span> (${prog.nextPointFormattedDistance}, ~${prog.nextPointEtaMins}m)
             </div>
-            <div style="color: #b91c1c; font-weight: 600;">🏁 Destination: <span style="color: #1e293b; font-weight: 500;">${prog.lastPoint}</span></div>
+            <div style="color: #b91c1c; font-weight: 600;">🏁 Last: <span style="color: #1e293b; font-weight: 500;">${prog.lastPoint}</span></div>
           </div>
-          <div style="margin-top: 4px; font-size: 10px; color: #64748b; display: flex; justify-content: space-between;">
-            <span>Speed: ${bus.speedKmH} km/h</span>
-            <span style="color: #059669; font-weight: 600;">Click to inspect ➔</span>
+          <div style="margin-top: 5px; font-size: 10px; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
+            <span>Speed: <strong>${bus.speedKmH} km/h</strong></span>
+            <span style="color: #059669; font-weight: 700;">Click for Delhi One info ➔</span>
           </div>
         </div>
       `;

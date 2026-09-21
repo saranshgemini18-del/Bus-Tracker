@@ -1,0 +1,4683 @@
+[
+  {
+    "id": "stop_dhaula_kuan_148",
+    "name": "Dhaula Kuan",
+    "type": "Interchange",
+    "lat": 28.5926,
+    "lng": 77.16358,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "543A",
+      "729",
+      "740",
+      "0AIRPORT EXP-4",
+      "392B",
+      "511E",
+      "518",
+      "546"
+    ]
+  },
+  {
+    "id": "stop_dhaula_kuan_ring_road__2249",
+    "name": "Dhaula Kuan (Ring Road)",
+    "type": "Interchange",
+    "lat": 28.59946,
+    "lng": 77.16248,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "0TMS(+)",
+      "0TMS(-)",
+      "323",
+      "392",
+      "398",
+      "442",
+      "448",
+      "448B"
+    ]
+  },
+  {
+    "id": "stop_arsd_college_dhaula_kuan_2494",
+    "name": "ARSD College / Dhaula Kuan",
+    "type": "Interchange",
+    "lat": 28.59077,
+    "lng": 77.16838,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "543A",
+      "0TMS(+)",
+      "207",
+      "323",
+      "392B",
+      "392",
+      "398",
+      "442"
+    ]
+  },
+  {
+    "id": "stop_dhaula_kuan_arsd_college_2467",
+    "name": "Dhaula Kuan ARSD College",
+    "type": "Interchange",
+    "lat": 28.59039,
+    "lng": 77.16889,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "543A",
+      "392",
+      "507",
+      "507E",
+      "511",
+      "511A",
+      "511E",
+      "518"
+    ]
+  },
+  {
+    "id": "stop_dhaula_kuan_5339",
+    "name": "Dhaula Kuan",
+    "type": "Interchange",
+    "lat": 28.59272,
+    "lng": 77.16349,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "6",
+      "50",
+      "899",
+      "1314",
+      "1326",
+      "1850",
+      "1946",
+      "1961"
+    ]
+  },
+  {
+    "id": "stop_aps_school_dhaula_kuan_3899",
+    "name": "APS School Dhaula Kuan",
+    "type": "Interchange",
+    "lat": 28.60153,
+    "lng": 77.16842,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "712",
+      "728A",
+      "728E",
+      "792",
+      "D-024",
+      "6",
+      "1314",
+      "1326"
+    ]
+  },
+  {
+    "id": "stop_air_force_officers_flats_dhaul_3891",
+    "name": "Air Force Officers Flats Dhaula Kuan",
+    "type": "Interchange",
+    "lat": 28.60097,
+    "lng": 77.16787,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "712",
+      "728A",
+      "728E",
+      "792",
+      "D-024",
+      "598",
+      "2098"
+    ]
+  },
+  {
+    "id": "stop_arsd_college_dhaula_kuan__5469",
+    "name": "ARSD College (Dhaula Kuan)",
+    "type": "Interchange",
+    "lat": 28.59038,
+    "lng": 77.16847,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "32",
+      "584",
+      "3338",
+      "2035",
+      "1924",
+      "2169",
+      "2065"
+    ]
+  },
+  {
+    "id": "stop_dhaula_kuan_520",
+    "name": "Dhaula Kuan",
+    "type": "Interchange",
+    "lat": 28.5993,
+    "lng": 77.16262,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "448A",
+      "479A",
+      "2390"
+    ]
+  },
+  {
+    "id": "stop_dhaula_kuan_423",
+    "name": "Dhaula Kuan",
+    "type": "Interchange",
+    "lat": 28.59933,
+    "lng": 77.1669,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "Gurgaon → Karol Bagh"
+    ]
+  },
+  {
+    "id": "stop_dhaula_kuan_terminal_4501",
+    "name": "Dhaula Kuan Terminal",
+    "type": "Interchange",
+    "lat": 28.59473,
+    "lng": 77.16608,
+    "zone": "South-West Delhi",
+    "description": "Ring Road & Airport Express High-Speed Corridor",
+    "majorRoutes": [
+      "392"
+    ]
+  },
+  {
+    "id": "stop_aiims_2565",
+    "name": "AIIMS",
+    "type": "Bus Stand",
+    "lat": 28.56891,
+    "lng": 77.21369,
+    "zone": "South Delhi",
+    "description": "All India Institute of Medical Sciences & Aurobindo Marg Hub",
+    "majorRoutes": [
+      "543A",
+      "0TMS(+)",
+      "323",
+      "392",
+      "392B",
+      "398",
+      "400",
+      "433"
+    ]
+  },
+  {
+    "id": "stop_aiims_ring_road_2253",
+    "name": "AIIMS Ring Road",
+    "type": "Bus Stand",
+    "lat": 28.56919,
+    "lng": 77.21269,
+    "zone": "South Delhi",
+    "description": "All India Institute of Medical Sciences & Aurobindo Marg Hub",
+    "majorRoutes": [
+      "543A",
+      "0TMS(-)",
+      "323",
+      "392",
+      "392B",
+      "398",
+      "400",
+      "433"
+    ]
+  },
+  {
+    "id": "stop_aiims_safdurjung_hospital_2421",
+    "name": "AIIMS / Safdurjung Hospital",
+    "type": "Bus Stand",
+    "lat": 28.56698,
+    "lng": 77.20795,
+    "zone": "South Delhi",
+    "description": "All India Institute of Medical Sciences & Aurobindo Marg Hub",
+    "majorRoutes": [
+      "502",
+      "168",
+      "335",
+      "344",
+      "465",
+      "502A",
+      "505",
+      "507"
+    ]
+  },
+  {
+    "id": "stop_aiims_eye_center_trilok_puri_5008",
+    "name": "AIIMS Eye Center Trilok Puri",
+    "type": "Bus Stand",
+    "lat": 28.61055,
+    "lng": 77.31447,
+    "zone": "South Delhi",
+    "description": "All India Institute of Medical Sciences & Aurobindo Marg Hub",
+    "majorRoutes": [
+      "D-4401"
+    ]
+  },
+  {
+    "id": "stop_aiims_capfims_5145",
+    "name": "AIIMS-CAPFIMS",
+    "type": "Bus Stand",
+    "lat": 28.47601,
+    "lng": 77.21289,
+    "zone": "South Delhi",
+    "description": "All India Institute of Medical Sciences & Aurobindo Marg Hub",
+    "majorRoutes": [
+      "D-7701A"
+    ]
+  },
+  {
+    "id": "stop_safdarjung_hospital_169",
+    "name": "Safdarjung Hospital",
+    "type": "Bus Stand",
+    "lat": 28.56964,
+    "lng": 77.20411,
+    "zone": "South Delhi",
+    "description": "Ring Road Super-Specialty Medical Transit Junction",
+    "majorRoutes": [
+      "479A",
+      "743",
+      "Gurgaon → Anand Vihar ISBT",
+      "2390"
+    ]
+  },
+  {
+    "id": "stop_iit_gate_487",
+    "name": "IIT Gate",
+    "type": "Bus Stand",
+    "lat": 28.54613,
+    "lng": 77.20223,
+    "zone": "South Delhi",
+    "description": "Outer Ring Road IIT Delhi & Hauz Khas Node",
+    "majorRoutes": [
+      "502",
+      "168",
+      "334",
+      "465",
+      "465A",
+      "502A",
+      "505",
+      "507"
+    ]
+  },
+  {
+    "id": "stop_iit_gate_109",
+    "name": "IIT Gate",
+    "type": "Bus Stand",
+    "lat": 28.54594,
+    "lng": 77.19703,
+    "zone": "South Delhi",
+    "description": "Outer Ring Road IIT Delhi & Hauz Khas Node",
+    "majorRoutes": [
+      "335",
+      "448",
+      "448B",
+      "507",
+      "507E",
+      "620",
+      "764",
+      "764B"
+    ]
+  },
+  {
+    "id": "stop_iit_gate_503",
+    "name": "IIT Gate",
+    "type": "Bus Stand",
+    "lat": 28.54294,
+    "lng": 77.20074,
+    "zone": "South Delhi",
+    "description": "Outer Ring Road IIT Delhi & Hauz Khas Node",
+    "majorRoutes": [
+      "334",
+      "511",
+      "511A",
+      "511E",
+      "605",
+      "605A",
+      "D-046",
+      "U-SPL-05"
+    ]
+  },
+  {
+    "id": "stop_iit_gate_5506",
+    "name": "IIT Gate",
+    "type": "Bus Stand",
+    "lat": 28.5462,
+    "lng": 77.2025,
+    "zone": "South Delhi",
+    "description": "Outer Ring Road IIT Delhi & Hauz Khas Node",
+    "majorRoutes": [
+      "46",
+      "1665",
+      "1901"
+    ]
+  },
+  {
+    "id": "stop_iit_gate_5507",
+    "name": "IIT Gate",
+    "type": "Bus Stand",
+    "lat": 28.5461,
+    "lng": 77.1957,
+    "zone": "South Delhi",
+    "description": "Outer Ring Road IIT Delhi & Hauz Khas Node",
+    "majorRoutes": [
+      "46",
+      "2983"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_crossing_324",
+    "name": "Lajpat Nagar Crossing",
+    "type": "Bus Stand",
+    "lat": 28.56418,
+    "lng": 77.25039,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "243",
+      "311A",
+      "411",
+      "411LNK",
+      "418A",
+      "427",
+      "429",
+      "433"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_ring_road_vinoba__2317",
+    "name": "Lajpat Nagar Ring Road / VINOBA PURI METRO STATAION",
+    "type": "Bus Stand",
+    "lat": 28.56539,
+    "lng": 77.24851,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "543A",
+      "0TMS(+)",
+      "323",
+      "334",
+      "392",
+      "398",
+      "400",
+      "410"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_ring_road__1365",
+    "name": "Lajpat Nagar (Ring Road)",
+    "type": "Bus Stand",
+    "lat": 28.56507,
+    "lng": 77.24279,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "323",
+      "334",
+      "392",
+      "392B",
+      "398",
+      "413",
+      "418A",
+      "433"
+    ]
+  },
+  {
+    "id": "stop_defence_colony_lajpat_nagar_mt_2288",
+    "name": "Defence Colony (Lajpat Nagar Mtr Stn)",
+    "type": "Bus Stand",
+    "lat": 28.57304,
+    "lng": 77.23776,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "419",
+      "244",
+      "356",
+      "374",
+      "404",
+      "418A",
+      "419A",
+      "423"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_ring_road_vinoba__2441",
+    "name": "Lajpat Nagar Ring Road / Vinoba Puri Metro Station",
+    "type": "Bus Stand",
+    "lat": 28.56572,
+    "lng": 77.24937,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "334",
+      "392",
+      "418A",
+      "427",
+      "433",
+      "47A",
+      "480",
+      "507E"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_ring_road__2285",
+    "name": "Lajpat Nagar (Ring Road)",
+    "type": "Bus Stand",
+    "lat": 28.56559,
+    "lng": 77.24825,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "543A",
+      "0TMS(-)",
+      "400",
+      "404",
+      "410",
+      "418A",
+      "433",
+      "47B"
+    ]
+  },
+  {
+    "id": "stop_delhi_jal_board_lajpat_nagar_2318",
+    "name": "Delhi Jal Board Lajpat Nagar",
+    "type": "Bus Stand",
+    "lat": 28.57058,
+    "lng": 77.24668,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "410",
+      "427",
+      "450",
+      "47A",
+      "507B",
+      "D-026",
+      "D-026B",
+      "D-060"
+    ]
+  },
+  {
+    "id": "stop_sri_niwaspuri_pg_dav_college_l_5498",
+    "name": "Sri Niwaspuri / PG DAV College Lajpat Nagar",
+    "type": "Bus Stand",
+    "lat": 28.56675,
+    "lng": 77.25312,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "46",
+      "295",
+      "1747",
+      "2054",
+      "2163",
+      "1978",
+      "1924",
+      "2065"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_221",
+    "name": "Lajpat Nagar",
+    "type": "Bus Stand",
+    "lat": 28.56528,
+    "lng": 77.24389,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "450",
+      "479A",
+      "47A",
+      "743",
+      "D-026",
+      "D-026B",
+      "D-060"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_double_story_4541",
+    "name": "Lajpat Nagar Double Story",
+    "type": "Bus Stand",
+    "lat": 28.56842,
+    "lng": 77.24746,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "450",
+      "507B"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_ring_road__7540",
+    "name": "Lajpat Nagar (Ring Road)",
+    "type": "Bus Stand",
+    "lat": 28.56548,
+    "lng": 77.24562,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "1933",
+      "1966"
+    ]
+  },
+  {
+    "id": "stop_lajpat_nagar_subway_187",
+    "name": "Lajpat Nagar subway",
+    "type": "Bus Stand",
+    "lat": 28.57323,
+    "lng": 77.23746,
+    "zone": "South-East Delhi",
+    "description": "Central Market & Ring Road Metro Interchange",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_moolchand_hospital_783",
+    "name": "Moolchand Hospital",
+    "type": "Bus Stand",
+    "lat": 28.56552,
+    "lng": 77.2358,
+    "zone": "South-East Delhi",
+    "description": "Ring Road Hospital Transit Crossing",
+    "majorRoutes": [
+      "392",
+      "414",
+      "416",
+      "451A",
+      "711A",
+      "763",
+      "864"
+    ]
+  },
+  {
+    "id": "stop_moolchand_metro_station_4771",
+    "name": "Moolchand Metro Station",
+    "type": "Bus Stand",
+    "lat": 28.56429,
+    "lng": 77.23373,
+    "zone": "South-East Delhi",
+    "description": "Ring Road Hospital Transit Crossing",
+    "majorRoutes": [
+      "D-009"
+    ]
+  },
+  {
+    "id": "stop_moolchand_hospital_8230",
+    "name": "Moolchand Hospital",
+    "type": "Bus Stand",
+    "lat": 28.56512,
+    "lng": 77.23573,
+    "zone": "South-East Delhi",
+    "description": "Ring Road Hospital Transit Crossing",
+    "majorRoutes": [
+      "3033"
+    ]
+  },
+  {
+    "id": "stop_moolchand_khairati_ram_hospita_186",
+    "name": "Moolchand Khairati Ram Hospital",
+    "type": "Bus Stand",
+    "lat": 28.56895,
+    "lng": 77.23523,
+    "zone": "South-East Delhi",
+    "description": "Ring Road Hospital Transit Crossing",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_udaseen_ashram_3023",
+    "name": "Udaseen Ashram",
+    "type": "Interchange",
+    "lat": 28.62156,
+    "lng": 76.98806,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "539",
+      "567B",
+      "567",
+      "708",
+      "715A",
+      "72",
+      "728LNK",
+      "765"
+    ]
+  },
+  {
+    "id": "stop_ashram_hari_nagar__2068",
+    "name": "Ashram (Hari Nagar)",
+    "type": "Interchange",
+    "lat": 28.57336,
+    "lng": 77.25742,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "274",
+      "334",
+      "396",
+      "402",
+      "405A",
+      "405D",
+      "405E",
+      "410"
+    ]
+  },
+  {
+    "id": "stop_ashram_chowk_2085",
+    "name": "Ashram Chowk",
+    "type": "Interchange",
+    "lat": 28.57148,
+    "lng": 77.25888,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "405",
+      "44",
+      "306",
+      "400",
+      "402",
+      "403",
+      "404",
+      "405A"
+    ]
+  },
+  {
+    "id": "stop_kaushal_devi_netraheen_ashram_1509",
+    "name": "Kaushal Devi Netraheen Ashram",
+    "type": "Interchange",
+    "lat": 28.82551,
+    "lng": 77.06976,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "103",
+      "109",
+      "112",
+      "120B",
+      "120",
+      "131",
+      "133",
+      "136"
+    ]
+  },
+  {
+    "id": "stop_maharani_bagh_ashram_3483",
+    "name": "Maharani Bagh / Ashram",
+    "type": "Interchange",
+    "lat": 28.57327,
+    "lng": 77.25972,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "311A",
+      "323",
+      "392",
+      "400",
+      "412",
+      "422",
+      "473E",
+      "507"
+    ]
+  },
+  {
+    "id": "stop_guru_ravidass_marg_guru_ravi_d_2322",
+    "name": "Guru Ravidass Marg / Guru Ravi Das Ashram / Tughlaqabad Extension",
+    "type": "Interchange",
+    "lat": 28.51945,
+    "lng": 77.25448,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "311A",
+      "411",
+      "425",
+      "425A",
+      "440",
+      "445A",
+      "463",
+      "469"
+    ]
+  },
+  {
+    "id": "stop_keshav_nagar_mukti_ashram_1404",
+    "name": "Keshav Nagar Mukti Ashram",
+    "type": "Interchange",
+    "lat": 28.7793,
+    "lng": 77.17976,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "105",
+      "143",
+      "162",
+      "192",
+      "61",
+      "945",
+      "945A",
+      "D-2201"
+    ]
+  },
+  {
+    "id": "stop_swarg_ashram_1414",
+    "name": "Swarg Ashram",
+    "type": "Interchange",
+    "lat": 28.631,
+    "lng": 77.1149,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "108",
+      "108A",
+      "611A",
+      "73",
+      "751",
+      "751A",
+      "776",
+      "83"
+    ]
+  },
+  {
+    "id": "stop_geeta_ashram_3031",
+    "name": "Geeta Ashram",
+    "type": "Interchange",
+    "lat": 28.5919,
+    "lng": 77.1211,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "518",
+      "628",
+      "712",
+      "723",
+      "728A",
+      "728B",
+      "728E",
+      "770"
+    ]
+  },
+  {
+    "id": "stop_anand_gram_kusht_ashram_tahirp_2189",
+    "name": "Anand Gram Kusht Ashram / Tahirpur Village",
+    "type": "Interchange",
+    "lat": 28.68863,
+    "lng": 77.3191,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "0OMS(-)",
+      "205",
+      "208",
+      "208LNK",
+      "239",
+      "243",
+      "281",
+      "33"
+    ]
+  },
+  {
+    "id": "stop_vriddha_ashram_3410",
+    "name": "Vriddha Ashram",
+    "type": "Interchange",
+    "lat": 28.74458,
+    "lng": 76.98095,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "114",
+      "114A",
+      "114B",
+      "114C",
+      "174B",
+      "741",
+      "741B",
+      "983"
+    ]
+  },
+  {
+    "id": "stop_rama_krishna_ashram_marg_1451",
+    "name": "Rama Krishna Ashram Marg",
+    "type": "Interchange",
+    "lat": 28.63742,
+    "lng": 77.20706,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "100A",
+      "100",
+      "156",
+      "313LSPL",
+      "352",
+      "450",
+      "521",
+      "752"
+    ]
+  },
+  {
+    "id": "stop_balmiki_gandhi_ashram_1385",
+    "name": "Balmiki Gandhi Ashram",
+    "type": "Interchange",
+    "lat": 28.70472,
+    "lng": 77.20514,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "143",
+      "143A",
+      "143LINK",
+      "192",
+      "61",
+      "971",
+      "1410"
+    ]
+  },
+  {
+    "id": "stop_divya_dham_ashram_3575",
+    "name": "Divya Dham Ashram",
+    "type": "Interchange",
+    "lat": 28.78822,
+    "lng": 76.96273,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "114",
+      "114A",
+      "114B",
+      "114C",
+      "961",
+      "70",
+      "3024"
+    ]
+  },
+  {
+    "id": "stop_baba_bishamber_dass_ashram_khe_2091",
+    "name": "Baba Bishamber Dass Ashram / Khel Gaon",
+    "type": "Interchange",
+    "lat": 28.6087,
+    "lng": 77.2783,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "306",
+      "344",
+      "355",
+      "492",
+      "534A",
+      "611",
+      "611A",
+      "GURGAON TO ANAND VIHAR ISBT"
+    ]
+  },
+  {
+    "id": "stop_maharani_bagh_ashram_5496",
+    "name": "Maharani Bagh / Ashram",
+    "type": "Interchange",
+    "lat": 28.57509,
+    "lng": 77.26257,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "46",
+      "1747",
+      "2054",
+      "2163",
+      "1978",
+      "2065",
+      "1977",
+      "3676"
+    ]
+  },
+  {
+    "id": "stop_agrasen_vriddh_ashram_4080",
+    "name": "Agrasen Vriddh Ashram",
+    "type": "Interchange",
+    "lat": 28.71181,
+    "lng": 76.97627,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "928A",
+      "928",
+      "961"
+    ]
+  },
+  {
+    "id": "stop_udaseen_ashram_khera_dabar_4016",
+    "name": "Udaseen Ashram Khera Dabar",
+    "type": "Interchange",
+    "lat": 28.58616,
+    "lng": 76.92846,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "826LINK",
+      "D-9915",
+      "3699"
+    ]
+  },
+  {
+    "id": "stop_vriddha_ashram_5875",
+    "name": "Vriddha Ashram",
+    "type": "Interchange",
+    "lat": 28.74447,
+    "lng": 76.98092,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "292",
+      "345",
+      "1288",
+      "2074",
+      "2557"
+    ]
+  },
+  {
+    "id": "stop_ashram_hari_nagar__5889",
+    "name": "Ashram (Hari Nagar)",
+    "type": "Interchange",
+    "lat": 28.57449,
+    "lng": 77.25684,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "295",
+      "315",
+      "869",
+      "1919",
+      "3468"
+    ]
+  },
+  {
+    "id": "stop_anand_gram_kusht_ashram_6632",
+    "name": "Anand Gram Kusht Ashram",
+    "type": "Interchange",
+    "lat": 28.68879,
+    "lng": 77.3216,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "1041",
+      "1516",
+      "1924",
+      "2561",
+      "2893"
+    ]
+  },
+  {
+    "id": "stop_mehrishi_ashram_salarpur_1176",
+    "name": "Mehrishi Ashram Salarpur",
+    "type": "Interchange",
+    "lat": 28.548,
+    "lng": 77.38115,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "8",
+      "8A"
+    ]
+  },
+  {
+    "id": "stop_divya_dham_ashram_5883",
+    "name": "Divya Dham Ashram",
+    "type": "Interchange",
+    "lat": 28.78812,
+    "lng": 76.96244,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "292",
+      "345",
+      "1288",
+      "2557"
+    ]
+  },
+  {
+    "id": "stop_ashram_chowk_7387",
+    "name": "Ashram Chowk",
+    "type": "Interchange",
+    "lat": 28.57045,
+    "lng": 77.25979,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "1756",
+      "1949",
+      "1985",
+      "1928"
+    ]
+  },
+  {
+    "id": "stop_maharani_bagh_ashram_7388",
+    "name": "Maharani Bagh / Ashram",
+    "type": "Interchange",
+    "lat": 28.57321,
+    "lng": 77.25899,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "1756",
+      "1985",
+      "2818",
+      "1417"
+    ]
+  },
+  {
+    "id": "stop_kaushal_devi_netraheen_ashram_7463",
+    "name": "Kaushal Devi Netraheen Ashram",
+    "type": "Interchange",
+    "lat": 28.82522,
+    "lng": 77.06967,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "1841",
+      "2066",
+      "1724",
+      "2480"
+    ]
+  },
+  {
+    "id": "stop_ashram_hari_nagar__7224",
+    "name": "Ashram (Hari Nagar)",
+    "type": "Interchange",
+    "lat": 28.57337,
+    "lng": 77.25753,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "1551",
+      "1968",
+      "1923"
+    ]
+  },
+  {
+    "id": "stop_hiranki_crossing_sant_kirpal_r_4220",
+    "name": "Hiranki Crossing / Sant Kirpal Rohani Ashram",
+    "type": "Interchange",
+    "lat": 28.78406,
+    "lng": 77.1801,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "D-2201"
+    ]
+  },
+  {
+    "id": "stop_guru_ravi_das_ashram_tughlaqab_7874",
+    "name": "Guru Ravi Das Ashram / Tughlaqabad Extension",
+    "type": "Interchange",
+    "lat": 28.51957,
+    "lng": 77.2543,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "2818",
+      "1417"
+    ]
+  },
+  {
+    "id": "stop_udaseen_ashram_khera_dabar_7605",
+    "name": "Udaseen Ashram Khera Dabar",
+    "type": "Interchange",
+    "lat": 28.58624,
+    "lng": 76.92863,
+    "zone": "South-East Delhi",
+    "description": "Mathura Road & Ring Road Major Mega-Interchange",
+    "majorRoutes": [
+      "1979"
+    ]
+  },
+  {
+    "id": "stop_ito_agcr_ito_1405",
+    "name": "ITO AGCR / ITO",
+    "type": "Interchange",
+    "lat": 28.62792,
+    "lng": 77.24447,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "261",
+      "740",
+      "943",
+      "135",
+      "156",
+      "281",
+      "281A",
+      "310"
+    ]
+  },
+  {
+    "id": "stop_ito_bsz_marg_ram_charan_aggarw_1785",
+    "name": "ITO BSZ Marg (Ram Charan Aggarwal Chowk)",
+    "type": "Interchange",
+    "lat": 28.62907,
+    "lng": 77.24119,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "405",
+      "419",
+      "502",
+      "139",
+      "164",
+      "167",
+      "173",
+      "188"
+    ]
+  },
+  {
+    "id": "stop_ito_ring_road_1308",
+    "name": "ITO Ring Road",
+    "type": "Interchange",
+    "lat": 28.62979,
+    "lng": 77.24664,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "118EXT",
+      "261",
+      "118",
+      "118EXTN",
+      "307",
+      "307A",
+      "309",
+      "310"
+    ]
+  },
+  {
+    "id": "stop_ip_power_station_ito_ring_road_2041",
+    "name": "IP Power Station / ITO Ring Road",
+    "type": "Interchange",
+    "lat": 28.62449,
+    "lng": 77.24716,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "261",
+      "3",
+      "156",
+      "244",
+      "261LNK",
+      "307LNK",
+      "307",
+      "317"
+    ]
+  },
+  {
+    "id": "stop_ito_ring_road_3808",
+    "name": "ITO Ring Road",
+    "type": "Interchange",
+    "lat": 28.62639,
+    "lng": 77.24667,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "0TMS(-)",
+      "174B",
+      "318",
+      "396",
+      "422",
+      "949",
+      "BPEXP",
+      "BPEXPA"
+    ]
+  },
+  {
+    "id": "stop_air_pusa_monitoring_and_receiv_2560",
+    "name": "Air Pusa / Monitoring and Receiving Station",
+    "type": "Interchange",
+    "lat": 28.6263,
+    "lng": 77.15345,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "310",
+      "522",
+      "522B",
+      "721",
+      "721B",
+      "725",
+      "840",
+      "850"
+    ]
+  },
+  {
+    "id": "stop_ramdev_chowk_pitori_johad_5420",
+    "name": "Ramdev Chowk / Pitori Johad",
+    "type": "Interchange",
+    "lat": 28.85771,
+    "lng": 77.09285,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "30",
+      "1144",
+      "1367",
+      "1497",
+      "1841",
+      "3201",
+      "2498",
+      "2480"
+    ]
+  },
+  {
+    "id": "stop_ghitorni_school_244",
+    "name": "Ghitorni School",
+    "type": "Interchange",
+    "lat": 28.48913,
+    "lng": 77.13804,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "428",
+      "517",
+      "525",
+      "BADARPUR BORDER TO GURGAON",
+      "BPG",
+      "GURGAON TO BADARPUR BORDER"
+    ]
+  },
+  {
+    "id": "stop_ito_5403",
+    "name": "ITO",
+    "type": "Interchange",
+    "lat": 28.62822,
+    "lng": 77.24505,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "10",
+      "656",
+      "742",
+      "1327",
+      "1512",
+      "1972",
+      "2061",
+      "2341"
+    ]
+  },
+  {
+    "id": "stop_air_force_station_ghitorni_2530",
+    "name": "Air Force Station Ghitorni",
+    "type": "Interchange",
+    "lat": 28.48793,
+    "lng": 77.13547,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "428",
+      "517",
+      "525",
+      "BADARPUR BORDER TO GURGAON",
+      "GURGAON TO BADARPUR BORDER"
+    ]
+  },
+  {
+    "id": "stop_nbcc_ghitorni_modern_batta_2528",
+    "name": "NBCC Ghitorni / Modern Batta",
+    "type": "Interchange",
+    "lat": 28.4954,
+    "lng": 77.15303,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "428",
+      "517",
+      "525"
+    ]
+  },
+  {
+    "id": "stop_ghitorni_metro_station_ghitora_2529",
+    "name": "Ghitorni Metro Station / Ghitorani Village",
+    "type": "Interchange",
+    "lat": 28.49342,
+    "lng": 77.1487,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "428",
+      "517",
+      "525",
+      "BADARPUR BORDER TO GURGAON",
+      "D-7103",
+      "2037"
+    ]
+  },
+  {
+    "id": "stop_ip_power_house_ito_ring_road__6846",
+    "name": "IP Power House (ITO Ring Road)",
+    "type": "Interchange",
+    "lat": 28.62457,
+    "lng": 77.24708,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "1245",
+      "1427",
+      "1678",
+      "1774",
+      "1985",
+      "2143"
+    ]
+  },
+  {
+    "id": "stop_ghitorni_metro_station_ghitorn_4514",
+    "name": "Ghitorni Metro Station / Ghitorni Village",
+    "type": "Interchange",
+    "lat": 28.49374,
+    "lng": 77.14854,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "428",
+      "517",
+      "525",
+      "D-7103",
+      "GURGAON TO BADARPUR BORDER"
+    ]
+  },
+  {
+    "id": "stop_ghitorni_village_245",
+    "name": "Ghitorni Village",
+    "type": "Interchange",
+    "lat": 28.49346,
+    "lng": 77.14845,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "BPG",
+      "2106",
+      "2038"
+    ]
+  },
+  {
+    "id": "stop_ip_power_house_ito_ring_road__6298",
+    "name": "IP Power House (ITO Ring Road)",
+    "type": "Interchange",
+    "lat": 28.62408,
+    "lng": 77.24769,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "738",
+      "2097",
+      "1977"
+    ]
+  },
+  {
+    "id": "stop_vivek_vihar_phase_2_vivek_viha_4852",
+    "name": "Vivek Vihar Phase-2 / Vivek Vihar Auditorium",
+    "type": "Interchange",
+    "lat": 28.66655,
+    "lng": 77.30283,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "D-031(+)",
+      "D-5508"
+    ]
+  },
+  {
+    "id": "stop_vivek_vihar_auditorium_vivek_v_4863",
+    "name": "Vivek Vihar Auditorium / Vivek Vihar Phase-2",
+    "type": "Interchange",
+    "lat": 28.66647,
+    "lng": 77.30246,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "D-031(-)",
+      "D-5508"
+    ]
+  },
+  {
+    "id": "stop_100_foota_road_ghitorni_5142",
+    "name": "100 Foota Road Ghitorni",
+    "type": "Interchange",
+    "lat": 28.49441,
+    "lng": 77.14571,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "D-7103"
+    ]
+  },
+  {
+    "id": "stop_ito_ring_road_6918",
+    "name": "ITO Ring Road",
+    "type": "Interchange",
+    "lat": 28.62957,
+    "lng": 77.24783,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "1303",
+      "2114"
+    ]
+  },
+  {
+    "id": "stop_ghitorni_246",
+    "name": "Ghitorni",
+    "type": "Interchange",
+    "lat": 28.49622,
+    "lng": 77.15404,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "BPG"
+    ]
+  },
+  {
+    "id": "stop_ansari_auditorium_2475",
+    "name": "ANSARI AUDITORIUM",
+    "type": "Interchange",
+    "lat": 28.56123,
+    "lng": 77.2834,
+    "zone": "Central Delhi",
+    "description": "Delhi Secretariat, Vikas Minar & Media Hub Transit Node",
+    "majorRoutes": [
+      "507"
+    ]
+  },
+  {
+    "id": "stop_delhi_secretariat_415",
+    "name": "Delhi Secretariat",
+    "type": "Terminal",
+    "lat": 28.62807,
+    "lng": 77.25186,
+    "zone": "Central Delhi",
+    "description": "GNCTD Headquarters Bus Terminal & Ring Road Node",
+    "majorRoutes": [
+      "118EXT",
+      "740",
+      "943",
+      "118",
+      "118EXTN",
+      "281",
+      "281A",
+      "307"
+    ]
+  },
+  {
+    "id": "stop_delhi_secretariat_6277",
+    "name": "Delhi Secretariat",
+    "type": "Terminal",
+    "lat": 28.6283,
+    "lng": 77.2514,
+    "zone": "Central Delhi",
+    "description": "GNCTD Headquarters Bus Terminal & Ring Road Node",
+    "majorRoutes": [
+      "656",
+      "742",
+      "1245",
+      "1303",
+      "1327",
+      "1427",
+      "1512",
+      "1678"
+    ]
+  },
+  {
+    "id": "stop_mandi_house_413",
+    "name": "Mandi House",
+    "type": "Interchange",
+    "lat": 28.62525,
+    "lng": 77.23214,
+    "zone": "Central Delhi",
+    "description": "Cultural Corridor & Blue/Violet Metro Interchange",
+    "majorRoutes": [
+      "44",
+      "740",
+      "139",
+      "164",
+      "167",
+      "188",
+      "241",
+      "260"
+    ]
+  },
+  {
+    "id": "stop_mandi_house_5401",
+    "name": "Mandi House",
+    "type": "Interchange",
+    "lat": 28.6258,
+    "lng": 77.2343,
+    "zone": "Central Delhi",
+    "description": "Cultural Corridor & Blue/Violet Metro Interchange",
+    "majorRoutes": [
+      "10",
+      "656",
+      "742",
+      "1153",
+      "1327",
+      "2061",
+      "2204",
+      "2341"
+    ]
+  },
+  {
+    "id": "stop_mandi_house_5541",
+    "name": "Mandi House",
+    "type": "Interchange",
+    "lat": 28.62504,
+    "lng": 77.23057,
+    "zone": "Central Delhi",
+    "description": "Cultural Corridor & Blue/Violet Metro Interchange",
+    "majorRoutes": [
+      "50",
+      "616",
+      "742"
+    ]
+  },
+  {
+    "id": "stop_mandi_house_6276",
+    "name": "Mandi House",
+    "type": "Interchange",
+    "lat": 28.62499,
+    "lng": 77.23012,
+    "zone": "Central Delhi",
+    "description": "Cultural Corridor & Blue/Violet Metro Interchange",
+    "majorRoutes": [
+      "656",
+      "1153",
+      "2204"
+    ]
+  },
+  {
+    "id": "stop_supreme_court_pragati_maidan_m_2286",
+    "name": "Supreme Court / Pragati Maidan Metro Station",
+    "type": "Bus Stand",
+    "lat": 28.622,
+    "lng": 77.24053,
+    "zone": "Central Delhi",
+    "description": "Bharat Mandapam & Mathura Road International Exhibition Node",
+    "majorRoutes": [
+      "405",
+      "156",
+      "274A",
+      "274",
+      "334",
+      "356",
+      "402",
+      "404"
+    ]
+  },
+  {
+    "id": "stop_itpo_gate_no_3_itpo_office_pra_3700",
+    "name": "ITPO Gate No. 3 / ITPO Office Pragati Maidan",
+    "type": "Bus Stand",
+    "lat": 28.6155,
+    "lng": 77.24015,
+    "zone": "Central Delhi",
+    "description": "Bharat Mandapam & Mathura Road International Exhibition Node",
+    "majorRoutes": [
+      "405",
+      "419",
+      "156",
+      "274",
+      "274A",
+      "334",
+      "355",
+      "402"
+    ]
+  },
+  {
+    "id": "stop_pragati_maidan_gate_5_2232",
+    "name": "Pragati Maidan Gate 5",
+    "type": "Bus Stand",
+    "lat": 28.61766,
+    "lng": 77.2405,
+    "zone": "Central Delhi",
+    "description": "Bharat Mandapam & Mathura Road International Exhibition Node",
+    "majorRoutes": [
+      "405",
+      "419",
+      "44",
+      "156",
+      "274A",
+      "274",
+      "334",
+      "355"
+    ]
+  },
+  {
+    "id": "stop_pragati_maidan_bhairon_marg__2192",
+    "name": "Pragati Maidan (Bhairon Marg)",
+    "type": "Bus Stand",
+    "lat": 28.61252,
+    "lng": 77.24494,
+    "zone": "Central Delhi",
+    "description": "Bharat Mandapam & Mathura Road International Exhibition Node",
+    "majorRoutes": [
+      "156",
+      "244",
+      "344",
+      "355",
+      "374",
+      "859",
+      "944",
+      "SC-IP-"
+    ]
+  },
+  {
+    "id": "stop_pragati_maidan_terminal_purana_4445",
+    "name": "Pragati Maidan Terminal / Purana Qila",
+    "type": "Bus Stand",
+    "lat": 28.61179,
+    "lng": 77.24376,
+    "zone": "Central Delhi",
+    "description": "Bharat Mandapam & Mathura Road International Exhibition Node",
+    "majorRoutes": [
+      "244",
+      "344",
+      "355",
+      "374",
+      "U-SPL-24"
+    ]
+  },
+  {
+    "id": "stop_pragati_maidan_metro_station_7581",
+    "name": "Pragati Maidan Metro Station",
+    "type": "Bus Stand",
+    "lat": 28.62343,
+    "lng": 77.24057,
+    "zone": "Central Delhi",
+    "description": "Bharat Mandapam & Mathura Road International Exhibition Node",
+    "majorRoutes": [
+      "1949",
+      "1966"
+    ]
+  },
+  {
+    "id": "stop_pragati_maidan_gate_no_5__735",
+    "name": "Pragati Maidan (Gate No.5)",
+    "type": "Bus Stand",
+    "lat": 28.6175,
+    "lng": 77.24016,
+    "zone": "Central Delhi",
+    "description": "Bharat Mandapam & Mathura Road International Exhibition Node",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_najafgarh_delhi_gate_2798",
+    "name": "Najafgarh Delhi Gate",
+    "type": "Bus Stand",
+    "lat": 28.61183,
+    "lng": 76.98563,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "72",
+      "539",
+      "539A",
+      "546",
+      "567B",
+      "567",
+      "578",
+      "628"
+    ]
+  },
+  {
+    "id": "stop_delhi_gate_1737",
+    "name": "Delhi Gate",
+    "type": "Bus Stand",
+    "lat": 28.64064,
+    "lng": 77.23905,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "118EXT",
+      "261",
+      "3",
+      "405",
+      "419",
+      "502",
+      "729",
+      "753"
+    ]
+  },
+  {
+    "id": "stop_delhi_gate_ambedkar_stadium_te_1309",
+    "name": "Delhi Gate / Ambedkar Stadium Terminal",
+    "type": "Bus Stand",
+    "lat": 28.63966,
+    "lng": 77.24379,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "118EXT",
+      "261",
+      "3",
+      "118",
+      "118EXTN",
+      "135",
+      "139",
+      "167"
+    ]
+  },
+  {
+    "id": "stop_delhi_gate_564",
+    "name": "Delhi Gate",
+    "type": "Bus Stand",
+    "lat": 28.63735,
+    "lng": 77.24127,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "261",
+      "405",
+      "419",
+      "502",
+      "135",
+      "139",
+      "164",
+      "167"
+    ]
+  },
+  {
+    "id": "stop_delhi_gate_jln_marg__1143",
+    "name": "Delhi Gate (JLN Marg)",
+    "type": "Bus Stand",
+    "lat": 28.63992,
+    "lng": 77.23964,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "12",
+      "3",
+      "44",
+      "729",
+      "72",
+      "753",
+      "901",
+      "0AIRPORT EXP-4"
+    ]
+  },
+  {
+    "id": "stop_delhi_gate_ambedkar_stadium_ar_1829",
+    "name": "Delhi Gate / Ambedkar Stadium / ARUN JETLI STADIUM",
+    "type": "Bus Stand",
+    "lat": 28.63882,
+    "lng": 77.24101,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "405",
+      "419",
+      "502",
+      "139",
+      "167",
+      "173",
+      "188",
+      "241"
+    ]
+  },
+  {
+    "id": "stop_najafgarh_delhi_gate_6046",
+    "name": "NajafGarh Delhi Gate",
+    "type": "Bus Stand",
+    "lat": 28.61263,
+    "lng": 76.98625,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "585",
+      "597",
+      "811",
+      "1412",
+      "1596",
+      "3699",
+      "2165",
+      "2283"
+    ]
+  },
+  {
+    "id": "stop_delhi_gate_jln_marg__5328",
+    "name": "Delhi Gate (JLN Marg)",
+    "type": "Bus Stand",
+    "lat": 28.63996,
+    "lng": 77.23807,
+    "zone": "Central Delhi",
+    "description": "Ambedkar Stadium & Asaf Ali Road Walled City Node",
+    "majorRoutes": [
+      "6",
+      "760",
+      "877",
+      "1234",
+      "1707",
+      "1893",
+      "1966",
+      "2143"
+    ]
+  },
+  {
+    "id": "stop_jama_masjid_613",
+    "name": "Jama Masjid",
+    "type": "Bus Stand",
+    "lat": 28.6511,
+    "lng": 77.23813,
+    "zone": "Central Delhi",
+    "description": "Historic Old Delhi Heritage Transit Stop",
+    "majorRoutes": [
+      "118EXT",
+      "12",
+      "261",
+      "405",
+      "419",
+      "44",
+      "502",
+      "729"
+    ]
+  },
+  {
+    "id": "stop_new_seelam_pur_jama_masjid_4835",
+    "name": "New Seelam Pur Jama Masjid",
+    "type": "Bus Stand",
+    "lat": 28.67438,
+    "lng": 77.26603,
+    "zone": "Central Delhi",
+    "description": "Historic Old Delhi Heritage Transit Stop",
+    "majorRoutes": [
+      "D-025",
+      "D-051"
+    ]
+  },
+  {
+    "id": "stop_old_delhi_railway_station_fate_1680",
+    "name": "Old Delhi Railway Station (Fatehpuri)",
+    "type": "Terminal",
+    "lat": 28.6603,
+    "lng": 77.2249,
+    "zone": "North Delhi",
+    "description": "Khari Baoli & Chandni Chowk Historic Terminal",
+    "majorRoutes": [
+      "106",
+      "115",
+      "119",
+      "146",
+      "17",
+      "199",
+      "937A",
+      "2433"
+    ]
+  },
+  {
+    "id": "stop_vishwa_vidyalaya_metro_station_807",
+    "name": "Vishwa Vidyalaya Metro Station",
+    "type": "Interchange",
+    "lat": 28.69509,
+    "lng": 77.21475,
+    "zone": "North Delhi",
+    "description": "University of Delhi North Campus Central Transit Hub",
+    "majorRoutes": [
+      "901",
+      "0TMS(+)",
+      "0TMS(-)",
+      "103",
+      "103E",
+      "105",
+      "107",
+      "108"
+    ]
+  },
+  {
+    "id": "stop_vishwa_vidyalaya_metro_station_6445",
+    "name": "Vishwa Vidyalaya Metro Station",
+    "type": "Interchange",
+    "lat": 28.69521,
+    "lng": 77.2141,
+    "zone": "North Delhi",
+    "description": "University of Delhi North Campus Central Transit Hub",
+    "majorRoutes": [
+      "837",
+      "1153",
+      "1367",
+      "1497",
+      "1672",
+      "1999",
+      "1671",
+      "2394"
+    ]
+  },
+  {
+    "id": "stop_gtb_nagar_gtb_nagar_metro_stat_1383",
+    "name": "GTB Nagar / GTB Nagar Metro Station",
+    "type": "Interchange",
+    "lat": 28.69837,
+    "lng": 77.20577,
+    "zone": "North Delhi",
+    "description": "Kingsway Camp Student Hub & Ring Road Connector",
+    "majorRoutes": [
+      "114",
+      "901",
+      "0TMS(-)",
+      "100A",
+      "100",
+      "103",
+      "103E",
+      "105"
+    ]
+  },
+  {
+    "id": "stop_gtb_nagar_1998",
+    "name": "GTB Nagar",
+    "type": "Interchange",
+    "lat": 28.69822,
+    "lng": 77.20657,
+    "zone": "North Delhi",
+    "description": "Kingsway Camp Student Hub & Ring Road Connector",
+    "majorRoutes": [
+      "901",
+      "0TMS(+)",
+      "100A",
+      "100",
+      "103",
+      "103E",
+      "105",
+      "107"
+    ]
+  },
+  {
+    "id": "stop_gtb_nagar_haqiqat_nagar_1864",
+    "name": "GTB Nagar / Haqiqat Nagar",
+    "type": "Interchange",
+    "lat": 28.69822,
+    "lng": 77.20753,
+    "zone": "North Delhi",
+    "description": "Kingsway Camp Student Hub & Ring Road Connector",
+    "majorRoutes": [
+      "153",
+      "185",
+      "333",
+      "813LNK",
+      "912",
+      "ML06",
+      "837",
+      "1672"
+    ]
+  },
+  {
+    "id": "stop_model_town_ii_1152",
+    "name": "Model Town II",
+    "type": "Bus Stand",
+    "lat": 28.7043,
+    "lng": 77.19036,
+    "zone": "North Delhi",
+    "description": "Grand Trunk Road North Corridor Bus Stop",
+    "majorRoutes": [
+      "114",
+      "901",
+      "0TMS(+)",
+      "0TMS(-)",
+      "100A",
+      "100",
+      "102",
+      "103"
+    ]
+  },
+  {
+    "id": "stop_alpana_cinema_model_town_mtr_s_1151",
+    "name": "Alpana Cinema (Model Town Mtr Stn)",
+    "type": "Bus Stand",
+    "lat": 28.70293,
+    "lng": 77.19381,
+    "zone": "North Delhi",
+    "description": "Grand Trunk Road North Corridor Bus Stop",
+    "majorRoutes": [
+      "114",
+      "901",
+      "0TMS(+)",
+      "0TMS(-)",
+      "100A",
+      "100",
+      "102",
+      "103"
+    ]
+  },
+  {
+    "id": "stop_model_town_iii_1153",
+    "name": "Model Town III",
+    "type": "Bus Stand",
+    "lat": 28.70602,
+    "lng": 77.18532,
+    "zone": "North Delhi",
+    "description": "Grand Trunk Road North Corridor Bus Stop",
+    "majorRoutes": [
+      "114",
+      "901",
+      "0TMS(+)",
+      "0TMS(-)",
+      "100A",
+      "100",
+      "102",
+      "103"
+    ]
+  },
+  {
+    "id": "stop_model_town_ii_5444",
+    "name": "Model Town II",
+    "type": "Bus Stand",
+    "lat": 28.70428,
+    "lng": 77.19063,
+    "zone": "North Delhi",
+    "description": "Grand Trunk Road North Corridor Bus Stop",
+    "majorRoutes": [
+      "30",
+      "49",
+      "1158",
+      "1206",
+      "1336",
+      "1379",
+      "1948",
+      "1759"
+    ]
+  },
+  {
+    "id": "stop_model_town_1_4655",
+    "name": "MODEL TOWN 1",
+    "type": "Bus Stand",
+    "lat": 28.70144,
+    "lng": 77.19791,
+    "zone": "North Delhi",
+    "description": "Grand Trunk Road North Corridor Bus Stop",
+    "majorRoutes": [
+      "883"
+    ]
+  },
+  {
+    "id": "stop_new_sabzi_mandi_azadpur_1128",
+    "name": "New Sabzi Mandi Azadpur",
+    "type": "Terminal",
+    "lat": 28.71423,
+    "lng": 77.17266,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "12",
+      "131",
+      "100A",
+      "100",
+      "103",
+      "103E",
+      "106",
+      "106A"
+    ]
+  },
+  {
+    "id": "stop_azadpur_terminal_1085",
+    "name": "Azadpur Terminal",
+    "type": "Terminal",
+    "lat": 28.70833,
+    "lng": 77.17792,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "114",
+      "131",
+      "901",
+      "0TMS(-)",
+      "100A",
+      "100",
+      "102",
+      "102A"
+    ]
+  },
+  {
+    "id": "stop_azadpur_metro_station_terminal_1996",
+    "name": "Azadpur Metro Station / Terminal",
+    "type": "Terminal",
+    "lat": 28.7075,
+    "lng": 77.18055,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "901",
+      "0TMS(+)",
+      "100A",
+      "100",
+      "102",
+      "103",
+      "103E",
+      "107"
+    ]
+  },
+  {
+    "id": "stop_azadpur_metro_station_1154",
+    "name": "Azadpur Metro Station",
+    "type": "Terminal",
+    "lat": 28.70748,
+    "lng": 77.18024,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "102",
+      "103E",
+      "107",
+      "113",
+      "114",
+      "121",
+      "125A-",
+      "125"
+    ]
+  },
+  {
+    "id": "stop_azadpur_kewal_park_1683",
+    "name": "Azadpur / Kewal Park",
+    "type": "Terminal",
+    "lat": 28.71084,
+    "lng": 77.17535,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "114C",
+      "117",
+      "119",
+      "142",
+      "144A",
+      "159",
+      "804",
+      "861"
+    ]
+  },
+  {
+    "id": "stop_azadpur_terminal_bara_bagh_roa_3693",
+    "name": "Azadpur Terminal (Bara Bagh Road)",
+    "type": "Terminal",
+    "lat": 28.70646,
+    "lng": 77.17915,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "106",
+      "106A",
+      "109",
+      "116",
+      "119",
+      "125",
+      "127",
+      "130"
+    ]
+  },
+  {
+    "id": "stop_azadpur_terminal_5442",
+    "name": "Azadpur Terminal",
+    "type": "Terminal",
+    "lat": 28.70767,
+    "lng": 77.18027,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "30",
+      "49",
+      "1158",
+      "1206",
+      "1336",
+      "1379",
+      "1914",
+      "1948"
+    ]
+  },
+  {
+    "id": "stop_azadpur_terminal_bara_bagh_roa_6830",
+    "name": "Azadpur Terminal (Bara Bagh Road)",
+    "type": "Terminal",
+    "lat": 28.70653,
+    "lng": 77.17928,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "1234",
+      "1600",
+      "1815",
+      "1941",
+      "2045"
+    ]
+  },
+  {
+    "id": "stop_azadpur_8163",
+    "name": "Azadpur",
+    "type": "Terminal",
+    "lat": 28.7096,
+    "lng": 77.1758,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "2314",
+      "3390"
+    ]
+  },
+  {
+    "id": "stop_kewal_park_azadpur_4269",
+    "name": "Kewal Park Azadpur",
+    "type": "Terminal",
+    "lat": 28.71113,
+    "lng": 77.17732,
+    "zone": "North Delhi",
+    "description": "New Sabzi Mandi & Yellow/Pink Line Metro Interchange",
+    "majorRoutes": [
+      "ML96"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_metro_station_gt__1130",
+    "name": "Jahangirpuri Metro Station GT Road",
+    "type": "Bus Stand",
+    "lat": 28.7259,
+    "lng": 77.16281,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "12",
+      "131",
+      "100A",
+      "100",
+      "103",
+      "103E",
+      "106",
+      "106A"
+    ]
+  },
+  {
+    "id": "stop_jahangir_puri_crossing_jahangi_1467",
+    "name": "Jahangir Puri Crossing / Jahangirpuri GT Road",
+    "type": "Bus Stand",
+    "lat": 28.72711,
+    "lng": 77.16161,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "12",
+      "131",
+      "100A",
+      "100",
+      "103",
+      "103E",
+      "106",
+      "107"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_k_block_1133",
+    "name": "Jahangirpuri K Block",
+    "type": "Bus Stand",
+    "lat": 28.7304,
+    "lng": 77.168,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "139",
+      "142",
+      "143LINK",
+      "159",
+      "181",
+      "181A",
+      "19",
+      "19A"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_ablock_1132",
+    "name": "Jahangirpuri ABlock",
+    "type": "Bus Stand",
+    "lat": 28.7285,
+    "lng": 77.1648,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "139",
+      "142",
+      "143LINK",
+      "159",
+      "181",
+      "181A",
+      "19",
+      "19A"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_eblock_1135",
+    "name": "Jahangirpuri EBlock",
+    "type": "Bus Stand",
+    "lat": 28.7324,
+    "lng": 77.1713,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "142",
+      "143LINK",
+      "159",
+      "181",
+      "181A",
+      "19",
+      "19A",
+      "19B"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_b_block_2033",
+    "name": "Jahangirpuri B Block",
+    "type": "Bus Stand",
+    "lat": 28.7293,
+    "lng": 77.1662,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "139",
+      "142",
+      "143LINK",
+      "19",
+      "19A",
+      "237",
+      "259",
+      "891"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_bblock_4400",
+    "name": "Jahangirpuri BBlock",
+    "type": "Bus Stand",
+    "lat": 28.7297,
+    "lng": 77.1668,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "19",
+      "19A"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_gt_road_7244",
+    "name": "Jahangirpuri GT Road",
+    "type": "Bus Stand",
+    "lat": 28.72547,
+    "lng": 77.16283,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "1627",
+      "1149"
+    ]
+  },
+  {
+    "id": "stop_jahangirpuri_e_block_869",
+    "name": "Jahangirpuri E-Block",
+    "type": "Bus Stand",
+    "lat": 28.7328,
+    "lng": 77.17209,
+    "zone": "North Delhi",
+    "description": "GT Road North Delhi Commuter Transit Stop",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_gtk_bypass_mukarba_chowk_1469",
+    "name": "GTK ByPass / Mukarba chowk",
+    "type": "Interchange",
+    "lat": 28.73514,
+    "lng": 77.15561,
+    "zone": "North-West Delhi",
+    "description": "GT Karnal Road & Outer Ring Road Major Cloverleaf Node",
+    "majorRoutes": [
+      "12",
+      "131",
+      "100A",
+      "100",
+      "103",
+      "106A",
+      "109",
+      "112"
+    ]
+  },
+  {
+    "id": "stop_mukarba_chowk_orr_1822",
+    "name": "Mukarba Chowk ORR",
+    "type": "Interchange",
+    "lat": 28.73683,
+    "lng": 77.15993,
+    "zone": "North-West Delhi",
+    "description": "GT Karnal Road & Outer Ring Road Major Cloverleaf Node",
+    "majorRoutes": [
+      "0OMS(-)",
+      "117",
+      "165",
+      "165A",
+      "174B",
+      "907",
+      "932",
+      "945"
+    ]
+  },
+  {
+    "id": "stop_mukarba_chowk_292",
+    "name": "Mukarba Chowk",
+    "type": "Interchange",
+    "lat": 28.73489,
+    "lng": 77.15544,
+    "zone": "North-West Delhi",
+    "description": "GT Karnal Road & Outer Ring Road Major Cloverleaf Node",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_peera_garhi_chowk_1963",
+    "name": "Peera Garhi Chowk",
+    "type": "Interchange",
+    "lat": 28.67919,
+    "lng": 77.09615,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Outer Ring Road Critical Highway Interchange",
+    "majorRoutes": [
+      "236",
+      "926",
+      "929",
+      "943",
+      "0OMS(-)",
+      "153",
+      "219",
+      "232"
+    ]
+  },
+  {
+    "id": "stop_peera_garhi_chowk_5374",
+    "name": "Peera Garhi Chowk",
+    "type": "Interchange",
+    "lat": 28.67936,
+    "lng": 77.09699,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Outer Ring Road Critical Highway Interchange",
+    "majorRoutes": [
+      "10",
+      "54",
+      "1088",
+      "1379",
+      "1655",
+      "2417",
+      "3017",
+      "1233"
+    ]
+  },
+  {
+    "id": "stop_peera_garhi_chowk_6040",
+    "name": "Peera Garhi Chowk",
+    "type": "Interchange",
+    "lat": 28.6803,
+    "lng": 77.0944,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Outer Ring Road Critical Highway Interchange",
+    "majorRoutes": [
+      "584",
+      "1839",
+      "1931",
+      "2342",
+      "3338",
+      "2366",
+      "1924"
+    ]
+  },
+  {
+    "id": "stop_peera_garhi_chowk_7204",
+    "name": "Peera Garhi Chowk",
+    "type": "Interchange",
+    "lat": 28.67818,
+    "lng": 77.09467,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Outer Ring Road Critical Highway Interchange",
+    "majorRoutes": [
+      "1534",
+      "1853",
+      "1996",
+      "2818",
+      "1417",
+      "2988"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_terminal_507",
+    "name": "Punjabi Bagh Terminal",
+    "type": "Interchange",
+    "lat": 28.66743,
+    "lng": 77.13575,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "943",
+      "0TMS(+)",
+      "160",
+      "168",
+      "448",
+      "448A",
+      "448B",
+      "479"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_club_509",
+    "name": "Punjabi Bagh Club",
+    "type": "Interchange",
+    "lat": 28.66344,
+    "lng": 77.13127,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "0TMS(+)",
+      "0TMS(-)",
+      "442",
+      "448",
+      "448A",
+      "448B",
+      "479",
+      "479A"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_west_power_house_1954",
+    "name": "Punjabi Bagh West Power House",
+    "type": "Interchange",
+    "lat": 28.67278,
+    "lng": 77.1469,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "236",
+      "926",
+      "929",
+      "219",
+      "232",
+      "233",
+      "236A",
+      "236E"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_east_t__1955",
+    "name": "Punjabi Bagh East (T)",
+    "type": "Interchange",
+    "lat": 28.67312,
+    "lng": 77.14369,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "236",
+      "926",
+      "929",
+      "219",
+      "232",
+      "233",
+      "236A",
+      "236E"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_crossing_punjabi__1428",
+    "name": "Punjabi Bagh Crossing / PUNJABI BAGH",
+    "type": "Interchange",
+    "lat": 28.67584,
+    "lng": 77.14094,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "0TMS(-)",
+      "153",
+      "159",
+      "442",
+      "448",
+      "479",
+      "78",
+      "85"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_ring_road_1780",
+    "name": "Punjabi Bagh Ring Road",
+    "type": "Interchange",
+    "lat": 28.66932,
+    "lng": 77.13752,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "160",
+      "568A",
+      "569",
+      "569A",
+      "709",
+      "709A",
+      "804",
+      "808"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_1771",
+    "name": "Punjabi Bagh",
+    "type": "Interchange",
+    "lat": 28.67548,
+    "lng": 77.14046,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "153",
+      "159",
+      "168",
+      "442",
+      "861A",
+      "883B_LTD_",
+      "889",
+      "891"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_east_3859",
+    "name": "Punjabi Bagh East",
+    "type": "Interchange",
+    "lat": 28.67114,
+    "lng": 77.13918,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "568",
+      "568A",
+      "569A",
+      "569",
+      "709",
+      "709A",
+      "808",
+      "849"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_terminal_6758",
+    "name": "Punjabi Bagh Terminal",
+    "type": "Interchange",
+    "lat": 28.66772,
+    "lng": 77.13751,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "1151",
+      "2417",
+      "3017",
+      "2455",
+      "3015",
+      "2341",
+      "2442",
+      "2409"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_market_west_punja_2646",
+    "name": "Punjabi Bagh Market / West Punjabi Bagh",
+    "type": "Interchange",
+    "lat": 28.66613,
+    "lng": 77.12717,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "567",
+      "567A",
+      "910",
+      "910A",
+      "956",
+      "D-6601(+)",
+      "D-6601(-)",
+      "U-SPL-18"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_market_2643",
+    "name": "Punjabi Bagh Market",
+    "type": "Interchange",
+    "lat": 28.67027,
+    "lng": 77.13267,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "567",
+      "567A",
+      "910",
+      "910A",
+      "956",
+      "D-6601(+)",
+      "D-6601(-)",
+      "U-SPL-18"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_extension_2647",
+    "name": "Punjabi Bagh Extension",
+    "type": "Interchange",
+    "lat": 28.66662,
+    "lng": 77.12324,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "567",
+      "567A",
+      "910",
+      "910A",
+      "956",
+      "U-SPL-18"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_punjabi_bagh_more_2642",
+    "name": "Punjabi Bagh / Punjabi Bagh More",
+    "type": "Interchange",
+    "lat": 28.66886,
+    "lng": 77.13588,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "567",
+      "567A",
+      "910",
+      "956",
+      "U-SPL-18"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_club_6039",
+    "name": "Punjabi Bagh Club",
+    "type": "Interchange",
+    "lat": 28.66319,
+    "lng": 77.13011,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "584",
+      "1747",
+      "3338",
+      "2345",
+      "2169",
+      "3676",
+      "2364",
+      "3022"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_club_6901",
+    "name": "Punjabi Bagh Club",
+    "type": "Interchange",
+    "lat": 28.66355,
+    "lng": 77.13121,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "1285",
+      "1655",
+      "2250",
+      "2433",
+      "2314"
+    ]
+  },
+  {
+    "id": "stop_west_punjabi_bagh_metro_statio_4705",
+    "name": "West Punjabi Bagh Metro station",
+    "type": "Interchange",
+    "lat": 28.67255,
+    "lng": 77.13979,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "974",
+      "D-6601(-)"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_extension_7358",
+    "name": "Punjabi Bagh Extension",
+    "type": "Interchange",
+    "lat": 28.66646,
+    "lng": 77.12314,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "1747",
+      "3676"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_terminal__447",
+    "name": "Punjabi Bagh (Terminal)",
+    "type": "Interchange",
+    "lat": 28.66764,
+    "lng": 77.1368,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "448A"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_west_metro_statio_5126",
+    "name": "Punjabi bagh West metro station",
+    "type": "Interchange",
+    "lat": 28.67256,
+    "lng": 77.13939,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "D-6601(+)"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_terminal_7832",
+    "name": "Punjabi Bagh Terminal",
+    "type": "Interchange",
+    "lat": 28.66735,
+    "lng": 77.13732,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "2465"
+    ]
+  },
+  {
+    "id": "stop_punjabi_bagh_east_1043",
+    "name": "Punjabi Bagh East",
+    "type": "Interchange",
+    "lat": 28.67308,
+    "lng": 77.14327,
+    "zone": "West Delhi",
+    "description": "Rohtak Road & Ring Road West Transit Node",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_raja_garden_664",
+    "name": "Raja Garden",
+    "type": "Interchange",
+    "lat": 28.65086,
+    "lng": 77.12613,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road & Ring Road Shivaji College Junction",
+    "majorRoutes": [
+      "72",
+      "234A",
+      "408",
+      "410",
+      "410A",
+      "801",
+      "806",
+      "810"
+    ]
+  },
+  {
+    "id": "stop_rajdhani_college_raja_garden_2641",
+    "name": "Rajdhani College Raja Garden",
+    "type": "Interchange",
+    "lat": 28.65601,
+    "lng": 77.12588,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road & Ring Road Shivaji College Junction",
+    "majorRoutes": [
+      "0TMS(+)",
+      "442",
+      "448",
+      "448B",
+      "479",
+      "567",
+      "567A",
+      "568"
+    ]
+  },
+  {
+    "id": "stop_raja_garden_ring_road_rajouri__2573",
+    "name": "Raja Garden (Ring Road)/Rajouri Garden Ring Road",
+    "type": "Interchange",
+    "lat": 28.65087,
+    "lng": 77.12439,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road & Ring Road Shivaji College Junction",
+    "majorRoutes": [
+      "442",
+      "448B",
+      "508",
+      "529",
+      "567A",
+      "568A",
+      "569A",
+      "569"
+    ]
+  },
+  {
+    "id": "stop_rajdhani_college_raja_garden_6903",
+    "name": "Rajdhani College / Raja Garden",
+    "type": "Interchange",
+    "lat": 28.65477,
+    "lng": 77.12544,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road & Ring Road Shivaji College Junction",
+    "majorRoutes": [
+      "1285",
+      "1655",
+      "2250",
+      "2314"
+    ]
+  },
+  {
+    "id": "stop_raja_garden_6071",
+    "name": "Raja Garden",
+    "type": "Interchange",
+    "lat": 28.6513,
+    "lng": 77.1266,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road & Ring Road Shivaji College Junction",
+    "majorRoutes": [
+      "585",
+      "1602",
+      "1840",
+      "2340"
+    ]
+  },
+  {
+    "id": "stop_raja_garden_ring_road__7261",
+    "name": "Raja Garden (Ring Road)",
+    "type": "Interchange",
+    "lat": 28.65172,
+    "lng": 77.1246,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road & Ring Road Shivaji College Junction",
+    "majorRoutes": [
+      "1655"
+    ]
+  },
+  {
+    "id": "stop_tilak_nagar_terminal_1422",
+    "name": "Tilak Nagar Terminal",
+    "type": "Terminal",
+    "lat": 28.63632,
+    "lng": 77.09574,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "234A",
+      "408",
+      "410",
+      "518",
+      "546",
+      "588",
+      "628",
+      "72"
+    ]
+  },
+  {
+    "id": "stop_tilak_nagar_crossing_3128",
+    "name": "Tilak Nagar Crossing",
+    "type": "Terminal",
+    "lat": 28.63554,
+    "lng": 77.0929,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "153LINK",
+      "153",
+      "410",
+      "518",
+      "546",
+      "588",
+      "628",
+      "793"
+    ]
+  },
+  {
+    "id": "stop_sant_pura_tilak_nagar_3037",
+    "name": "Sant Pura Tilak Nagar",
+    "type": "Terminal",
+    "lat": 28.63857,
+    "lng": 77.10058,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "72",
+      "234A",
+      "408",
+      "410",
+      "801",
+      "806",
+      "810",
+      "813"
+    ]
+  },
+  {
+    "id": "stop_tilak_nagar_crossing_najafgarh_3099",
+    "name": "Tilak Nagar Crossing (Najafgarh Road)",
+    "type": "Terminal",
+    "lat": 28.63532,
+    "lng": 77.09296,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "72",
+      "153LINK",
+      "153",
+      "518",
+      "546",
+      "628",
+      "806",
+      "816"
+    ]
+  },
+  {
+    "id": "stop_tilak_nagar_terminal_tilak_nag_3129",
+    "name": "Tilak Nagar Terminal / Tilak Nagar",
+    "type": "Terminal",
+    "lat": 28.63659,
+    "lng": 77.0955,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "234A",
+      "410",
+      "72",
+      "809",
+      "810",
+      "813",
+      "818",
+      "818B"
+    ]
+  },
+  {
+    "id": "stop_tilak_nagar_jail_road_3038",
+    "name": "Tilak Nagar Jail Road",
+    "type": "Terminal",
+    "lat": 28.63447,
+    "lng": 77.09738,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "153LINK",
+      "153",
+      "518",
+      "588",
+      "628",
+      "73",
+      "793",
+      "801"
+    ]
+  },
+  {
+    "id": "stop_tilak_nagar_jail_road_7436",
+    "name": "Tilak Nagar Jail Road",
+    "type": "Terminal",
+    "lat": 28.63574,
+    "lng": 77.09669,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "1796",
+      "642",
+      "1566",
+      "3745",
+      "1886",
+      "1530",
+      "713",
+      "3744"
+    ]
+  },
+  {
+    "id": "stop_tilak_nagar_terminal_6428",
+    "name": "Tilak Nagar Terminal",
+    "type": "Terminal",
+    "lat": 28.63667,
+    "lng": 77.09706,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "811",
+      "1010",
+      "3699",
+      "2165",
+      "2283",
+      "2314",
+      "2053"
+    ]
+  },
+  {
+    "id": "stop_sant_pura_tilak_nagar_6067",
+    "name": "Sant Pura Tilak Nagar",
+    "type": "Terminal",
+    "lat": 28.63892,
+    "lng": 77.10047,
+    "zone": "West Delhi",
+    "description": "Najafgarh Road Central Commercial Bus Terminal",
+    "majorRoutes": [
+      "585",
+      "1602",
+      "1840"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_najafgarh_road__2815",
+    "name": "Uttam Nagar (Najafgarh Road)",
+    "type": "Terminal",
+    "lat": 28.62608,
+    "lng": 77.06832,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "740",
+      "753",
+      "0OMS(+)",
+      "518",
+      "546",
+      "628",
+      "711",
+      "718"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_mini_stand_3088",
+    "name": "Uttam Nagar Mini Stand",
+    "type": "Terminal",
+    "lat": 28.62282,
+    "lng": 77.06047,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "72",
+      "628",
+      "783",
+      "806",
+      "809",
+      "817",
+      "817N",
+      "818"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_terminal_272",
+    "name": "Uttam Nagar Terminal",
+    "type": "Terminal",
+    "lat": 28.6257,
+    "lng": 77.06667,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "72",
+      "588",
+      "703",
+      "740",
+      "740EX",
+      "776",
+      "806",
+      "809"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_a1_janakpuri_2816",
+    "name": "Uttam nagar / A1 Janakpuri",
+    "type": "Terminal",
+    "lat": 28.62467,
+    "lng": 77.06776,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "740",
+      "753",
+      "703",
+      "711",
+      "711A",
+      "718",
+      "724",
+      "724A"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_a1_janakpuri_pankh_2953",
+    "name": "Uttam Nagar / A1 Janakpuri (Pankha Road)",
+    "type": "Terminal",
+    "lat": 28.62407,
+    "lng": 77.06789,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "740",
+      "753",
+      "703",
+      "711",
+      "711A",
+      "718",
+      "724",
+      "724A"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_terminal_in_gate__2954",
+    "name": "Uttam Nagar Terminal (In Gate)",
+    "type": "Terminal",
+    "lat": 28.62501,
+    "lng": 77.06551,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "518",
+      "546",
+      "628",
+      "703",
+      "72",
+      "740",
+      "753",
+      "761"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_terminal_uttam_nag_3087",
+    "name": "Uttam Nagar Terminal / Uttam Nagar East Metro Station",
+    "type": "Terminal",
+    "lat": 28.62465,
+    "lng": 77.06503,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "740",
+      "0OMS(-)",
+      "546",
+      "711",
+      "711A",
+      "783",
+      "818",
+      "825A"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_3073",
+    "name": "Uttam Nagar",
+    "type": "Terminal",
+    "lat": 28.62313,
+    "lng": 77.06119,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "809",
+      "817N",
+      "825",
+      "825A",
+      "834",
+      "845",
+      "873",
+      "887"
+    ]
+  },
+  {
+    "id": "stop_uttam_nagar_terminal_5488",
+    "name": "Uttam Nagar Terminal",
+    "type": "Terminal",
+    "lat": 28.62533,
+    "lng": 77.06695,
+    "zone": "West Delhi",
+    "description": "High-Volume Commuter Terminal & Blue Line Metro Feeder",
+    "majorRoutes": [
+      "32",
+      "955",
+      "1115",
+      "2303"
+    ]
+  },
+  {
+    "id": "stop_sewak_park_dwarka_more_metro_s_3080",
+    "name": "Sewak Park Dwarka More Metro Station",
+    "type": "Interchange",
+    "lat": 28.61926,
+    "lng": 77.03373,
+    "zone": "South-West Delhi",
+    "description": "Najafgarh Road & Dwarka Expressway Gateway Node",
+    "majorRoutes": [
+      "72",
+      "546",
+      "628",
+      "783",
+      "806",
+      "809",
+      "817",
+      "817N"
+    ]
+  },
+  {
+    "id": "stop_dwarka_more_metro_station_term_2995",
+    "name": "Dwarka More Metro Station (Terminal)",
+    "type": "Interchange",
+    "lat": 28.6178,
+    "lng": 77.03187,
+    "zone": "South-West Delhi",
+    "description": "Najafgarh Road & Dwarka Expressway Gateway Node",
+    "majorRoutes": [
+      "727",
+      "751",
+      "764",
+      "765",
+      "850",
+      "AIRPORTEXP08",
+      "D-068",
+      "D-070"
+    ]
+  },
+  {
+    "id": "stop_shiv_murti_2_nh8_dwarka_mor_3838",
+    "name": "Shiv Murti 2 (NH8) / Dwarka Mor",
+    "type": "Interchange",
+    "lat": 28.5352,
+    "lng": 77.10868,
+    "zone": "South-West Delhi",
+    "description": "Najafgarh Road & Dwarka Expressway Gateway Node",
+    "majorRoutes": [
+      "729",
+      "539",
+      "539A",
+      "543A",
+      "578A",
+      "706",
+      "706A",
+      "712"
+    ]
+  },
+  {
+    "id": "stop_dwarka_more_metro_station_sewa_6054",
+    "name": "Dwarka More Metro Station (Sewak Park)",
+    "type": "Interchange",
+    "lat": 28.61936,
+    "lng": 77.0331,
+    "zone": "South-West Delhi",
+    "description": "Najafgarh Road & Dwarka Expressway Gateway Node",
+    "majorRoutes": [
+      "585",
+      "811",
+      "1412",
+      "3699",
+      "2165",
+      "2283",
+      "1566",
+      "3745"
+    ]
+  },
+  {
+    "id": "stop_shiv_murti_dwarka_more_5348",
+    "name": "Shiv Murti / Dwarka More",
+    "type": "Interchange",
+    "lat": 28.5349,
+    "lng": 77.10844,
+    "zone": "South-West Delhi",
+    "description": "Najafgarh Road & Dwarka Expressway Gateway Node",
+    "majorRoutes": [
+      "6",
+      "50",
+      "1326",
+      "1714",
+      "1739",
+      "1795",
+      "1946",
+      "2007"
+    ]
+  },
+  {
+    "id": "stop_dwarka_more_119",
+    "name": "Dwarka More",
+    "type": "Interchange",
+    "lat": 28.59278,
+    "lng": 77.0795,
+    "zone": "South-West Delhi",
+    "description": "Najafgarh Road & Dwarka Expressway Gateway Node",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_1_2848",
+    "name": "Dwarka Sector 1",
+    "type": "Bus Stand",
+    "lat": 28.59447,
+    "lng": 77.07344,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "715",
+      "715A",
+      "716",
+      "721",
+      "727",
+      "727B",
+      "728A",
+      "728B"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_7_princess_park__2907",
+    "name": "Dwarka Sector-7 Princess Park Apartment",
+    "type": "Bus Stand",
+    "lat": 28.58879,
+    "lng": 77.06775,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "715A",
+      "716",
+      "718",
+      "752A",
+      "783",
+      "801",
+      "D-1901",
+      "D-3902"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector19_20_crossing_3982",
+    "name": "Dwarka Sector19 / 20 Crossing",
+    "type": "Bus Stand",
+    "lat": 28.57648,
+    "lng": 77.05702,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "715A",
+      "716",
+      "752",
+      "752A",
+      "775E",
+      "775LINK",
+      "D-9904",
+      "D-9918"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_22_cluster_depot_3981",
+    "name": "Dwarka sector 22 Cluster Depot",
+    "type": "Bus Stand",
+    "lat": 28.55371,
+    "lng": 77.0518,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "773",
+      "775LINK",
+      "792",
+      "801LNK",
+      "850LTD",
+      "892",
+      "892D",
+      "D-9916"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_17_18_more_3471",
+    "name": "Dwarka Sector 17/18 More",
+    "type": "Bus Stand",
+    "lat": 28.59337,
+    "lng": 77.03345,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "781",
+      "D-070",
+      "D-9903(+)",
+      "D-9903(-)",
+      "DCS(+)",
+      "DCS(-)",
+      "DS-25",
+      "654"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_6_10_5_11_xing_5164",
+    "name": "Dwarka Sector-6/10- 5/11 Xing",
+    "type": "Bus Stand",
+    "lat": 28.59207,
+    "lng": 77.05813,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9601",
+      "DS-22",
+      "RL-75",
+      "RL-77"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_12_4_x_ing_5177",
+    "name": "Dwarka Sector-12/4 X-ing",
+    "type": "Bus Stand",
+    "lat": 28.60125,
+    "lng": 77.04309,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9903(+)",
+      "D-9903(-)",
+      "DCS(+)",
+      "DCS(-)",
+      "RL-75",
+      "654",
+      "679",
+      "782"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_18_18a_5178",
+    "name": "Dwarka Sector-18/18A",
+    "type": "Bus Stand",
+    "lat": 28.58836,
+    "lng": 77.0408,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9903(+)",
+      "D-9903(-)",
+      "DCS(+)",
+      "DCS(-)",
+      "RL-77",
+      "654",
+      "679",
+      "782"
+    ]
+  },
+  {
+    "id": "stop_spg_complex_dwarka_sector_8_3056",
+    "name": "SPG Complex Dwarka Sector-8",
+    "type": "Bus Stand",
+    "lat": 28.5635,
+    "lng": 77.06915,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "717",
+      "801",
+      "2986",
+      "2170"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_4_5_crossing_3032",
+    "name": "Dwarka Sector 4/5 crossing",
+    "type": "Bus Stand",
+    "lat": 28.60296,
+    "lng": 77.0565,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "724",
+      "770",
+      "770A",
+      "778",
+      "794A",
+      "803",
+      "2245"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_11_metro_station_5182",
+    "name": "Dwarka Sector-11 Metro Station Gate No.2",
+    "type": "Bus Stand",
+    "lat": 28.58684,
+    "lng": 77.04941,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9904",
+      "D-9909(+)",
+      "D-9909(-)",
+      "RL-77"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_14_vegas_mall_5210",
+    "name": "Dwarka Sector-14 Vegas Mall",
+    "type": "Bus Stand",
+    "lat": 28.60022,
+    "lng": 77.02895,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "DCS(+)",
+      "DCS(-)",
+      "DS-4",
+      "654",
+      "679",
+      "782"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sec_4_5_11_12_xing_dwar_4607",
+    "name": "Dwarka sec 4/5 & 11/12 Xing /Dwarka Sector 12 / Ashirwad Chowk",
+    "type": "Bus Stand",
+    "lat": 28.5959,
+    "lng": 77.04944,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "724",
+      "794A",
+      "DS-2"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_11_sbi_4608",
+    "name": "Dwarka Sector-11 SBI",
+    "type": "Bus Stand",
+    "lat": 28.58678,
+    "lng": 77.04337,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "724",
+      "D-9903(+)",
+      "RL-77"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_10_11_max_hospit_5183",
+    "name": "Dwarka Sector-10/11 / Max Hospital Gate No.1",
+    "type": "Bus Stand",
+    "lat": 28.58279,
+    "lng": 77.05046,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9904",
+      "DS-22",
+      "RL-77"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_5_5172",
+    "name": "Dwarka Sector-5",
+    "type": "Bus Stand",
+    "lat": 28.59756,
+    "lng": 77.063,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9601",
+      "RL-77"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_19_pocket_2_5208",
+    "name": "Dwarka Sector 19 Pocket 2",
+    "type": "Bus Stand",
+    "lat": 28.57782,
+    "lng": 77.04509,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9918",
+      "3370"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_10_max_hospital__5181",
+    "name": "Dwarka Sector 10 / Max Hospital Gali no 1",
+    "type": "Bus Stand",
+    "lat": 28.58117,
+    "lng": 77.05163,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "D-9904"
+    ]
+  },
+  {
+    "id": "stop_dwarka_sector_13_mrv_school_86",
+    "name": "Dwarka Sector 13 MRV School",
+    "type": "Bus Stand",
+    "lat": 28.60404,
+    "lng": 77.03902,
+    "zone": "South-West Delhi",
+    "description": "Sub-City Residential Sectors Transit Hub",
+    "majorRoutes": [
+      "502",
+      "840",
+      "100"
+    ]
+  },
+  {
+    "id": "stop_kapashera_border_128",
+    "name": "Kapashera Border",
+    "type": "Terminal",
+    "lat": 28.52324,
+    "lng": 77.08294,
+    "zone": "South-West Delhi",
+    "description": "Delhi-Gurgaon Interstate Border Terminal",
+    "majorRoutes": [
+      "543A",
+      "729",
+      "578A",
+      "706",
+      "706A",
+      "712",
+      "717A",
+      "717E"
+    ]
+  },
+  {
+    "id": "stop_a_block_mahipalpur_3888",
+    "name": "A Block Mahipalpur",
+    "type": "Interchange",
+    "lat": 28.54973,
+    "lng": 77.12821,
+    "zone": "South-West Delhi",
+    "description": "NH-48 Aerocity & IGI Airport Bypass Node",
+    "majorRoutes": [
+      "709",
+      "729B",
+      "790B",
+      "828LTD",
+      "850LTD",
+      "D-034",
+      "D-1103",
+      "DW1"
+    ]
+  },
+  {
+    "id": "stop_inderlok_metro_station_1318",
+    "name": "Inderlok Metro Station",
+    "type": "Interchange",
+    "lat": 28.67363,
+    "lng": 77.16898,
+    "zone": "North-West Delhi",
+    "description": "Red/Green Line Interchange & Major Feeder Terminal",
+    "majorRoutes": [
+      "108",
+      "108A",
+      "141",
+      "141A",
+      "144A",
+      "182A",
+      "229",
+      "234"
+    ]
+  },
+  {
+    "id": "stop_shastri_nagar_e_block_971",
+    "name": "Shastri Nagar E Block",
+    "type": "Bus Stand",
+    "lat": 28.67126,
+    "lng": 77.17614,
+    "zone": "North Delhi",
+    "description": "Sarai Rohilla Feeder & Red Line Metro Stop",
+    "majorRoutes": [
+      "108",
+      "108A",
+      "141",
+      "144A",
+      "182A",
+      "229",
+      "234",
+      "234A"
+    ]
+  },
+  {
+    "id": "stop_karol_bagh_terminal_726",
+    "name": "Karol Bagh Terminal",
+    "type": "Terminal",
+    "lat": 28.64806,
+    "lng": 77.20114,
+    "zone": "Central Delhi",
+    "description": "Pusa Road & Gurudwara Road Commercial Terminal",
+    "majorRoutes": [
+      "12",
+      "3",
+      "100",
+      "100A",
+      "144A",
+      "156",
+      "166",
+      "181"
+    ]
+  },
+  {
+    "id": "stop_east_patel_nagar_440",
+    "name": "East Patel Nagar",
+    "type": "Bus Stand",
+    "lat": 28.64214,
+    "lng": 77.17365,
+    "zone": "Central/West Delhi",
+    "description": "Shadipur & West Delhi Arterial Corridor Node",
+    "majorRoutes": [
+      "72",
+      "753",
+      "943",
+      "160",
+      "168",
+      "208",
+      "208A",
+      "218"
+    ]
+  },
+  {
+    "id": "stop_moti_nagar_industrial_area_444",
+    "name": "Moti Nagar Industrial Area",
+    "type": "Interchange",
+    "lat": 28.65776,
+    "lng": 77.14822,
+    "zone": "West Delhi",
+    "description": "Ring Road & Shivaji Marg Industrial/Commercial Node",
+    "majorRoutes": [
+      "72",
+      "943",
+      "108",
+      "108A",
+      "159",
+      "160",
+      "168",
+      "208"
+    ]
+  },
+  {
+    "id": "stop_rohini_depot_3_286",
+    "name": "Rohini Depot 3",
+    "type": "Terminal",
+    "lat": 28.69549,
+    "lng": 77.109,
+    "zone": "North-West Delhi",
+    "description": "Integrated Sub-City Residential Transit Hub",
+    "majorRoutes": [
+      "114",
+      "901",
+      "0OMS(-)",
+      "0OMS(+)",
+      "114A",
+      "114B",
+      "128",
+      "129"
+    ]
+  },
+  {
+    "id": "stop_pitampura_nd_block_1617",
+    "name": "Pitampura ND Block",
+    "type": "Bus Stand",
+    "lat": 28.69582,
+    "lng": 77.14587,
+    "zone": "North-West Delhi",
+    "description": "Outer Ring Road Madhuban Chowk Node",
+    "majorRoutes": [
+      "114",
+      "901",
+      "102",
+      "102A",
+      "114A",
+      "114B",
+      "141",
+      "141A"
+    ]
+  },
+  {
+    "id": "stop_shalimar_bagh_crossing_ring_ro_1423",
+    "name": "Shalimar Bagh Crossing Ring Road",
+    "type": "Bus Stand",
+    "lat": 28.70355,
+    "lng": 77.16938,
+    "zone": "North-West Delhi",
+    "description": "Ring Road High-Density Residential Bus Stop",
+    "majorRoutes": [
+      "114",
+      "12",
+      "3",
+      "901",
+      "0TMS(+)",
+      "0TMS(-)",
+      "102",
+      "102A"
+    ]
+  },
+  {
+    "id": "stop_wazirpur_dtc_depot_netaji_subh_1616",
+    "name": "Wazirpur DTC Depot / Netaji Subhash Palace",
+    "type": "Depot",
+    "lat": 28.69386,
+    "lng": 77.15092,
+    "zone": "North-West Delhi",
+    "description": "Ring Road Industrial Fleet Operations Center",
+    "majorRoutes": [
+      "114",
+      "901",
+      "102",
+      "102A",
+      "114A",
+      "114B",
+      "141",
+      "141A"
+    ]
+  },
+  {
+    "id": "stop_burari_crossing_294",
+    "name": "Burari Crossing",
+    "type": "Terminal",
+    "lat": 28.72859,
+    "lng": 77.19933,
+    "zone": "North Delhi",
+    "description": "Transport Authority & North Suburbs Feeder Terminal",
+    "majorRoutes": [
+      "0OMS(-)",
+      "0OMS(+)",
+      "143A",
+      "143",
+      "165",
+      "165A",
+      "174B",
+      "185"
+    ]
+  },
+  {
+    "id": "stop_shahdara_shyam_lal_college__1926",
+    "name": "Shahdara (Shyam Lal College)",
+    "type": "Terminal",
+    "lat": 28.67367,
+    "lng": 77.28359,
+    "zone": "Shahdara / East Delhi",
+    "description": "Grand Trunk Road East Historic Terminal & Metro Node",
+    "majorRoutes": [
+      "236",
+      "121",
+      "125A-",
+      "125",
+      "208",
+      "214",
+      "214B",
+      "221"
+    ]
+  },
+  {
+    "id": "stop_dilshad_garden_gt_road_1929",
+    "name": "Dilshad Garden GT Road",
+    "type": "Terminal",
+    "lat": 28.67615,
+    "lng": 77.31188,
+    "zone": "Shahdara",
+    "description": "Delhi-Ghaziabad Interstate Border Terminal",
+    "majorRoutes": [
+      "236",
+      "125A-",
+      "125",
+      "165",
+      "165A",
+      "208",
+      "214",
+      "214B"
+    ]
+  },
+  {
+    "id": "stop_shahdara_border_seemapuri_road_1204",
+    "name": "Shahdara Border Seemapuri Road",
+    "type": "Terminal",
+    "lat": 28.67766,
+    "lng": 77.32341,
+    "zone": "North-East Delhi",
+    "description": "Apsara Border Transit Terminal",
+    "majorRoutes": [
+      "0OMS(-)",
+      "0OMS(+)",
+      "208",
+      "214",
+      "214B",
+      "243",
+      "281",
+      "33"
+    ]
+  },
+  {
+    "id": "stop_nand_nagri_depot_1805",
+    "name": "Nand Nagri Depot",
+    "type": "Depot",
+    "lat": 28.69889,
+    "lng": 77.30632,
+    "zone": "North-East Delhi",
+    "description": "Wazirabad Road North-East Fleet Operations Center",
+    "majorRoutes": [
+      "261",
+      "0OMS(-)",
+      "165",
+      "165A",
+      "205",
+      "208A",
+      "210",
+      "212"
+    ]
+  },
+  {
+    "id": "stop_bhajanpura_301",
+    "name": "Bhajanpura",
+    "type": "Bus Stand",
+    "lat": 28.7035,
+    "lng": 77.26378,
+    "zone": "North-East Delhi",
+    "description": "Wazirabad Road High-Density Commuter Hub",
+    "majorRoutes": [
+      "261",
+      "0OMS(-)",
+      "0OMS(+)",
+      "121",
+      "165",
+      "165A",
+      "206A",
+      "207"
+    ]
+  },
+  {
+    "id": "stop_yamuna_vihar_b_block_1810",
+    "name": "Yamuna Vihar B-Block",
+    "type": "Terminal",
+    "lat": 28.70292,
+    "lng": 77.26995,
+    "zone": "North-East Delhi",
+    "description": "C-4 Yamuna Vihar Major North-East Terminal",
+    "majorRoutes": [
+      "261",
+      "0OMS(-)",
+      "121",
+      "165",
+      "165A",
+      "206A",
+      "207",
+      "208A"
+    ]
+  },
+  {
+    "id": "stop_khajuri_khas_1244",
+    "name": "Khajuri Khas",
+    "type": "Interchange",
+    "lat": 28.70465,
+    "lng": 77.25694,
+    "zone": "North-East Delhi",
+    "description": "Signature Bridge & Wazirabad Highway Crossing",
+    "majorRoutes": [
+      "261",
+      "0OMS(-)",
+      "0OMS(+)",
+      "121",
+      "165",
+      "165A",
+      "207",
+      "208A"
+    ]
+  },
+  {
+    "id": "stop_laxmi_nagar_metro_station_laxm_2149",
+    "name": "Laxmi Nagar Metro Station / Laxmi Nagar",
+    "type": "Interchange",
+    "lat": 28.63087,
+    "lng": 77.27789,
+    "zone": "East Delhi",
+    "description": "Vikas Marg East Commercial Corridor Node",
+    "majorRoutes": [
+      "943",
+      "243",
+      "281",
+      "281A",
+      "316",
+      "317",
+      "320",
+      "335"
+    ]
+  },
+  {
+    "id": "stop_nirman_vihar_546",
+    "name": "Nirman Vihar",
+    "type": "Bus Stand",
+    "lat": 28.63682,
+    "lng": 77.2874,
+    "zone": "East Delhi",
+    "description": "Vikas Marg Preet Vihar Commercial Center",
+    "majorRoutes": [
+      "943",
+      "243",
+      "281",
+      "281A",
+      "317",
+      "320",
+      "335",
+      "336"
+    ]
+  },
+  {
+    "id": "stop_karkardooma_crossing_548",
+    "name": "Karkardooma Crossing",
+    "type": "Bus Stand",
+    "lat": 28.64299,
+    "lng": 77.29721,
+    "zone": "East Delhi",
+    "description": "District Courts Complex & Blue/Pink Line Node",
+    "majorRoutes": [
+      "943",
+      "243",
+      "281",
+      "281A",
+      "317",
+      "320",
+      "335",
+      "336"
+    ]
+  },
+  {
+    "id": "stop_mayur_vihar_phase_3_crossing_794",
+    "name": "Mayur Vihar Phase 3 Crossing",
+    "type": "Terminal",
+    "lat": 28.60162,
+    "lng": 77.32743,
+    "zone": "East Delhi",
+    "description": "Trilokpuri & Noida Border Transit Terminal",
+    "majorRoutes": [
+      "118EXT",
+      "118EXTN",
+      "206A",
+      "211",
+      "319",
+      "319A",
+      "33",
+      "33A"
+    ]
+  },
+  {
+    "id": "stop_pusta_crossing_akshardham_temp_2092",
+    "name": "Pusta Crossing / Akshardham Temple",
+    "type": "Interchange",
+    "lat": 28.61295,
+    "lng": 77.28215,
+    "zone": "East Delhi",
+    "description": "National Highway 24 & Commonwealth Games Node",
+    "majorRoutes": [
+      "543A",
+      "243",
+      "306",
+      "311A",
+      "344",
+      "355",
+      "443",
+      "469"
+    ]
+  },
+  {
+    "id": "stop_isbt_sarai_kale_khan_2432",
+    "name": "ISBT Sarai Kale Khan",
+    "type": "ISBT",
+    "lat": 28.58663,
+    "lng": 77.25952,
+    "zone": "South-East Delhi",
+    "description": "Hazrat Nizamuddin Railway, RRTS & ISBT Mega-Hub",
+    "majorRoutes": [
+      "261",
+      "543A",
+      "0TMS(+)",
+      "306",
+      "396",
+      "412",
+      "422",
+      "469"
+    ]
+  },
+  {
+    "id": "stop_bhogal_jungpura__1097",
+    "name": "Bhogal (Jungpura)",
+    "type": "Bus Stand",
+    "lat": 28.58488,
+    "lng": 77.24973,
+    "zone": "South-East Delhi",
+    "description": "Jangpura & Mathura Road Commercial Stop",
+    "majorRoutes": [
+      "405",
+      "44",
+      "156",
+      "166",
+      "181",
+      "181A",
+      "19",
+      "274"
+    ]
+  },
+  {
+    "id": "stop_south_extension_2_2254",
+    "name": "South Extension 2",
+    "type": "Bus Stand",
+    "lat": 28.56893,
+    "lng": 77.21689,
+    "zone": "South Delhi",
+    "description": "Ring Road Part 1 & Part 2 High-Footfall Shopping Hub",
+    "majorRoutes": [
+      "543A",
+      "0TMS(+)",
+      "0TMS(-)",
+      "323",
+      "392",
+      "392B",
+      "398",
+      "400"
+    ]
+  },
+  {
+    "id": "stop_andrews_ganj_185",
+    "name": "Andrews Ganj",
+    "type": "Interchange",
+    "lat": 28.56603,
+    "lng": 77.23002,
+    "zone": "South Delhi",
+    "description": "Ring Road & BRT Corridor Intersecting Node",
+    "majorRoutes": [
+      "543A",
+      "0TMS(+)",
+      "0TMS(-)",
+      "323",
+      "334",
+      "375",
+      "392",
+      "392B"
+    ]
+  },
+  {
+    "id": "stop_sarojini_nagar_depot_758",
+    "name": "Sarojini Nagar Depot",
+    "type": "Terminal",
+    "lat": 28.57412,
+    "lng": 77.1899,
+    "zone": "South Delhi",
+    "description": "Famous Market & Ring Road Transit Terminal",
+    "majorRoutes": [
+      "465",
+      "465A",
+      "512",
+      "536",
+      "544",
+      "544A",
+      "610",
+      "610A"
+    ]
+  },
+  {
+    "id": "stop_netaji_nagar_bhikaji_cama_plac_2174",
+    "name": "Netaji Nagar / Bhikaji Cama Place",
+    "type": "Interchange",
+    "lat": 28.56775,
+    "lng": 77.18928,
+    "zone": "South Delhi",
+    "description": "Ring Road Africa Avenue Commercial Complex Node",
+    "majorRoutes": [
+      "336",
+      "512",
+      "536",
+      "544",
+      "544A",
+      "578",
+      "578A",
+      "610"
+    ]
+  },
+  {
+    "id": "stop_munirka_village_t__2182",
+    "name": "Munirka Village (T)",
+    "type": "Bus Stand",
+    "lat": 28.55858,
+    "lng": 77.17381,
+    "zone": "South Delhi",
+    "description": "Outer Ring Road JNU & Vasant Vihar Gateway",
+    "majorRoutes": [
+      "336",
+      "448",
+      "448B",
+      "511",
+      "511A",
+      "511E",
+      "523",
+      "523A"
+    ]
+  },
+  {
+    "id": "stop_vasant_kunj_c8_vasant_kunj_roa_2609",
+    "name": "Vasant Kunj C8 (Vasant Kunj Road)",
+    "type": "Terminal",
+    "lat": 28.53678,
+    "lng": 77.14013,
+    "zone": "South-West Delhi",
+    "description": "Institutional Area, Promenade & Fortis Hospital Hub",
+    "majorRoutes": [
+      "534A",
+      "539",
+      "539A",
+      "605A",
+      "715",
+      "715A",
+      "717",
+      "717A"
+    ]
+  },
+  {
+    "id": "stop_mehrauli_terminal_448",
+    "name": "Mehrauli Terminal",
+    "type": "Terminal",
+    "lat": 28.52224,
+    "lng": 77.18251,
+    "zone": "South Delhi",
+    "description": "Historic Qutub Minar & Gurugram Highway Terminal",
+    "majorRoutes": [
+      "502",
+      "334",
+      "34",
+      "356",
+      "413",
+      "427",
+      "463",
+      "493"
+    ]
+  },
+  {
+    "id": "stop_chhatarpur_mandir_2515",
+    "name": "Chhatarpur Mandir",
+    "type": "Interchange",
+    "lat": 28.50139,
+    "lng": 77.18285,
+    "zone": "South Delhi",
+    "description": "Mandir Marg & Yellow Line Metro Terminal",
+    "majorRoutes": [
+      "434",
+      "506",
+      "516",
+      "523",
+      "523A",
+      "536",
+      "947A",
+      "D-046"
+    ]
+  },
+  {
+    "id": "stop_saket_crossing_253",
+    "name": "Saket Crossing",
+    "type": "Interchange",
+    "lat": 28.51776,
+    "lng": 77.21661,
+    "zone": "South Delhi",
+    "description": "Select Citywalk, Max Hospital & Press Enclave Node",
+    "majorRoutes": [
+      "34",
+      "34A",
+      "356",
+      "411",
+      "419",
+      "419A",
+      "423",
+      "427"
+    ]
+  },
+  {
+    "id": "stop_hauz_khas_489",
+    "name": "Hauz Khas",
+    "type": "Interchange",
+    "lat": 28.553,
+    "lng": 77.20503,
+    "zone": "South Delhi",
+    "description": "Aurobindo Marg & Outer Ring Road Yellow/Magenta Node",
+    "majorRoutes": [
+      "502",
+      "335",
+      "344",
+      "465",
+      "465A",
+      "502A",
+      "505",
+      "507"
+    ]
+  },
+  {
+    "id": "stop_nehru_place_terminal_2082",
+    "name": "Nehru Place Terminal",
+    "type": "Terminal",
+    "lat": 28.5487,
+    "lng": 77.25698,
+    "zone": "South-East Delhi",
+    "description": "Asia Largest IT Hardware Market Central Terminal",
+    "majorRoutes": [
+      "244",
+      "306",
+      "374",
+      "375",
+      "412",
+      "424",
+      "425A",
+      "427"
+    ]
+  },
+  {
+    "id": "stop_kalkaji_mandir_maaanandmayeema_1370",
+    "name": "Kalkaji Mandir (MaaAnandmayeeMarg)",
+    "type": "Interchange",
+    "lat": 28.54808,
+    "lng": 77.2629,
+    "zone": "South-East Delhi",
+    "description": "Lotus Temple & Violet/Magenta Metro Node",
+    "majorRoutes": [
+      "243",
+      "311A",
+      "411",
+      "411LNK",
+      "425A",
+      "429",
+      "433",
+      "433A"
+    ]
+  },
+  {
+    "id": "stop_govindpuri_gali_no_5_3774",
+    "name": "Govindpuri Gali No 5",
+    "type": "Bus Stand",
+    "lat": 28.53755,
+    "lng": 77.26134,
+    "zone": "South-East Delhi",
+    "description": "Maa Anandmayee Marg High-Density Feeder",
+    "majorRoutes": [
+      "243",
+      "311A",
+      "445A",
+      "480",
+      "511",
+      "D-011",
+      "D-042",
+      "D-8802"
+    ]
+  },
+  {
+    "id": "stop_okhla_tank_829",
+    "name": "Okhla Tank",
+    "type": "Depot",
+    "lat": 28.5481,
+    "lng": 77.27667,
+    "zone": "South-East Delhi",
+    "description": "Phase 1 to 3 Heavy Industrial DTC Fleet Hub",
+    "majorRoutes": [
+      "405",
+      "404",
+      "405A",
+      "405D",
+      "405E",
+      "418A",
+      "422",
+      "451A"
+    ]
+  },
+  {
+    "id": "stop_jasola_vihar_631",
+    "name": "Jasola Vihar",
+    "type": "Bus Stand",
+    "lat": 28.54056,
+    "lng": 77.297,
+    "zone": "South-East Delhi",
+    "description": "Apollo Hospital & Mathura Road Medical Node",
+    "majorRoutes": [
+      "34",
+      "34A",
+      "403",
+      "434",
+      "443",
+      "451A",
+      "465",
+      "493"
+    ]
+  },
+  {
+    "id": "stop_badarpur_border_t__1155",
+    "name": "Badarpur Border (T)",
+    "type": "Terminal",
+    "lat": 28.49313,
+    "lng": 77.30373,
+    "zone": "South-East Delhi",
+    "description": "Delhi-Faridabad Interstate Major Terminal",
+    "majorRoutes": [
+      "405",
+      "405A",
+      "405D",
+      "405E",
+      "418A",
+      "422",
+      "433",
+      "433B"
+    ]
+  },
+  {
+    "id": "stop_sec_a9_narela_narela_pocket_13_1500",
+    "name": "Sec A9 Narela / Narela Pocket 13 / A9",
+    "type": "Terminal",
+    "lat": 28.85175,
+    "lng": 77.09777,
+    "zone": "North Delhi",
+    "description": "Sub-City Industrial & Haryana Border Terminal",
+    "majorRoutes": [
+      "131",
+      "103",
+      "109",
+      "109A",
+      "112A",
+      "120",
+      "120A",
+      "120B"
+    ]
+  },
+  {
+    "id": "stop_alipur_village_gt_road_1485",
+    "name": "Alipur Village GT Road",
+    "type": "Terminal",
+    "lat": 28.7955,
+    "lng": 77.1396,
+    "zone": "North Delhi",
+    "description": "GT Karnal Road North Gateway Terminal",
+    "majorRoutes": [
+      "131",
+      "103",
+      "103E",
+      "109",
+      "109A",
+      "112",
+      "112A",
+      "120"
+    ]
+  },
+  {
+    "id": "stop_bawana_dispensary_1515",
+    "name": "Bawana Dispensary",
+    "type": "Terminal",
+    "lat": 28.80095,
+    "lng": 77.03738,
+    "zone": "North-West Delhi",
+    "description": "Industrial Mega-Cluster Bus Operations Terminal",
+    "majorRoutes": [
+      "103",
+      "106A",
+      "107",
+      "113",
+      "113A",
+      "114C",
+      "119",
+      "119LNK"
+    ]
+  },
+  {
+    "id": "stop_police_station_najafgarh_2692",
+    "name": "Police Station Najafgarh",
+    "type": "Terminal",
+    "lat": 28.60941,
+    "lng": 76.98312,
+    "zone": "South-West Delhi",
+    "description": "Delhi Gate Najafgarh Rural-Urban Major Western Hub",
+    "majorRoutes": [
+      "72",
+      "539",
+      "539A",
+      "546",
+      "567B",
+      "567",
+      "578",
+      "628"
+    ]
+  },
+  {
+    "id": "stop_tikri_border_3306",
+    "name": "Tikri Border",
+    "type": "Terminal",
+    "lat": 28.68825,
+    "lng": 76.96291,
+    "zone": "West Delhi",
+    "description": "Delhi-Bahadurgarh Border Rohtak Road Terminal",
+    "majorRoutes": [
+      "926",
+      "938A",
+      "949",
+      "BAHADURGARH TO KARAM PURA TERMINAL",
+      "BAHADURGARH TO NARELA A-9 TERMINAL",
+      "BAHADURGARH TO N.D.RLY. ST. G.-2",
+      "D-3601",
+      "KARAM PURA TERMINAL TO BAHADURGARH"
+    ]
+  },
+  {
+    "id": "stop_ggs_university_isbt_kashmere_g_1474",
+    "name": "GGS University ISBT Kashmere Gate",
+    "type": "ISBT",
+    "lat": 28.66548,
+    "lng": 77.23017,
+    "zone": "North Delhi",
+    "description": "Maharana Pratap ISBT Triple-Metro Central Terminal",
+    "majorRoutes": [
+      "118EXT",
+      "131",
+      "261",
+      "405",
+      "729",
+      "753",
+      "901",
+      "926"
+    ]
+  },
+  {
+    "id": "stop_anand_vihar_isbt_main_road_1208",
+    "name": "Anand Vihar ISBT Main Road",
+    "type": "ISBT",
+    "lat": 28.64701,
+    "lng": 77.31796,
+    "zone": "East Delhi",
+    "description": "Swami Vivekanand ISBT & East Railway Mega-Terminal",
+    "majorRoutes": [
+      "236",
+      "543A",
+      "740",
+      "943",
+      "0GL-23",
+      "0OMS(+)",
+      "125A-",
+      "125"
+    ]
+  }
+]

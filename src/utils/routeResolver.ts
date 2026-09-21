@@ -165,32 +165,35 @@ export function resolveBusProgression(bus: DTCBus, allBuses: DTCBus[] = []): Bus
   }
 
   // Fallback: Dynamic Auto-Resolver for any other route
-  // 1. Check if any hubs mention this route
-  const hubsWithRoute = DELHI_HUBS.filter((h) => h.majorRoutes?.includes(cleanRouteId));
-  let originName = 'Shivaji Stadium Terminal';
-  let destName = 'Uttam Nagar Terminal';
+  let originName = bus.originTerminal || '';
+  let destName = bus.destinationTerminal || '';
 
-  if (hubsWithRoute.length >= 2) {
-    originName = hubsWithRoute[0].name;
-    destName = hubsWithRoute[1].name;
-  } else if (hubsWithRoute.length === 1) {
-    originName = hubsWithRoute[0].name;
-    destName = originName.includes('ISBT') ? 'Shivaji Stadium Terminal' : 'Kashmere Gate ISBT';
-  } else {
-    // Geographical deduction based on bus position
-    // If bus is in West Delhi (lng < 77.10), origin/dest relates to West Delhi & Central
-    if (bus.lng < 77.10) {
-      originName = 'Uttam Nagar Terminal';
-      destName = 'Shivaji Stadium Terminal';
-    } else if (bus.lng > 77.26) {
-      originName = 'Anand Vihar ISBT';
-      destName = 'Shivaji Stadium Terminal';
-    } else if (bus.lat > 78.68) {
-      originName = 'Azadpur Terminal';
-      destName = 'Central Secretariat Terminal';
+  if (!originName || !destName) {
+    const hubsWithRoute = DELHI_HUBS.filter(
+      (h) => h.majorRoutes?.includes(cleanRouteId) || (bus.rawRouteId && h.majorRoutes?.includes(bus.rawRouteId))
+    );
+
+    if (hubsWithRoute.length >= 2) {
+      originName = hubsWithRoute[0].name;
+      destName = hubsWithRoute[1].name;
+    } else if (hubsWithRoute.length === 1) {
+      originName = hubsWithRoute[0].name;
+      destName = originName.includes('ISBT') ? 'Shivaji Stadium Terminal' : 'Kashmere Gate ISBT';
     } else {
-      originName = 'Kashmere Gate ISBT';
-      destName = 'Nehru Place Bus Terminal';
+      // Geographical deduction based on bus position
+      if (bus.lng < 77.10) {
+        originName = 'Uttam Nagar Terminal';
+        destName = 'Shivaji Stadium Terminal';
+      } else if (bus.lng > 77.26) {
+        originName = 'Anand Vihar ISBT';
+        destName = 'Shivaji Stadium Terminal';
+      } else if (bus.lat > 28.68) {
+        originName = 'Azadpur Terminal';
+        destName = 'Central Secretariat Terminal';
+      } else {
+        originName = 'Kashmere Gate ISBT';
+        destName = 'Nehru Place Bus Terminal';
+      }
     }
   }
 

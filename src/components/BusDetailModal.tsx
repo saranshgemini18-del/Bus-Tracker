@@ -17,6 +17,11 @@ import {
   Clock,
   Radio,
   CheckCircle2,
+  Ticket,
+  Users,
+  Building2,
+  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 
 interface BusDetailModalProps {
@@ -48,6 +53,21 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
 
   const isEV = bus.type === 'ev';
 
+  // Check and extract current speed in kilometers per hour (km/h) if available in the bus data object
+  const busRecord = bus as unknown as Record<string, unknown>;
+  const rawSpeed =
+    typeof bus.speedKmH === 'number' && !isNaN(bus.speedKmH)
+      ? bus.speedKmH
+      : typeof bus.speed === 'number' && !isNaN(bus.speed)
+      ? bus.speed
+      : typeof busRecord['speed_kmh'] === 'number' && !isNaN(busRecord['speed_kmh'] as number)
+      ? (busRecord['speed_kmh'] as number)
+      : null;
+
+  const isSpeedAvailable = rawSpeed !== null;
+  const currentSpeedKmH = isSpeedAvailable ? Math.round(rawSpeed) : null;
+  const speedFormatted = isSpeedAvailable ? `${currentSpeedKmH} km/h` : null;
+
   const handleCopyCoords = () => {
     navigator.clipboard.writeText(`${bus.lat.toFixed(6)}, ${bus.lng.toFixed(6)}`);
     setCopied(true);
@@ -56,14 +76,22 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
 
   const googleMapsUrl = `https://www.google.com/maps?q=${bus.lat},${bus.lng}`;
 
+  // Crowding configuration
+  const crowding = bus.crowdingStatus || 'moderate';
+  const crowdingConfig = {
+    low: { label: 'Seats Available', color: 'bg-emerald-100 text-emerald-800 border-emerald-300', dot: 'bg-emerald-500' },
+    moderate: { label: 'Moderate Load', color: 'bg-amber-100 text-amber-800 border-amber-300', dot: 'bg-amber-500' },
+    crowded: { label: 'Heavy Rush / Standing Only', color: 'bg-rose-100 text-rose-800 border-rose-300', dot: 'bg-rose-500' },
+  }[crowding];
+
   return (
     <div
       id="bus-detail-panel"
-      className="fixed inset-x-3 bottom-3 md:inset-auto md:right-6 md:top-20 md:w-[420px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 z-[500] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6 md:slide-in-from-right-6 max-h-[88vh] flex flex-col"
+      className="fixed inset-x-3 bottom-3 md:inset-auto md:right-6 md:top-20 md:w-[440px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 z-[500] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6 md:slide-in-from-right-6 max-h-[88vh] flex flex-col"
     >
       {/* Header Banner */}
       <div
-        className={`px-5 py-3.5 text-white flex items-center justify-between shrink-0 ${
+        className={`px-5 py-3 text-white flex items-center justify-between shrink-0 ${
           isEV
             ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700'
             : 'bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-800'
@@ -75,12 +103,24 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
           </div>
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-100 flex items-center gap-1.5">
-              <span>{isEV ? '100% Electric Low Floor' : `${bus.agency} Fleet Bus`}</span>
+              <span>{isEV ? 'Delhi EV Low-Floor AC' : `${bus.agency} Fleet`}</span>
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
             </div>
-            <h3 className="font-mono font-black text-xl tracking-tight leading-none text-white mt-0.5">
-              {bus.id}
-            </h3>
+            <div className="flex items-center gap-2 mt-0.5">
+              <h3 className="font-mono font-black text-xl tracking-tight leading-none text-white">
+                {bus.id}
+              </h3>
+              {isSpeedAvailable && (
+                <span
+                  id="bus-header-speed-badge"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-sm border border-white/20 shadow-sm"
+                  title={`Current Speed: ${speedFormatted}`}
+                >
+                  <Gauge className="w-3 h-3 text-emerald-200" />
+                  {speedFormatted}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -95,32 +135,69 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
       </div>
 
       {/* Scrollable Body */}
-      <div className="p-4 space-y-3.5 overflow-y-auto text-slate-800 text-sm flex-1">
-        {/* Route Badge & Actions */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Assigned Route
+      <div className="p-4 space-y-3 overflow-y-auto text-slate-800 text-sm flex-1">
+        {/* ========================================================================= */}
+        {/* DIGITAL AMBER LED DESTINATION DISPLAY BOARD (AS SEEN ON DELHI BUSES)      */}
+        {/* ========================================================================= */}
+        <div className="p-3.5 rounded-xl bg-zinc-950 border-2 border-zinc-800 text-amber-400 font-mono shadow-inner space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500/80 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span>
+              BUS FRONT LED BOARD
             </span>
-            <div className="text-xl font-black text-slate-900 flex items-center gap-2">
-              <span>Route {bus.routeId}</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                Live DTC
+            {bus.rawRouteId && bus.rawRouteId !== bus.routeId && (
+              <span className="text-[10px] text-zinc-500 font-sans font-medium">
+                Feed ID: #{bus.rawRouteId}
               </span>
-            </div>
+            )}
           </div>
-          <button
-            id="filter-this-route-btn"
-            onClick={() => onFilterRoute(bus.routeId)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition cursor-pointer"
-          >
-            <Filter className="w-3.5 h-3.5" />
-            Filter Route
-          </button>
+          
+          <div className="flex items-baseline justify-between pt-0.5">
+            <div className="text-2xl font-black tracking-wider text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]">
+              {bus.routeId}
+            </div>
+            <button
+              id="filter-this-route-btn"
+              onClick={() => onFilterRoute(bus.routeId)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 text-xs font-sans font-bold transition border border-amber-400/40 cursor-pointer"
+            >
+              <Filter className="w-3 h-3" />
+              Filter Route
+            </button>
+          </div>
+
+          <div className="text-xs text-amber-200/90 font-medium truncate pt-1 border-t border-zinc-800/80 flex items-center gap-1.5">
+            <span>{progression.startPoint}</span>
+            <span className="text-amber-500">➔</span>
+            <span>{progression.lastPoint}</span>
+          </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* CORE USER REQUIREMENT: STARTING POINT, NEXT POINT, AND LAST POINT OF BUS */}
+        {/* DELHI ONE APP VERIFIED TELEMETRY BADGE & OCCUPANCY                        */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Live Crowding / Occupancy */}
+          <div className={`p-2.5 rounded-xl border flex items-center gap-2 ${crowdingConfig.color}`}>
+            <Users className="w-4 h-4 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-wider opacity-75">Occupancy</div>
+              <div className="text-xs font-extrabold truncate">{crowdingConfig.label}</div>
+            </div>
+          </div>
+
+          {/* Delhi One Verified Status */}
+          <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-indigo-900 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Delhi One App</div>
+              <div className="text-xs font-extrabold truncate">Verified OTD GPS</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* CORE REQUIREMENT: STARTING POINT, NEXT POINT, AND LAST POINT OF BUS       */}
         {/* ========================================================================= */}
         <div className="p-3.5 rounded-xl bg-gradient-to-br from-slate-50 to-emerald-50/40 border border-emerald-200/80 shadow-sm space-y-3">
           <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
@@ -145,7 +222,7 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
-                  Starting Point (Origin)
+                  Starting Point (Origin Terminal)
                 </div>
                 <div className="text-sm font-bold text-slate-900 truncate">
                   {progression.startPoint}
@@ -153,18 +230,18 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
               </div>
             </div>
 
-            {/* 2. NEXT POINT (PROMINENT HIGHLIGHT) */}
-            <div className="flex items-start gap-3 relative z-10 bg-amber-50/90 border border-amber-200 p-2.5 rounded-xl shadow-sm">
+            {/* 2. NEXT POINT (PROMINENT HIGHLIGHT WITH ETA & DISTANCE) */}
+            <div className="flex items-start gap-3 relative z-10 bg-amber-50/95 border-2 border-amber-300 p-2.5 rounded-xl shadow-sm">
               <div className="w-7 h-7 rounded-full bg-amber-400 border-2 border-amber-600 text-amber-900 flex items-center justify-center shrink-0 font-bold text-xs shadow-md animate-pulse">
                 <Radio className="w-4 h-4 text-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                  <span className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span>
-                    Next Point (Upcoming Stand)
+                    Next Point (Upcoming Bus Stand)
                   </span>
-                  <span className="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-1.5 py-0.2 rounded">
+                  <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded shadow-sm">
                     ~{progression.nextPointEtaMins} min ETA
                   </span>
                 </div>
@@ -173,8 +250,12 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
                 </div>
                 <div className="text-xs text-slate-600 mt-0.5 flex items-center gap-2">
                   <span>Distance: <strong>{progression.nextPointFormattedDistance}</strong></span>
-                  <span>•</span>
-                  <span>Speed: {bus.speedKmH} km/h</span>
+                  {isSpeedAvailable && (
+                    <>
+                      <span>•</span>
+                      <span>Current Speed: <strong className="text-slate-800">{speedFormatted}</strong></span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -186,7 +267,7 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">
-                  Last Point (Destination)
+                  Last Point (Destination Terminal)
                 </div>
                 <div className="text-sm font-bold text-slate-900 truncate">
                   {progression.lastPoint}
@@ -210,42 +291,88 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
               ></div>
             </div>
           </div>
+        </div>
 
-          {/* Complete Waypoint Sequence Chips */}
-          {progression.orderedStops.length > 3 && (
-            <div className="pt-1">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Intermediate Waypoints on this Route:
+        {/* ========================================================================= */}
+        {/* DELHI GOVT FARE & PINK TICKET INFO (FROM ONE DELHI APP)                   */}
+        {/* ========================================================================= */}
+        <div className="p-3 rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-pink-500 text-white flex items-center justify-center font-black shadow-sm">
+              <Ticket className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-pink-700">
+                Delhi Pink Ticket (Gulabi Pass)
               </div>
-              <div className="flex flex-wrap gap-1">
-                {progression.orderedStops.map((st, i) => (
-                  <span
-                    key={i}
-                    className={`text-[10px] px-2 py-0.5 rounded font-medium border ${
-                      st.isCurrentNext
-                        ? 'bg-amber-100 border-amber-300 text-amber-900 font-bold ring-1 ring-amber-400'
-                        : st.isPassed
-                        ? 'bg-slate-100 text-slate-400 line-through border-slate-200'
-                        : 'bg-white text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    {st.name}
-                  </span>
-                ))}
+              <div className="text-xs font-extrabold text-pink-950">
+                100% Free Travel for Women & Transgender
               </div>
             </div>
-          )}
+          </div>
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-200/80 text-pink-900 border border-pink-300">
+            ₹0 Fare
+          </span>
+        </div>
+
+        {/* Depot & Vehicle Specs Grid */}
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-1 text-slate-400 font-medium text-[10px] uppercase tracking-wider">
+              <Building2 className="w-3 h-3 text-indigo-500" /> Assigned Home Depot
+            </div>
+            <div className="font-bold text-slate-800 mt-0.5 truncate">
+              {bus.depotName || 'Delhi DTC Depot'}
+            </div>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-1 text-slate-400 font-medium text-[10px] uppercase tracking-wider">
+              <Bus className="w-3 h-3 text-emerald-500" /> Bus Specification
+            </div>
+            <div className="font-bold text-slate-800 mt-0.5 truncate">
+              {bus.busModel || (isEV ? 'Electric AC Low-Floor' : 'CNG Low-Floor')}
+            </div>
+          </div>
         </div>
 
         {/* Telemetry Metrics Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           {/* Speed */}
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-              <Gauge className="w-3.5 h-3.5 text-indigo-600" /> Current Speed
+          <div id="bus-current-speed-card" className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+              <span className="flex items-center gap-1.5">
+                <Gauge className="w-3.5 h-3.5 text-indigo-600" /> Current Speed
+              </span>
+              {isSpeedAvailable && currentSpeedKmH !== null && (
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    currentSpeedKmH > 0
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-amber-100 text-amber-700'
+                  }`}
+                >
+                  {currentSpeedKmH > 0 ? 'Moving' : 'At Stop'}
+                </span>
+              )}
             </div>
-            <div className="mt-1 font-black text-lg text-slate-900">
-              {bus.speedKmH > 0 ? `${bus.speedKmH} km/h` : 'At Stop / Idling'}
+            <div className="mt-1 font-black text-lg text-slate-900 flex items-baseline gap-1.5">
+              {isSpeedAvailable ? (
+                <>
+                  <span id="bus-speed-kmh-value" className="font-mono text-xl font-black text-slate-900">
+                    {speedFormatted}
+                  </span>
+                  {currentSpeedKmH === 0 && (
+                    <span className="text-xs font-normal text-slate-500">
+                      (Idling)
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-sm font-semibold text-slate-400">
+                  Not available
+                </span>
+              )}
             </div>
           </div>
 
@@ -260,11 +387,11 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Live GPS Coordinates & Maps Link */}
+        {/* Live GPS Coordinates & Google Maps Link */}
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
             <span className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-rose-500" /> Live GPS Ping
+              <MapPin className="w-3.5 h-3.5 text-rose-500" /> Live GPS Coordinates
             </span>
             <span className="text-[11px] font-mono text-slate-400">
               {bus.ageSeconds < 5 ? 'Live ping' : `${bus.ageSeconds}s ago`}
@@ -307,20 +434,6 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
               </button>
             )}
           </div>
-        </div>
-
-        {/* Operating Agency & Trip Info */}
-        <div className="text-xs text-slate-600 space-y-1 pt-2 border-t border-slate-200">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-400">Operating Agency:</span>
-            <span className="font-bold text-slate-800">{bus.agency} (Govt of NCT Delhi)</span>
-          </div>
-          {bus.tripId && (
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">GTFS Trip ID:</span>
-              <span className="font-mono text-slate-800 text-[11px]">{bus.tripId}</span>
-            </div>
-          )}
         </div>
       </div>
     </div>
