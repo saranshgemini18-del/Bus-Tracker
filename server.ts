@@ -1,15 +1,11 @@
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import { createServer as createViteServer } from 'vite';
-import { DELHI_HUBS } from './src/data/terminals.js';
-import { resolveCommercialRoute, resolveBusDepot, estimateOccupancy } from './src/data/delhiRouteRegistry.js';
+import { DELHI_HUBS } from './src/data/terminals';
+import { resolveCommercialRoute, resolveBusDepot, estimateOccupancy } from './src/data/delhiRouteRegistry';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const DEFAULT_API_KEY = process.env.DTC_API_KEY || 'qj4xC9Up9YmsSAbfywNyD0vdpubZ09m9';
 const OTD_ENDPOINT = 'https://otd.delhi.gov.in/api/realtime/VehiclePositions.pb';
 
