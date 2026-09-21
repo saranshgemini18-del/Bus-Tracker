@@ -1,0 +1,6 @@
+{
+  "name": "DTC Bus Live Tracker",
+  "description": "Real-time tracking for Delhi Transport Corporation (DTC) and DIMTS buses using Delhi Open Transit Data (OTD) live GPS telemetry.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

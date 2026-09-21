@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* Leaflet Custom Marker & Popup adjustments */
+.leaflet-container {
+  font-family: inherit;
+  z-index: 10;
+}
+
+.custom-bus-div-icon,
+.custom-hub-marker,
+.user-loc-icon {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  line-height: 1.4;
+}
