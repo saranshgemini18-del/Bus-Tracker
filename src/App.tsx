@@ -5,53 +5,48 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { DTCBus, FleetSummary, RouteItem, TransitHub, BreadcrumbPoint } from './types';
-import { DELHI_HUBS } from './data/terminals';
-import { calculateDistanceKm } from './utils/geo';
-import { Header } from './components/Header';
-import { FleetStatsBar } from './components/FleetStatsBar';
-import { FilterBar } from './components/FilterBar';
-import { BusMap } from './components/BusMap';
-import { BusDetailModal } from './components/BusDetailModal';
-import { BusListView } from './components/BusListView';
-import { RoutesDirectory } from './components/RoutesDirectory';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { CivicHeader } from './components/CivicHeader';
+import { CivicFooter } from './components/CivicFooter';
+import { EmergencySOSModal } from './components/EmergencySOSModal';
+import { LiveMapView } from './components/views/LiveMapView';
+import { NearbyStopsView } from './components/views/NearbyStopsView';
+import { FareAndPassView } from './components/views/FareAndPassView';
+import { HelpAndSupportView } from './components/views/HelpAndSupportView';
+import { ContactAndGrievanceView } from './components/views/ContactAndGrievanceView';
+import { AlertCircle } from 'lucide-react';
 
 const DEFAULT_API_KEY = 'qj4xC9Up9YmsSAbfywNyD0vdpubZ09m9';
 
 export default function App() {
-  // State
+  // Navigation & Preferences State
+  const [activePath, setActivePath] = useState<string>('live-map');
+  const [fontScale, setFontScale] = useState<number>(1);
+  const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [isSOSOpen, setIsSOSOpen] = useState<boolean>(false);
+
+  // Telematics State
   const [apiKey] = useState<string>(DEFAULT_API_KEY);
-  const [activeTab, setActiveTab] = useState<'map' | 'fleet' | 'routes'>('map');
   const [buses, setBuses] = useState<DTCBus[]>([]);
   const [summary, setSummary] = useState<FleetSummary | null>(null);
   const [routes, setRoutes] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  // Bus selection & route filters
   const [selectedRoute, setSelectedRoute] = useState<string>('');
-  const [selectedType, setSelectedType] = useState<'all' | 'ev' | 'cng'>('all');
-  const [showHubs, setShowHubs] = useState<boolean>(true);
-  const [triggerNearestStandCount, setTriggerNearestStandCount] = useState<number>(0);
-
-  // Bus selection & tracking
   const [selectedBus, setSelectedBus] = useState<DTCBus | null>(null);
   const [busTrail, setBusTrail] = useState<BreadcrumbPoint[]>([]);
   const [isFollowingBus, setIsFollowingBus] = useState<boolean>(false);
   const [flyToTarget, setFlyToTarget] = useState<{ lat: number; lng: number; zoom?: number } | null>(null);
+  const [triggerNearestStandCount, setTriggerNearestStandCount] = useState<number>(0);
 
-  // Refs to prevent unnecessary re-creations of fetchBuses
+  // Refs for stable identity
   const selectedBusRef = useRef<DTCBus | null>(null);
   const isFollowingBusRef = useRef<boolean>(false);
   const busesRef = useRef<DTCBus[]>([]);
   selectedBusRef.current = selectedBus;
   isFollowingBusRef.current = isFollowingBus;
   busesRef.current = buses;
-
-  // Auto-refresh timer
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
-  const [countdown, setCountdown] = useState<number>(10);
 
   // Fetch summary and routes
   const fetchSummary = useCallback(async () => {
@@ -62,7 +57,7 @@ export default function App() {
         setSummary(data.summary);
       }
     } catch {
-      // Gracefully silent for background metric refresh
+      // Background silent
     }
   }, [apiKey]);
 
@@ -74,11 +69,11 @@ export default function App() {
         setRoutes(data.data);
       }
     } catch {
-      // Gracefully silent for background route refresh
+      // Background silent
     }
   }, [apiKey]);
 
-  // Main fetch buses function (stable identity using refs)
+  // Main fetch buses function
   const fetchBuses = useCallback(
     async (force = false) => {
       setLoading(true);
@@ -90,7 +85,6 @@ export default function App() {
           setBuses(data.buses);
           setError(null);
 
-          // If tracking a bus, update its position smoothly
           const currentSelected = selectedBusRef.current;
           if (currentSelected) {
             const updated = data.buses.find((b: DTCBus) => b.id === currentSelected.id);
@@ -110,7 +104,6 @@ export default function App() {
         }
       } finally {
         setLoading(false);
-        setCountdown(10);
       }
     },
     [apiKey]
@@ -141,78 +134,49 @@ export default function App() {
       .catch((e) => console.warn('Failed to fetch bus trail:', e));
   }, [selectedBus?.id, apiKey]);
 
-  // Auto-refresh countdown loop
+  // Auto-refresh loop every 10 seconds
   useEffect(() => {
-    if (!autoRefresh) return;
-
     const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          fetchBuses(false);
-          fetchSummary();
-          return 10;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
+      fetchBuses(false);
+      fetchSummary();
+    }, 10000);
     return () => clearInterval(timer);
-  }, [autoRefresh, fetchBuses, fetchSummary]);
+  }, [fetchBuses, fetchSummary]);
 
-  // Client-side filtering
-  const filteredBuses = useMemo(() => {
-    return buses.filter((bus) => {
-      // Type filter
-      if (selectedType !== 'all' && bus.type !== selectedType) {
-        return false;
+  // Global keyboard shortcut for ⌘K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setActivePath('live-map');
       }
-
-      // Route filter
-      if (selectedRoute && bus.routeId.toLowerCase() !== selectedRoute.toLowerCase()) {
-        return false;
-      }
-
-      // Search query (matches plate or route)
-      if (searchQuery.trim()) {
-        const q = searchQuery.trim().toUpperCase();
-        const matchesPlate = bus.id.includes(q);
-        const matchesRoute = bus.routeId.toUpperCase().includes(q);
-        if (!matchesPlate && !matchesRoute) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [buses, selectedType, selectedRoute, searchQuery]);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Handlers
   const handleSelectBus = (bus: DTCBus) => {
     setSelectedBus(bus);
     setFlyToTarget({ lat: bus.lat, lng: bus.lng, zoom: 15 });
-    if (activeTab !== 'map') {
-      setActiveTab('map');
+    if (activePath !== 'live-map') {
+      setActivePath('live-map');
     }
   };
 
-  const handleFilterRoute = (routeId: string) => {
+  const handleSelectRoute = (routeId: string) => {
     setSelectedRoute(routeId);
     setSelectedBus(null);
-    setActiveTab('map');
+    if (activePath !== 'live-map') {
+      setActivePath('live-map');
+    }
   };
 
   const handleSelectHub = (hub: TransitHub) => {
     setFlyToTarget({ lat: hub.lat, lng: hub.lng, zoom: 15 });
-    if (activeTab !== 'map') {
-      setActiveTab('map');
+    if (activePath !== 'live-map') {
+      setActivePath('live-map');
     }
-  };
-
-  const handleClearFilters = () => {
-    setSearchQuery('');
-    setSelectedRoute('');
-    setSelectedType('all');
-    setSelectedBus(null);
   };
 
   const handleFollowBus = (bus: DTCBus) => {
@@ -220,141 +184,115 @@ export default function App() {
     setFlyToTarget({ lat: bus.lat, lng: bus.lng, zoom: 16 });
   };
 
-  const handleFindNearestStand = () => {
-    setActiveTab('map');
-    setShowHubs(true);
-    setTriggerNearestStandCount((c) => c + 1);
+  const handleGlobalSearch = (query: string) => {
+    if (query.trim()) {
+      setSelectedRoute(query.trim());
+      if (activePath !== 'live-map') {
+        setActivePath('live-map');
+      }
+    }
   };
 
-  const hasActiveFilters = Boolean(searchQuery || selectedRoute || selectedType !== 'all');
-
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900">
-      {/* Header */}
-      <Header
-        summary={summary}
-        loading={loading}
-        onRefresh={() => {
-          fetchBuses(true);
-          fetchSummary();
-        }}
-        countdown={countdown}
-        autoRefresh={autoRefresh}
-        onToggleAutoRefresh={() => setAutoRefresh((p) => !p)}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+    <div
+      className="min-h-screen flex flex-col bg-[#f8f9ff] text-[#171c23] antialiased"
+      style={{ fontSize: `${fontScale}rem` }}
+    >
+      {/* 80px Civic Header */}
+      <CivicHeader
+        activePath={activePath}
+        onNavigate={setActivePath}
+        busesCount={buses.length || summary?.totalBuses || 6420}
+        onSearch={handleGlobalSearch}
+        fontScale={fontScale}
+        onFontScaleChange={setFontScale}
+        language={language}
+        onLanguageToggle={() => setLanguage((prev) => (prev === 'en' ? 'hi' : 'en'))}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 space-y-4">
-        {/* Error / Offline Notice */}
+      {/* Main Content Area (padded top for 80px fixed header) */}
+      <div className="pt-20 flex-1 flex flex-col">
+        {/* Telemetry Notice if offline */}
         {error && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3 shadow-sm">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-            <div className="flex-1 text-sm">
-              <span className="font-bold">Live Telemetry Notice: </span>
-              <span>{error}</span>
-              <p className="text-xs text-rose-700 mt-1">
-                The application will automatically use cached fleet telemetry and retry connecting.
-              </p>
+          <div className="mx-4 sm:mx-6 lg:mx-10 mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between text-xs shadow-sm">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                <strong>Live Telemetry Notice: </strong>
+                {error}. Serving cached Delhi transit data.
+              </span>
             </div>
             <button
               onClick={() => fetchBuses(true)}
-              className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-sm transition cursor-pointer"
+              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs cursor-pointer shadow-sm"
             >
               Retry Sync
             </button>
           </div>
         )}
 
-        {/* Fleet Metrics Overview */}
-        <FleetStatsBar
-          summary={summary}
-          loading={loading}
-          selectedType={selectedType}
-          onFilterType={setSelectedType}
-        />
-
-        {/* Global Filter Bar */}
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedRoute={selectedRoute}
-          onRouteChange={setSelectedRoute}
-          selectedType={selectedType}
-          onTypeChange={setSelectedType}
-          topRoutes={summary?.topRoutes || []}
-          allRoutes={routes}
-          onSelectHub={handleSelectHub}
-          onFindNearestStand={handleFindNearestStand}
-          onClearFilters={handleClearFilters}
-          hasActiveFilters={hasActiveFilters}
-          totalFilteredBuses={filteredBuses.length}
-        />
-
-        {/* Persistent Content Views */}
-        <div className="flex-1">
-          {/* Map View (Google Maps) */}
-          <div className={activeTab === 'map' ? 'relative h-[650px] w-full block' : 'hidden'}>
-            <BusMap
-              buses={filteredBuses}
-              selectedBus={selectedBus}
-              onSelectBus={handleSelectBus}
-              flyToTarget={flyToTarget}
-              busTrail={busTrail}
-              showHubs={showHubs}
-              onToggleHubs={() => setShowHubs((p) => !p)}
-              selectedRoute={selectedRoute}
-              onSelectRoute={handleFilterRoute}
-              onSelectHub={handleSelectHub}
-              triggerNearestStandCount={triggerNearestStandCount}
-            />
-
-            {/* Selected Bus Modal */}
-            <BusDetailModal
-              bus={selectedBus}
-              onClose={() => setSelectedBus(null)}
-              onFilterRoute={handleFilterRoute}
-              onFollowBus={handleFollowBus}
-              isFollowing={isFollowingBus}
-              allBuses={buses}
-            />
-          </div>
-
-          {/* Fleet Directory Tab */}
-          <div className={activeTab === 'fleet' ? 'min-h-[550px] block' : 'hidden'}>
-            <BusListView
-              buses={filteredBuses}
-              onSelectBus={handleSelectBus}
-              selectedBusId={selectedBus?.id}
-              onFilterRoute={handleFilterRoute}
-            />
-          </div>
-
-          {/* Routes Directory Tab */}
-          <div className={activeTab === 'routes' ? 'min-h-[550px] block' : 'hidden'}>
-            <RoutesDirectory
-              routes={routes}
-              onSelectRoute={handleFilterRoute}
-              selectedRoute={selectedRoute}
-            />
-          </div>
+        {/* View 1: Live Map */}
+        <div className={activePath === 'live-map' ? 'flex-1 flex flex-col min-h-0 h-[calc(100vh-80px)] w-full' : 'hidden'}>
+          <LiveMapView
+            buses={buses}
+            summary={summary}
+            routes={routes}
+            selectedBus={selectedBus}
+            onSelectBus={handleSelectBus}
+            onCloseBusDetail={() => setSelectedBus(null)}
+            selectedRoute={selectedRoute}
+            onSelectRoute={handleSelectRoute}
+            flyToTarget={flyToTarget}
+            busTrail={busTrail}
+            isFollowingBus={isFollowingBus}
+            onFollowBus={handleFollowBus}
+            onSelectHub={handleSelectHub}
+            triggerNearestStandCount={triggerNearestStandCount}
+            onTriggerNearestStand={() => setTriggerNearestStandCount((p) => p + 1)}
+          />
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200/80 py-3.5 px-4 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>
-            <strong>DTC Bus Live</strong> • Delhi Open Transit Data (OTD) GTFS-RT Telemetry
-          </div>
-          <div className="flex items-center gap-3 text-slate-400">
-            <span>Google Maps Platform</span>
-            <span>•</span>
-            <span>Delhi Transport Corporation & DIMTS</span>
-          </div>
+        {/* View 2: Nearby Bus Stops */}
+        <div className={activePath === 'nearby-bus-stops' ? 'flex-1 flex flex-col min-h-0 h-[calc(100vh-80px)] w-full' : 'hidden'}>
+          <NearbyStopsView
+            buses={buses}
+            onSelectRoute={handleSelectRoute}
+            onNavigateTab={setActivePath}
+            onSelectHub={handleSelectHub}
+          />
         </div>
-      </footer>
+
+        {/* View 3: Fare & Pass */}
+        <div className={activePath === 'fare-and-pass' ? 'flex-1 block' : 'hidden'}>
+          <FareAndPassView />
+        </div>
+
+        {/* View 4: Help & Support */}
+        <div className={activePath === 'help-and-support' ? 'flex-1 block' : 'hidden'}>
+          <HelpAndSupportView
+            onNavigateTab={setActivePath}
+            onOpenSOS={() => setIsSOSOpen(true)}
+          />
+        </div>
+
+        {/* View 5: Contact Us & Grievance */}
+        <div className={activePath === 'contact-us-and-grievance' ? 'flex-1 block' : 'hidden'}>
+          <ContactAndGrievanceView />
+        </div>
+      </div>
+
+      {/* Persistent Civic Footer */}
+      <CivicFooter
+        onOpenSOS={() => setIsSOSOpen(true)}
+        onNavigateTab={setActivePath}
+      />
+
+      {/* Emergency SOS Modal */}
+      <EmergencySOSModal
+        isOpen={isSOSOpen}
+        onClose={() => setIsSOSOpen(false)}
+      />
     </div>
   );
 }
+

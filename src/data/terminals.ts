@@ -2797,3 +2797,50 @@ export const DELHI_HUBS: TransitHub[] = [
     majorRoutes: ["118EXT","131","261","405","729","753","901","926"],
   },
 ];
+
+import allOfficialStandsJson from './allDtcBusStands.json';
+
+export const ALL_DTC_BUS_STANDS: TransitHub[] = (allOfficialStandsJson as any[]).map((s) => ({
+  id: s.id,
+  name: s.name,
+  type: s.type || 'Bus Stand',
+  lat: s.lat,
+  lng: s.lng,
+  zone: s.zone || 'Delhi NCR',
+  description: `Official DTC Bus Stand • Code: ${s.stopCode || s.id} • ${s.zone || 'Delhi'}`,
+  majorRoutes: s.majorRoutes || [],
+}));
+
+/**
+ * Fast Euclidean/Haversine search across all 3,465+ DTC bus stands
+ */
+export function findNearestStandFromAll(userLat: number, userLng: number): { hub: TransitHub; distanceKm: number } {
+  let closest: TransitHub = ALL_DTC_BUS_STANDS[0] || DELHI_HUBS[0];
+  let minDistance = Infinity;
+
+  // Use fast equirectangular approximation for initial distance comparison
+  const rad = Math.PI / 180;
+  const cosLat = Math.cos(userLat * rad);
+
+  for (let i = 0; i < ALL_DTC_BUS_STANDS.length; i++) {
+    const s = ALL_DTC_BUS_STANDS[i];
+    const x = (s.lng - userLng) * cosLat;
+    const y = s.lat - userLat;
+    const distSq = x * x + y * y;
+    if (distSq < minDistance) {
+      minDistance = distSq;
+      closest = s;
+    }
+  }
+
+  // Exact Haversine distance in km
+  const dLat = (closest.lat - userLat) * rad;
+  const dLon = (closest.lng - userLng) * rad;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(userLat * rad) * Math.cos(closest.lat * rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const exactKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return { hub: closest, distanceKm: exactKm };
+}
+

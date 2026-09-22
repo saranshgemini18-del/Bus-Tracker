@@ -1,27 +1,110 @@
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
 
-/* Leaflet Custom Marker & Popup adjustments */
-.leaflet-container {
-  font-family: inherit;
-  z-index: 10;
+@theme {
+  --color-primary: #a83301;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #ca4a1c;
+  --color-on-primary-container: #fffbff;
+  --color-primary-fixed: #ffdbd0;
+  --color-primary-fixed-dim: #ffb59d;
+  --color-on-primary-fixed: #390b00;
+  --color-on-primary-fixed-variant: #842500;
+
+  --color-secondary: #006d42;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #93f3ba;
+  --color-on-secondary-container: #007145;
+  --color-secondary-fixed: #96f6bd;
+  --color-secondary-fixed-dim: #7adaa2;
+  --color-on-secondary-fixed: #002111;
+
+  --color-tertiary: #1a637c;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #3a7c96;
+  --color-on-tertiary-container: #fbfdff;
+  --color-tertiary-fixed: #bde9ff;
+  --color-tertiary-fixed-dim: #90cfec;
+  --color-on-tertiary-fixed: #001f2a;
+
+  --color-surface: #f8f9ff;
+  --color-surface-dim: #d6dae4;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f4fd;
+  --color-surface-container: #eaeef8;
+  --color-surface-container-high: #e4e8f2;
+  --color-surface-container-highest: #dee2ec;
+  --color-surface-variant: #dee2ec;
+
+  --color-on-surface: #171c23;
+  --color-on-surface-variant: #59413a;
+  --color-on-background: #171c23;
+  --color-background: #f8f9ff;
+
+  --color-outline: #8d7168;
+  --color-outline-variant: #e1bfb5;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-inverse-surface: #2c3138;
+  --color-inverse-on-surface: #edf1fb;
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display-lg: 'Plus Jakarta Sans', sans-serif;
+  --font-headline-lg: 'Plus Jakarta Sans', sans-serif;
+  --font-headline-md: 'Plus Jakarta Sans', sans-serif;
+  --font-title-lg: 'Plus Jakarta Sans', sans-serif;
+  --font-body-lg: 'Plus Jakarta Sans', sans-serif;
+  --font-body-md: 'Plus Jakarta Sans', sans-serif;
+  --font-label-lg: 'Plus Jakarta Sans', sans-serif;
+  --font-label-md: 'Plus Jakarta Sans', sans-serif;
+  --font-label-sm: 'Plus Jakarta Sans', sans-serif;
+  --font-route-badge: 'Plus Jakarta Sans', sans-serif;
+  --font-eta-numeric: 'Plus Jakarta Sans', sans-serif;
+
+  --spacing-margin-desktop: 2.5rem;
+  --spacing-margin-tablet: 1.5rem;
+  --spacing-gutter-desktop: 1.5rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 0.75rem;
+  --spacing-space-lg: 1.25rem;
+  --spacing-space-xl: 2rem;
 }
 
-.custom-bus-div-icon,
-.custom-hub-marker,
-.user-loc-icon {
-  background: transparent;
-  border: none;
-}
-
-.leaflet-popup-content-wrapper {
-  border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  padding: 0;
-  overflow: hidden;
-}
-
-.leaflet-popup-content {
+/* Base custom font styles & utilities */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
   margin: 0;
-  line-height: 1.4;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Material Symbols font icon sizing */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  line-height: 1;
+  display: inline-block;
+}
+
+/* Tabular numbers for clock, ETAs and badges */
+.font-eta-numeric,
+.font-route-badge,
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

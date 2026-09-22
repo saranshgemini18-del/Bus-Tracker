@@ -347,6 +347,107 @@ async function startServer() {
     });
   });
 
+  // Complete DTC Bus Stands Database (3,465 official bus stands)
+  app.get('/api/bus-stands', (req, res) => {
+    try {
+      const standsPath = path.join(process.cwd(), 'src/data/allDtcBusStands.json');
+      if (fs.existsSync(standsPath)) {
+        const raw = fs.readFileSync(standsPath, 'utf-8');
+        let stands = JSON.parse(raw);
+
+        const q = (req.query.query as string || '').toLowerCase().trim();
+        if (q) {
+          stands = stands.filter((s: any) => 
+            s.name.toLowerCase().includes(q) || 
+            (s.zone && s.zone.toLowerCase().includes(q)) ||
+            (s.stopCode && s.stopCode.toLowerCase().includes(q))
+          );
+        }
+
+        const type = (req.query.type as string || '').toLowerCase().trim();
+        if (type && type !== 'all') {
+          stands = stands.filter((s: any) => s.type.toLowerCase() === type);
+        }
+
+        const limit = parseInt(req.query.limit as string, 10);
+        if (!isNaN(limit) && limit > 0) {
+          stands = stands.slice(0, limit);
+        }
+
+        return res.json({
+          success: true,
+          count: stands.length,
+          totalAvailable: 3465,
+          data: stands,
+        });
+      }
+      res.json({ success: true, count: DELHI_TRANSIT_HUBS.length, data: DELHI_TRANSIT_HUBS });
+    } catch (e: any) {
+      res.status(500).json({ success: false, error: e.message });
+    }
+  });
+
+  // Nearest Bus Stands by GPS Coordinates
+  app.get('/api/bus-stands/nearest', async (req, res) => {
+    try {
+      const lat = parseFloat(req.query.lat as string);
+      const lng = parseFloat(req.query.lng as string);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        return res.status(400).json({ success: false, error: 'Valid lat and lng query parameters required' });
+      }
+
+      const limit = parseInt(req.query.limit as string, 10) || 15;
+      const radiusKm = parseFloat(req.query.radiusKm as string) || 5;
+
+      const standsPath = path.join(process.cwd(), 'src/data/allDtcBusStands.json');
+      let stands: any[] = [];
+      if (fs.existsSync(standsPath)) {
+        stands = JSON.parse(fs.readFileSync(standsPath, 'utf-8'));
+      } else {
+        stands = DELHI_TRANSIT_HUBS;
+      }
+
+      // Calculate distances
+      const calculated = stands.map((s: any) => {
+        const d = calculateDistanceKm(lat, lng, s.lat, s.lng);
+        return {
+          ...s,
+          distanceKm: Math.round(d * 100) / 100,
+          distanceMeters: Math.round(d * 1000),
+          walkMinutes: Math.max(1, Math.round((d * 1000) / 80)),
+        };
+      })
+      .filter((s: any) => s.distanceKm <= radiusKm)
+      .sort((a: any, b: any) => a.distanceKm - b.distanceKm)
+      .slice(0, limit);
+
+      // Check active buses near the stands
+      const apiKey = (req.query.key as string) || DEFAULT_API_KEY;
+      const busData = await getBusesData(apiKey);
+      const enriched = calculated.map((stand: any) => {
+        const nearbyBuses = busData.buses.filter(
+          (b) => calculateDistanceKm(stand.lat, stand.lng, b.lat, b.lng) <= 2.0
+        );
+        const routesSet = new Set(nearbyBuses.map((b) => b.routeId));
+        return {
+          ...stand,
+          nearbyBusCount: nearbyBuses.length,
+          activeRoutesNearby: Array.from(routesSet).slice(0, 8),
+        };
+      });
+
+      res.json({
+        success: true,
+        referenceCoords: { lat, lng },
+        count: enriched.length,
+        data: enriched,
+      });
+    } catch (e: any) {
+      res.status(500).json({ success: false, error: e.message });
+    }
+  });
+
   // Summary Metrics Endpoint (lightweight)
   app.get('/api/buses/summary', async (req, res) => {
     try {

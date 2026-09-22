@@ -22,6 +22,9 @@ import {
   Building2,
   ShieldCheck,
   Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Activity,
 } from 'lucide-react';
 
 interface BusDetailModalProps {
@@ -42,12 +45,13 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
   allBuses = [],
 }) => {
   const [copied, setCopied] = useState(false);
+  const [showStopsList, setShowStopsList] = useState(false);
 
-  // Compute live route progression: Starting Point, Next Point, and Last Point
+  // Compute live route progression: Starting Point, Next Point, and Last Point with real-time telemetry
   const progression = useMemo(() => {
     if (!bus) return null;
     return resolveBusProgression(bus, allBuses);
-  }, [bus, allBuses]);
+  }, [bus?.id, bus?.routeId, bus?.lat, bus?.lng, bus?.speedKmH, bus?.speed, allBuses]);
 
   if (!bus || !progression) return null;
 
@@ -87,7 +91,7 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
   return (
     <div
       id="bus-detail-panel"
-      className="fixed inset-x-3 bottom-3 md:inset-auto md:right-6 md:top-20 md:w-[440px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 z-[500] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-6 md:slide-in-from-right-6 max-h-[88vh] flex flex-col"
+      className="fixed inset-x-3 bottom-3 md:inset-auto md:right-6 md:top-20 md:w-[440px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 z-[500] overflow-hidden transition-all duration-150 animate-in fade-in slide-in-from-bottom-3 md:slide-in-from-right-4 max-h-[88vh] flex flex-col"
     >
       {/* Header Banner */}
       <div
@@ -230,30 +234,53 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
               </div>
             </div>
 
-            {/* 2. NEXT POINT (PROMINENT HIGHLIGHT WITH ETA & DISTANCE) */}
+            {/* 2. NEXT POINT (PROMINENT HIGHLIGHT WITH LIVE TELEMETRY ETA & CLOCK TIME) */}
             <div className="flex items-start gap-3 relative z-10 bg-amber-50/95 border-2 border-amber-300 p-2.5 rounded-xl shadow-sm">
               <div className="w-7 h-7 rounded-full bg-amber-400 border-2 border-amber-600 text-amber-900 flex items-center justify-center shrink-0 font-bold text-xs shadow-md animate-pulse">
                 <Radio className="w-4 h-4 text-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-1 flex-wrap">
                   <span className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span>
-                    Next Point (Upcoming Bus Stand)
+                    Next Stop (Live Telemetry)
                   </span>
-                  <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded shadow-sm">
-                    ~{progression.nextPointEtaMins} min ETA
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] font-black bg-amber-200 text-amber-950 px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-amber-800" />
+                      {progression.nextPointClockTime ? `${progression.nextPointClockTime} (${progression.nextPointEtaMins}m)` : `~${progression.nextPointEtaMins} min`}
+                    </span>
+                  </div>
                 </div>
                 <div className="text-sm font-black text-slate-900 leading-snug mt-0.5">
                   {progression.nextPoint}
                 </div>
-                <div className="text-xs text-slate-600 mt-0.5 flex items-center gap-2">
-                  <span>Distance: <strong>{progression.nextPointFormattedDistance}</strong></span>
+                <div className="text-xs text-slate-600 mt-1 flex items-center gap-2 flex-wrap">
+                  <span>Distance: <strong className="text-slate-800">{progression.nextPointFormattedDistance}</strong></span>
                   {isSpeedAvailable && (
                     <>
                       <span>•</span>
-                      <span>Current Speed: <strong className="text-slate-800">{speedFormatted}</strong></span>
+                      <span>Speed: <strong className="text-slate-800">{speedFormatted}</strong></span>
+                    </>
+                  )}
+                  {progression.telemetrySummary?.congestionLevel && (
+                    <>
+                      <span>•</span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold ${
+                          progression.telemetrySummary.congestionLevel === 'smooth'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : progression.telemetrySummary.congestionLevel === 'congested'
+                            ? 'bg-rose-100 text-rose-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {progression.telemetrySummary.congestionLevel === 'smooth'
+                          ? 'Traffic: Smooth'
+                          : progression.telemetrySummary.congestionLevel === 'congested'
+                          ? 'Traffic: Congested'
+                          : 'Traffic: Moderate'}
+                      </span>
                     </>
                   )}
                 </div>
@@ -291,6 +318,109 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
               ></div>
             </div>
           </div>
+
+          {/* Real-time Telemetry Stats Pill Strip */}
+          {progression.telemetrySummary && (
+            <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-emerald-100 text-[11px]">
+              <div className="p-1.5 rounded-lg bg-white/80 border border-emerald-100 text-center">
+                <span className="block text-[9px] uppercase font-bold text-slate-400">Route Buses</span>
+                <span className="font-extrabold text-slate-800">{progression.telemetrySummary.activeBusesOnRoute} Active</span>
+              </div>
+              <div className="p-1.5 rounded-lg bg-white/80 border border-emerald-100 text-center">
+                <span className="block text-[9px] uppercase font-bold text-slate-400">Corridor Speed</span>
+                <span className="font-extrabold text-slate-800">{progression.telemetrySummary.averageSpeedKmH} km/h</span>
+              </div>
+              <div className="p-1.5 rounded-lg bg-white/80 border border-emerald-100 text-center">
+                <span className="block text-[9px] uppercase font-bold text-slate-400">Trip Est.</span>
+                <span className="font-extrabold text-slate-800">~{progression.telemetrySummary.estimatedFullTripMinutes}m</span>
+              </div>
+            </div>
+          )}
+
+          {/* Interactive Stop-by-Stop Live ETAs Accordion */}
+          {progression.orderedStops && progression.orderedStops.length > 0 && (
+            <div className="pt-2 border-t border-emerald-100">
+              <button
+                type="button"
+                onClick={() => setShowStopsList((p) => !p)}
+                className="w-full py-1.5 px-2.5 rounded-lg bg-emerald-100/70 hover:bg-emerald-200/80 text-emerald-900 text-xs font-bold flex items-center justify-between transition cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Stop-by-Stop Live ETAs ({progression.orderedStops.length} Stops)</span>
+                </span>
+                {showStopsList ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {showStopsList && (
+                <div className="mt-2 space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                  {progression.orderedStops.map((stop, sIdx) => {
+                    const isNext = stop.isCurrentNext;
+                    const isPassed = stop.isPassed;
+                    return (
+                      <div
+                        key={sIdx}
+                        className={`p-2 rounded-lg text-xs flex items-center justify-between transition-colors ${
+                          isNext
+                            ? 'bg-amber-100/90 border border-amber-300 font-medium'
+                            : isPassed
+                            ? 'bg-slate-100/60 opacity-60'
+                            : 'bg-white border border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0 pr-2">
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${
+                              isNext
+                                ? 'bg-amber-500 animate-ping'
+                                : isPassed
+                                ? 'bg-emerald-600'
+                                : 'bg-slate-400'
+                            }`}
+                          />
+                          <div className="truncate">
+                            <div className="flex items-center gap-1">
+                              <span className={`truncate font-semibold ${isNext ? 'text-amber-950 font-bold' : 'text-slate-800'}`}>
+                                {stop.name}
+                              </span>
+                              {stop.stopType === 'metro' && (
+                                <span className="text-[9px] px-1 py-0.2 rounded bg-purple-100 text-purple-700 font-bold shrink-0">Metro</span>
+                              )}
+                              {stop.stopType === 'isbt' && (
+                                <span className="text-[9px] px-1 py-0.2 rounded bg-blue-100 text-blue-700 font-bold shrink-0">ISBT</span>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-slate-500 block">
+                              {stop.formattedDistance ? `${stop.formattedDistance} away` : isPassed ? 'Departed' : 'Scheduled'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          {isPassed ? (
+                            <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-0.5 justify-end">
+                              <Check className="w-3 h-3" /> Passed
+                            </span>
+                          ) : (
+                            <div>
+                              <span className={`font-mono text-xs font-black block ${isNext ? 'text-amber-950' : 'text-slate-900'}`}>
+                                {stop.etaClockTime || (stop.etaMins ? `${stop.etaMins}m` : '--')}
+                              </span>
+                              {stop.etaMins && (
+                                <span className="text-[10px] text-slate-500 block">
+                                  +{stop.etaMins} min
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ========================================================================= */}
