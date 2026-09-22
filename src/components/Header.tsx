@@ -9,7 +9,6 @@ interface HeaderProps {
   countdown: number;
   autoRefresh: boolean;
   onToggleAutoRefresh: () => void;
-  onOpenApiKeyModal: () => void;
   activeTab: 'map' | 'fleet' | 'routes';
   onTabChange: (tab: 'map' | 'fleet' | 'routes') => void;
 }
@@ -21,63 +20,55 @@ export const Header: React.FC<HeaderProps> = ({
   countdown,
   autoRefresh,
   onToggleAutoRefresh,
-  onOpenApiKeyModal,
   activeTab,
   onTabChange,
 }) => {
   return (
-    <header className="bg-slate-900 text-slate-100 border-b border-slate-800 shadow-md sticky top-0 z-30">
+    <header className="bg-slate-900 text-slate-100 border-b border-slate-800 shadow-sm sticky top-0 z-30">
       {/* Top Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Logo & Identity */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-900/30 text-white font-bold">
-              <Bus className="w-6 h-6" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shadow-md shadow-emerald-950/40 text-white font-bold shrink-0">
+              <Bus className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                  DTC Bus Live Tracker
+                <h1 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                  DTC Bus Live
                 </h1>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  OTD Real-Time
+                  Live Telemetry
                 </span>
+                {summary && (
+                  <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60">
+                    <span className="font-semibold text-white">{summary.totalBuses.toLocaleString()}</span> buses online
+                  </span>
+                )}
               </div>
-              <p className="text-xs text-slate-400">
-                Delhi Transport Corporation & DIMTS Fleet • Live GPS Telemetry
+              <p className="text-[11px] text-slate-400 hidden xs:block">
+                Delhi Transport Corporation & DIMTS Fleet • Real-Time Tracking
               </p>
             </div>
           </div>
 
-          {/* Quick Metrics & Actions */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* API Key Pill */}
-            <button
-              id="header-api-key-btn"
-              onClick={onOpenApiKeyModal}
-              title="Click to view or edit DTC OTD API Key"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
-            >
-              <Key className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">API Key:</span>
-              <span className="font-mono text-amber-300">{summary?.apiKeyMasked || 'qj4x...09m9'}</span>
-            </button>
-
+          {/* Quick Actions */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
             {/* Auto-Refresh Toggle & Countdown */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-xs">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700/80 text-xs">
               <button
                 id="toggle-auto-refresh-btn"
                 onClick={onToggleAutoRefresh}
-                className="flex items-center gap-1.5 text-slate-300 hover:text-white"
+                className="flex items-center gap-1.5 text-slate-300 hover:text-white cursor-pointer"
                 title={autoRefresh ? 'Click to pause auto-sync' : 'Click to enable 10s auto-sync'}
               >
                 <Radio className={`w-3.5 h-3.5 ${autoRefresh ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`} />
-                <span className="hidden sm:inline">{autoRefresh ? 'Auto-Sync' : 'Paused'}</span>
+                <span className="text-xs">{autoRefresh ? 'Auto-Sync' : 'Paused'}</span>
               </button>
               {autoRefresh && (
-                <span className="text-[11px] font-mono bg-slate-900 px-1.5 py-0.5 rounded text-emerald-400 min-w-[24px] text-center border border-slate-700/60">
+                <span className="text-[11px] font-mono bg-slate-900 px-1.5 py-0.5 rounded text-emerald-400 min-w-[22px] text-center border border-slate-700/60">
                   {countdown}s
                 </span>
               )}
@@ -89,10 +80,10 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onRefresh}
               disabled={loading}
               title="Refresh live DTC feed now"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{loading ? 'Syncing...' : 'Sync Now'}</span>
+              <span>{loading ? 'Syncing...' : 'Sync'}</span>
             </button>
           </div>
         </div>

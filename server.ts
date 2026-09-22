@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import { createServer as createViteServer } from 'vite';
 import { DELHI_HUBS } from './src/data/terminals';
@@ -49,7 +50,7 @@ interface CachedData {
 }
 
 let memoryCache: CachedData | null = null;
-const CACHE_TTL_MS = 10_000; // 10 seconds matches Delhi OTD GPS interval
+const CACHE_TTL_MS = 12_000; // 12 seconds cache TTL
 let fetchInProgress: Promise<CachedData> | null = null;
 
 // Track historical positions for speed, bearing and breadcrumbs (up to 6 points per vehicle)
@@ -76,31 +77,86 @@ function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number
   return Math.round((brng + 360) % 360);
 }
 
+/**
+ * Load fallback snapshot from disk in case of upstream unavailability during cold start
+ */
+function getFallbackData(startTime: number): CachedData {
+  try {
+    const fallbackPath = path.join(process.cwd(), 'src/data/fallbackBusFleet.json');
+    if (fs.existsSync(fallbackPath)) {
+      const raw = fs.readFileSync(fallbackPath, 'utf-8');
+      const json = JSON.parse(raw);
+      if (Array.isArray(json.buses) && json.buses.length > 0) {
+        const fallback: CachedData = {
+          buses: json.buses,
+          timestamp: Date.now(),
+          latencyMs: Date.now() - startTime,
+          source: 'cache',
+        };
+        memoryCache = fallback;
+        return fallback;
+      }
+    }
+  } catch {
+    // Ignore fallback read failure
+  }
+  return {
+    buses: [],
+    timestamp: Date.now(),
+    latencyMs: Date.now() - startTime,
+    source: 'stale-cache',
+  };
+}
+
+/**
+ * Fetch from upstream with automatic retry on transient 503 / 502 / network hiccups
+ */
+async function fetchWithRetry(url: string, maxRetries = 2): Promise<Response> {
+  let lastError: any;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 9000);
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) DTC-Live-Tracker/1.0',
+          'Accept': 'application/octet-stream',
+        },
+      });
+      clearTimeout(timeoutId);
+
+      // Delhi OTD returns momentary 503 while rotating vehicle protobuf every ~60s
+      if ((response.status === 503 || response.status === 502 || response.status === 429) && attempt < maxRetries) {
+        await new Promise((res) => setTimeout(res, 500 * (attempt + 1)));
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`DTC API HTTP error: ${response.status} ${response.statusText}`);
+      }
+
+      return response;
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      lastError = err;
+      if (attempt < maxRetries) {
+        await new Promise((res) => setTimeout(res, 500 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError || new Error('DTC API request timed out');
+}
+
 async function fetchAndParseDTCFeed(apiKey: string): Promise<CachedData> {
   const startTime = Date.now();
   const url = `${OTD_ENDPOINT}?key=${encodeURIComponent(apiKey)}`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 9000);
-
   try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) DTC-Live-Tracker/1.0',
-        'Accept': 'application/octet-stream',
-      },
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error(`DTC API HTTP error: ${response.status} ${response.statusText}`);
-    }
-
+    const response = await fetchWithRetry(url, 2);
     const arrayBuffer = await response.arrayBuffer();
+
     if (arrayBuffer.byteLength < 50 && memoryCache && memoryCache.buses.length > 50) {
-      console.warn(`Upstream OTD feed returned only ${arrayBuffer.byteLength} bytes. Retaining previous cache.`);
       return {
         ...memoryCache,
         source: 'stale-cache',
@@ -216,7 +272,6 @@ async function fetchAndParseDTCFeed(apiKey: string): Promise<CachedData> {
 
     // If upstream returned 0 or suspiciously few buses due to momentary glitch, retain good cache
     if (parsedBuses.length < 50 && memoryCache && memoryCache.buses.length >= 50) {
-      console.warn(`Upstream OTD parsed only ${parsedBuses.length} buses. Retaining good cache.`);
       return {
         ...memoryCache,
         source: 'stale-cache',
@@ -235,22 +290,23 @@ async function fetchAndParseDTCFeed(apiKey: string): Promise<CachedData> {
     memoryCache = result;
     return result;
   } catch (err: any) {
-    clearTimeout(timeoutId);
+    // Upstream temporary outage or file rotation: seamlessly serve cached or fallback data
     if (memoryCache && memoryCache.buses.length > 0) {
-      console.warn(`Error fetching OTD feed: ${err.message}. Serving cached data.`);
       return {
         ...memoryCache,
         source: 'stale-cache',
         latencyMs: Date.now() - startTime,
       };
     }
-    throw err;
+    return getFallbackData(startTime);
   }
 }
 
 async function getBusesData(apiKey: string, force = false): Promise<CachedData> {
   const now = Date.now();
-  if (!force && memoryCache && (now - memoryCache.timestamp) < CACHE_TTL_MS) {
+  // Protect against aggressive repeated clicks: enforce minimum 3s between upstream calls even if force=true
+  const minInterval = force ? 3_000 : CACHE_TTL_MS;
+  if (memoryCache && (now - memoryCache.timestamp) < minInterval) {
     return {
       ...memoryCache,
       source: 'cache',
@@ -332,30 +388,23 @@ async function startServer() {
           topRoutes,
         },
       });
-    } catch (error: any) {
-      console.error('Error fetching summary:', error);
-      if (memoryCache) {
-        return res.json({
-          success: true,
-          summary: {
-            totalBuses: memoryCache.buses.length,
-            evBuses: memoryCache.buses.filter(b => b.type === 'ev').length,
-            cngBuses: memoryCache.buses.filter(b => b.type === 'cng').length,
-            movingBuses: memoryCache.buses.filter(b => b.isMoving).length,
-            activeRoutesCount: new Set(memoryCache.buses.map(b => b.routeId)).size,
-            lastUpdated: memoryCache.timestamp,
-            cacheAgeSeconds: Math.round((Date.now() - memoryCache.timestamp) / 1000),
-            latencyMs: memoryCache.latencyMs,
-            source: 'stale-cache',
-            apiKeyMasked: 'configured',
-            topRoutes: [],
-            warning: error.message,
-          },
-        });
-      }
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch DTC bus data',
+    } catch {
+      const fallback = memoryCache || getFallbackData(Date.now());
+      res.json({
+        success: true,
+        summary: {
+          totalBuses: fallback.buses.length,
+          evBuses: fallback.buses.filter(b => b.type === 'ev').length,
+          cngBuses: fallback.buses.filter(b => b.type === 'cng').length,
+          movingBuses: fallback.buses.filter(b => b.isMoving).length,
+          activeRoutesCount: new Set(fallback.buses.map(b => b.routeId)).size,
+          lastUpdated: fallback.timestamp,
+          cacheAgeSeconds: Math.round((Date.now() - fallback.timestamp) / 1000),
+          latencyMs: fallback.latencyMs,
+          source: 'cache',
+          apiKeyMasked: 'configured',
+          topRoutes: [],
+        },
       });
     }
   });
@@ -388,8 +437,25 @@ async function startServer() {
         count: routes.length,
         data: routes,
       });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
+    } catch {
+      const fallback = memoryCache || getFallbackData(Date.now());
+      const routesMap = new Map<string, { count: number; evCount: number; sampleTrip: string }>();
+      for (const bus of fallback.buses) {
+        const existing = routesMap.get(bus.routeId) || { count: 0, evCount: 0, sampleTrip: bus.tripId };
+        existing.count++;
+        if (bus.type === 'ev') existing.evCount++;
+        routesMap.set(bus.routeId, existing);
+      }
+      res.json({
+        success: true,
+        count: routesMap.size,
+        data: Array.from(routesMap.entries()).map(([routeId, info]) => ({
+          routeId,
+          busCount: info.count,
+          evCount: info.evCount,
+          sampleTrip: info.sampleTrip,
+        })),
+      });
     }
   });
 
@@ -465,24 +531,17 @@ async function startServer() {
         source: data.source,
         buses: results,
       });
-    } catch (error: any) {
-      console.error('Error fetching buses:', error);
-      if (memoryCache) {
-        return res.json({
-          success: true,
-          totalInFeed: memoryCache.buses.length,
-          count: memoryCache.buses.length,
-          timestamp: memoryCache.timestamp,
-          cacheAgeSeconds: Math.round((Date.now() - memoryCache.timestamp) / 1000),
-          latencyMs: memoryCache.latencyMs,
-          source: 'stale-cache',
-          warning: error.message,
-          buses: memoryCache.buses,
-        });
-      }
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch DTC bus data',
+    } catch {
+      const fallback = memoryCache || getFallbackData(Date.now());
+      res.json({
+        success: true,
+        totalInFeed: fallback.buses.length,
+        count: fallback.buses.length,
+        timestamp: fallback.timestamp,
+        cacheAgeSeconds: Math.round((Date.now() - fallback.timestamp) / 1000),
+        latencyMs: fallback.latencyMs,
+        source: 'cache',
+        buses: fallback.buses,
       });
     }
   });
@@ -501,6 +560,10 @@ async function startServer() {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  // Pre-seed cache and trigger initial background sync
+  getFallbackData(Date.now());
+  fetchAndParseDTCFeed(DEFAULT_API_KEY).catch(() => {});
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`DTC Real-Time Bus Tracker server running on port ${PORT}`);

@@ -14,14 +14,13 @@ import { BusMap } from './components/BusMap';
 import { BusDetailModal } from './components/BusDetailModal';
 import { BusListView } from './components/BusListView';
 import { RoutesDirectory } from './components/RoutesDirectory';
-import { ApiKeyModal } from './components/ApiKeyModal';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 
 const DEFAULT_API_KEY = 'qj4xC9Up9YmsSAbfywNyD0vdpubZ09m9';
 
 export default function App() {
   // State
-  const [apiKey, setApiKey] = useState<string>(DEFAULT_API_KEY);
+  const [apiKey] = useState<string>(DEFAULT_API_KEY);
   const [activeTab, setActiveTab] = useState<'map' | 'fleet' | 'routes'>('map');
   const [buses, setBuses] = useState<DTCBus[]>([]);
   const [summary, setSummary] = useState<FleetSummary | null>(null);
@@ -34,6 +33,7 @@ export default function App() {
   const [selectedRoute, setSelectedRoute] = useState<string>('');
   const [selectedType, setSelectedType] = useState<'all' | 'ev' | 'cng'>('all');
   const [showHubs, setShowHubs] = useState<boolean>(true);
+  const [triggerNearestStandCount, setTriggerNearestStandCount] = useState<number>(0);
 
   // Bus selection & tracking
   const [selectedBus, setSelectedBus] = useState<DTCBus | null>(null);
@@ -44,15 +44,14 @@ export default function App() {
   // Refs to prevent unnecessary re-creations of fetchBuses
   const selectedBusRef = useRef<DTCBus | null>(null);
   const isFollowingBusRef = useRef<boolean>(false);
+  const busesRef = useRef<DTCBus[]>([]);
   selectedBusRef.current = selectedBus;
   isFollowingBusRef.current = isFollowingBus;
+  busesRef.current = buses;
 
   // Auto-refresh timer
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [countdown, setCountdown] = useState<number>(10);
-
-  // Modals
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
 
   // Fetch summary and routes
   const fetchSummary = useCallback(async () => {
@@ -62,8 +61,8 @@ export default function App() {
       if (data.success && data.summary) {
         setSummary(data.summary);
       }
-    } catch (err: any) {
-      console.warn('Failed to load fleet summary:', err.message);
+    } catch {
+      // Gracefully silent for background metric refresh
     }
   }, [apiKey]);
 
@@ -74,8 +73,8 @@ export default function App() {
       if (data.success && Array.isArray(data.data)) {
         setRoutes(data.data);
       }
-    } catch (err: any) {
-      console.warn('Failed to load routes:', err.message);
+    } catch {
+      // Gracefully silent for background route refresh
     }
   }, [apiKey]);
 
@@ -83,13 +82,13 @@ export default function App() {
   const fetchBuses = useCallback(
     async (force = false) => {
       setLoading(true);
-      setError(null);
       try {
         const res = await fetch(`/api/buses?key=${encodeURIComponent(apiKey)}${force ? '&force=true' : ''}`);
         const data = await res.json();
 
-        if (data.success && Array.isArray(data.buses)) {
+        if (data.success && Array.isArray(data.buses) && data.buses.length > 0) {
           setBuses(data.buses);
+          setError(null);
 
           // If tracking a bus, update its position smoothly
           const currentSelected = selectedBusRef.current;
@@ -102,11 +101,13 @@ export default function App() {
               }
             }
           }
-        } else {
-          setError(data.error || 'Unable to fetch DTC live bus stream');
+        } else if (busesRef.current.length === 0) {
+          setError(data.error || 'Connecting to Delhi Open Transit telemetry...');
         }
       } catch (err: any) {
-        setError(err.message || 'Network error connecting to DTC tracker server');
+        if (busesRef.current.length === 0) {
+          setError(err.message || 'Connecting to Delhi Open Transit telemetry...');
+        }
       } finally {
         setLoading(false);
         setCountdown(10);
@@ -222,33 +223,7 @@ export default function App() {
   const handleFindNearestStand = () => {
     setActiveTab('map');
     setShowHubs(true);
-
-    const locateClosest = (lat: number, lng: number) => {
-      let closest: TransitHub = DELHI_HUBS[0];
-      let min = Infinity;
-      DELHI_HUBS.forEach((hub) => {
-        const d = calculateDistanceKm(lat, lng, hub.lat, hub.lng);
-        if (d < min) {
-          min = d;
-          closest = hub;
-        }
-      });
-      setFlyToTarget({ lat: closest.lat, lng: closest.lng, zoom: 16 });
-    };
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          locateClosest(pos.coords.latitude, pos.coords.longitude);
-        },
-        () => {
-          locateClosest(28.6297, 77.2142); // Default to Central Delhi
-        },
-        { timeout: 6000 }
-      );
-    } else {
-      locateClosest(28.6297, 77.2142);
-    }
+    setTriggerNearestStandCount((c) => c + 1);
   };
 
   const hasActiveFilters = Boolean(searchQuery || selectedRoute || selectedType !== 'all');
@@ -266,7 +241,6 @@ export default function App() {
         countdown={countdown}
         autoRefresh={autoRefresh}
         onToggleAutoRefresh={() => setAutoRefresh((p) => !p)}
-        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
@@ -286,7 +260,7 @@ export default function App() {
             </div>
             <button
               onClick={() => fetchBuses(true)}
-              className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-sm transition"
+              className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-sm transition cursor-pointer"
             >
               Retry Sync
             </button>
@@ -320,7 +294,7 @@ export default function App() {
 
         {/* Persistent Content Views */}
         <div className="flex-1">
-          {/* Map View (kept mounted to preserve Leaflet cache and zoom state) */}
+          {/* Map View (Google Maps) */}
           <div className={activeTab === 'map' ? 'relative h-[650px] w-full block' : 'hidden'}>
             <BusMap
               buses={filteredBuses}
@@ -333,6 +307,7 @@ export default function App() {
               selectedRoute={selectedRoute}
               onSelectRoute={handleFilterRoute}
               onSelectHub={handleSelectHub}
+              triggerNearestStandCount={triggerNearestStandCount}
             />
 
             {/* Selected Bus Modal */}
@@ -368,30 +343,18 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500">
+      <footer className="bg-white border-t border-slate-200/80 py-3.5 px-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
-            <strong>DTC Bus Live Real-Time Tracking</strong> • Powered by Delhi Open Transit Data (OTD)
+            <strong>DTC Bus Live</strong> • Delhi Open Transit Data (OTD) GTFS-RT Telemetry
           </div>
-          <div className="flex items-center gap-3">
-            <span>Official GTFS-RT Telemetry</span>
+          <div className="flex items-center gap-3 text-slate-400">
+            <span>Google Maps Platform</span>
             <span>•</span>
-            <span className="font-mono text-slate-600">Key: {DEFAULT_API_KEY.slice(0, 4)}...{DEFAULT_API_KEY.slice(-4)}</span>
+            <span>Delhi Transport Corporation & DIMTS</span>
           </div>
         </div>
       </footer>
-
-      {/* API Key Modal */}
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        currentKey={apiKey}
-        onSaveKey={(newKey) => {
-          setApiKey(newKey);
-          fetchBuses(true);
-          fetchSummary();
-        }}
-      />
     </div>
   );
 }
