@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #a83301;
   --color-on-primary: #ffffff;
@@ -107,4 +109,33 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Dark mode theme token overrides */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0b0f17;
+  color: #f1f5f9;
+}
+
+.dark {
+  --color-surface: #0f141c;
+  --color-surface-dim: #090d14;
+  --color-surface-bright: #171f2b;
+  --color-surface-container-lowest: #0c1017;
+  --color-surface-container-low: #131922;
+  --color-surface-container: #18202b;
+  --color-surface-container-high: #202b3a;
+  --color-surface-container-highest: #283547;
+  --color-surface-variant: #283547;
+  --color-on-surface: #f1f5f9;
+  --color-on-surface-variant: #cbd5e1;
+  --color-background: #0b0f17;
+  --color-on-background: #f1f5f9;
+  --color-outline: #475569;
+  --color-outline-variant: #334155;
+}
+
 

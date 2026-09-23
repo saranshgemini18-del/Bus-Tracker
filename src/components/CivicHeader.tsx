@@ -10,6 +10,8 @@ interface CivicHeaderProps {
   onFontScaleChange: (scale: number) => void;
   language: 'en' | 'hi';
   onLanguageToggle: () => void;
+  onOpenRouteFinder?: () => void;
+  onOpenFavorites?: () => void;
 }
 
 export const CivicHeader: React.FC<CivicHeaderProps> = ({
@@ -21,6 +23,8 @@ export const CivicHeader: React.FC<CivicHeaderProps> = ({
   onFontScaleChange,
   language,
   onLanguageToggle,
+  onOpenRouteFinder,
+  onOpenFavorites,
 }) => {
   const [searchValue, setSearchValue] = useState('');
 
@@ -32,9 +36,11 @@ export const CivicHeader: React.FC<CivicHeaderProps> = ({
   };
 
   const navItems = [
+    { path: 'home', en: 'Home', hi: 'मुख्य पृष्ठ' },
     { path: 'live-map', en: 'Live Map', hi: 'लाइव मैप' },
     { path: 'nearby-bus-stops', en: 'Nearby Bus Stops', hi: 'पास के बस स्टॉप' },
     { path: 'fare-and-pass', en: 'Fare & Pass', hi: 'किराया व पास' },
+    { path: 'about-us', en: 'About Us', hi: 'हमारे बारे में' },
     { path: 'help-and-support', en: 'Help & Support', hi: 'सहायता' },
     { path: 'contact-us-and-grievance', en: 'Contact Us & Grievance', hi: 'संपर्क व शिकायत' },
   ];
@@ -45,7 +51,7 @@ export const CivicHeader: React.FC<CivicHeaderProps> = ({
         {/* Brand Section */}
         <div className="flex items-center gap-4 shrink-0">
           <button
-            onClick={() => onNavigate('live-map')}
+            onClick={() => onNavigate('home')}
             className="flex items-center gap-3 text-left cursor-pointer group"
           >
             {/* SVG Logo from PRD */}
@@ -120,29 +126,55 @@ export const CivicHeader: React.FC<CivicHeaderProps> = ({
         </form>
 
         {/* Civic Navigation Menu Tabs */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-1">
           {navItems.map((item) => {
             const isActive = activePath === item.path;
             return (
               <button
                 key={item.path}
                 onClick={() => onNavigate(item.path)}
-                className={`px-3 py-2 rounded-lg text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-[#ca4a1c] text-white shadow-sm'
                     : 'text-[#59413a] hover:bg-[#e4e8f2] hover:text-[#171c23]'
                 }`}
               >
-                {language === 'hi' ? `${item.hi} / ${item.en}` : `${item.en} / ${item.hi}`}
+                {language === 'hi' ? item.hi : item.en}
               </button>
             );
           })}
+
+          {/* Quick Route Finder by Stands */}
+          {onOpenRouteFinder && (
+            <button
+              type="button"
+              onClick={onOpenRouteFinder}
+              className="px-2.5 py-1.5 rounded-xl text-[12px] font-extrabold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/80 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ml-1 shadow-xs"
+              title="Search buses connecting two bus stands"
+            >
+              <span className="material-symbols-outlined text-[16px] text-emerald-700">alt_route</span>
+              <span>{language === 'hi' ? 'स्टैंड खोजें' : 'Stand Finder'}</span>
+            </button>
+          )}
+
+          {/* Favorites Button */}
+          {onOpenFavorites && (
+            <button
+              type="button"
+              onClick={onOpenFavorites}
+              className="px-2.5 py-1.5 rounded-xl text-[12px] font-extrabold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/80 transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap shadow-xs"
+              title="Saved favorite routes"
+            >
+              <span className="material-symbols-outlined text-[16px] text-amber-600">hotel_class</span>
+              <span>{language === 'hi' ? 'पसंदीदा' : 'Favorites'}</span>
+            </button>
+          )}
         </nav>
 
         {/* Accessibility Tools: Font Scaler, Language Switcher, Profile */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 ml-auto lg:ml-0">
           {/* Font Scaler */}
-          <div className="flex items-center bg-[#f0f4fd] rounded-xl p-0.5 border border-slate-200">
+          <div className="hidden sm:flex items-center bg-[#f0f4fd] rounded-xl p-0.5 border border-slate-200 shrink-0">
             <button
               type="button"
               onClick={() => onFontScaleChange(Math.max(0.9, fontScale - 0.05))}
@@ -166,7 +198,7 @@ export const CivicHeader: React.FC<CivicHeaderProps> = ({
           <button
             type="button"
             onClick={onLanguageToggle}
-            className="px-3 py-1.5 rounded-xl bg-[#f0f4fd] text-[#171c23] text-[12px] font-bold hover:bg-[#e4e8f2] transition-colors flex items-center gap-1 border border-slate-200 cursor-pointer"
+            className="px-2.5 py-1.5 rounded-xl bg-[#f0f4fd] text-[#171c23] text-[12px] font-bold hover:bg-[#e4e8f2] transition-colors flex items-center gap-1 border border-slate-200 cursor-pointer shrink-0"
           >
             <span className={language === 'en' ? 'text-[#a83301] font-black' : 'text-slate-600'}>EN</span>
             <span className="text-slate-300">|</span>
@@ -180,8 +212,8 @@ export const CivicHeader: React.FC<CivicHeaderProps> = ({
         </div>
       </div>
 
-      {/* Mobile Navigation Strip (below 768px) */}
-      <div className="md:hidden flex items-center overflow-x-auto px-4 py-2 bg-slate-50 border-t border-slate-200 gap-1.5 no-scrollbar">
+      {/* Mobile & Tablet Navigation Strip (below lg screens: 1024px) */}
+      <div className="lg:hidden flex items-center overflow-x-auto px-4 py-2 bg-slate-50 border-t border-slate-200 gap-1.5 no-scrollbar">
         {navItems.map((item) => {
           const isActive = activePath === item.path;
           return (
@@ -196,6 +228,30 @@ export const CivicHeader: React.FC<CivicHeaderProps> = ({
             </button>
           );
         })}
+
+        {/* Mobile Stand Finder */}
+        {onOpenRouteFinder && (
+          <button
+            type="button"
+            onClick={onOpenRouteFinder}
+            className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[14px]">alt_route</span>
+            <span>{language === 'hi' ? 'स्टैंड खोजें' : 'Stand Finder'}</span>
+          </button>
+        )}
+
+        {/* Mobile Favorites */}
+        {onOpenFavorites && (
+          <button
+            type="button"
+            onClick={onOpenFavorites}
+            className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[14px]">hotel_class</span>
+            <span>{language === 'hi' ? 'पसंदीदा' : 'Favorites'}</span>
+          </button>
+        )}
       </div>
     </header>
   );

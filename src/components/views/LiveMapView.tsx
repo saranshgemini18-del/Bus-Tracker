@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { DTCBus, FleetSummary, RouteItem, TransitHub, BreadcrumbPoint } from '../../types';
+import { DTCBus, FleetSummary, RouteItem, TransitHub, BreadcrumbPoint, AiEtaResult } from '../../types';
 import { BusMap } from '../BusMap';
 import { BusDetailModal } from '../BusDetailModal';
 import { resolveBusProgression, resolveRouteProgression, getStopCoords, RouteStopStep } from '../../utils/routeResolver';
 import { ALL_DTC_BUS_STANDS, findNearestStandFromAll } from '../../data/terminals';
+import { fetchAiEtaPrediction } from '../../services/aiEtaService';
+import { DTC_KNOWN_ROUTES } from '../../data/dtcRoutes';
+import { DELHI_ROUTE_REGISTRY } from '../../data/delhiRouteRegistry';
+import { useBusAlerts } from '../../context/AlertContext';
 
 interface LiveMapViewProps {
   buses: DTCBus[];
   summary: FleetSummary | null;
   routes: RouteItem[];
   selectedBus: DTCBus | null;
-  onSelectBus: (bus: DTCBus) => void;
+  onSelectBus: (bus: DTCBus | null) => void;
   onCloseBusDetail: () => void;
   selectedRoute: string;
   onSelectRoute: (routeId: string) => void;
@@ -43,6 +47,7 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
   // Mobile tab state: 'map' is default so map is ALWAYS visible instantly!
   const [mobileTab, setMobileTab] = useState<'map' | 'timeline'>('map');
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  const [isBottomTrackerMinimised, setIsBottomTrackerMinimised] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'ev' | 'ladies' | 'lowfloor'>('all');
   const [mapType, setMapType] = useState<'transit' | 'satellite'>('transit');
@@ -55,6 +60,15 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
   const [localFlyTo, setLocalFlyTo] = useState<{ lat: number; lng: number; zoom?: number } | null>(null);
   const [etaDisplayMode, setEtaDisplayMode] = useState<'both' | 'clock' | 'mins'>('both');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showRoutePickerInTracker, setShowRoutePickerInTracker] = useState(false);
+  const [trackerRouteQuery, setTrackerRouteQuery] = useState('');
+  const { openSetAlertModal, isRouteAlerted } = useBusAlerts();
+
+  // AI-Based ETA Prediction states
+  const [aiEtaResult, setAiEtaResult] = useState<AiEtaResult | null>(null);
+  const [isAiEtaLoading, setIsAiEtaLoading] = useState(false);
+  const [isAiEtaEnabled, setIsAiEtaEnabled] = useState(true);
+  const [aiEtaRefreshKey, setAiEtaRefreshKey] = useState(0);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -112,6 +126,109 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
   const routeBuses = useMemo(() => {
     return buses.filter((b) => b.routeId.toLowerCase() === activeRouteId.toLowerCase());
   }, [buses, activeRouteId]);
+
+  // Dynamic set of all operating routes (from live buses and known registries)
+  const availableAllRoutes = useMemo(() => {
+    const routeMap = new Map<string, { routeId: string; liveCount: number; name?: string }>();
+
+    // Add all routes from live buses
+    buses.forEach((b) => {
+      const rid = b.routeId.trim();
+      if (!rid) return;
+      const key = rid.toUpperCase();
+      const existing = routeMap.get(key);
+      if (existing) {
+        existing.liveCount += 1;
+      } else {
+        routeMap.set(key, { routeId: rid, liveCount: 1 });
+      }
+    });
+
+    // Populate route names from registry
+    Object.entries(DELHI_ROUTE_REGISTRY).forEach(([rid, reg]) => {
+      const key = rid.toUpperCase();
+      const existing = routeMap.get(key);
+      const name = reg.name || (reg.startPoint && reg.lastPoint ? `${reg.startPoint} ↔ ${reg.lastPoint}` : `Route ${rid}`);
+      if (existing) {
+        existing.name = name;
+      } else {
+        routeMap.set(key, { routeId: rid, liveCount: 0, name });
+      }
+    });
+
+    // Populate from DTC_KNOWN_ROUTES
+    Object.entries(DTC_KNOWN_ROUTES).forEach(([rid, kr]) => {
+      const key = rid.toUpperCase();
+      const existing = routeMap.get(key);
+      if (existing && !existing.name) {
+        existing.name = `${kr.startPoint} ↔ ${kr.lastPoint}`;
+      } else if (!existing) {
+        routeMap.set(key, { routeId: rid, liveCount: 0, name: `${kr.startPoint} ↔ ${kr.lastPoint}` });
+      }
+    });
+
+    return Array.from(routeMap.values()).sort((a, b) => {
+      if (b.liveCount !== a.liveCount) return b.liveCount - a.liveCount;
+      return a.routeId.localeCompare(b.routeId, undefined, { numeric: true });
+    });
+  }, [buses]);
+
+  // Target bus for AI ETA predictions: explicitly selected bus or leading active route bus
+  const currentTargetBus = useMemo(() => {
+    if (selectedBus) return selectedBus;
+    return routeBuses[0] || null;
+  }, [selectedBus, routeBuses]);
+
+  // Fetch AI-based ETA predictions using live telemetry and historical traffic models
+  useEffect(() => {
+    if (!isAiEtaEnabled || !currentTargetBus) {
+      return;
+    }
+
+    let isMounted = true;
+    setIsAiEtaLoading(true);
+
+    fetchAiEtaPrediction(
+      currentTargetBus,
+      activeRouteId,
+      timelineStops,
+      currentProgression.telemetrySummary,
+      aiEtaRefreshKey > 0
+    )
+      .then((res) => {
+        if (isMounted && res) {
+          setAiEtaResult(res);
+        }
+      })
+      .catch(() => {
+        // Fall back gracefully
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsAiEtaLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    currentTargetBus?.id,
+    activeRouteId,
+    timelineStops.length,
+    isAiEtaEnabled,
+    aiEtaRefreshKey,
+  ]);
+
+  // Fast O(1) map of AI predicted stop ETAs by normalized name
+  const aiStopsMap = useMemo(() => {
+    if (!isAiEtaEnabled || !aiEtaResult?.predictedStops) return new Map();
+    const m = new Map();
+    aiEtaResult.predictedStops.forEach((p) => {
+      m.set(p.name.toLowerCase().trim(), p);
+    });
+    return m;
+  }, [isAiEtaEnabled, aiEtaResult]);
 
   // Quick route select handler
   const handleQuickRoute = (route: string) => {
@@ -214,16 +331,16 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-80px)] min-h-[500px] overflow-hidden flex flex-col bg-[#FAF8F5]">
+    <div className="relative w-full h-full min-h-[500px] overflow-hidden flex flex-col bg-[#FAF8F5] dark:bg-[#0b0f17]">
       {/* Mobile Top View-Switcher Bar (< lg screens) */}
-      <div className="lg:hidden flex items-center justify-between px-3 py-2 bg-white border-b border-slate-200 z-30 shrink-0">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+      <div className="lg:hidden flex items-center justify-between px-3 py-2 bg-white dark:bg-[#121a27] border-b border-slate-200 dark:border-slate-800 z-30 shrink-0">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
           <button
             onClick={() => setMobileTab('map')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               mobileTab === 'map'
                 ? 'bg-[#a83301] text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">map</span>
@@ -234,7 +351,7 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
             className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               mobileTab === 'timeline'
                 ? 'bg-[#a83301] text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">timeline</span>
@@ -245,14 +362,14 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={handleFindNearest}
-            className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold flex items-center gap-1 border border-emerald-200 cursor-pointer"
+            className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-800 cursor-pointer"
             title="Nearest Bus Stand"
           >
             <span className="material-symbols-outlined text-[18px]">near_me</span>
           </button>
           <button
             onClick={handleLocateMe}
-            className="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold flex items-center gap-1 border border-blue-200 cursor-pointer"
+            className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-xs font-bold flex items-center gap-1 border border-blue-200 dark:border-blue-800 cursor-pointer"
             title="My GPS Location"
           >
             <span className="material-symbols-outlined text-[18px]">my_location</span>
@@ -269,36 +386,44 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
             mobileTab === 'timeline' ? 'flex' : 'hidden'
           } lg:flex ${
             isPanelCollapsed ? 'lg:hidden' : 'lg:w-[420px] xl:w-[450px]'
-          } shrink-0 h-full bg-[#ffffff] shadow-[4px_0_24px_rgba(30,35,42,0.06)] z-20 flex-col overflow-hidden border-r border-slate-200/80 transition-all`}
+          } shrink-0 h-full bg-[#ffffff] dark:bg-[#121a27] shadow-[4px_0_24px_rgba(30,35,42,0.06)] z-20 flex-col overflow-hidden border-r border-slate-200/80 dark:border-slate-800 transition-all`}
         >
           {/* Top Welcoming Bar */}
-          <div className="p-4 bg-[#f0f4fd] pb-3 border-b border-slate-200 shrink-0">
+          <div className="p-4 bg-[#f0f4fd] dark:bg-[#162133] pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#006d42] animate-ping"></span>
                 <span className="w-2 h-2 -ml-2 rounded-full bg-[#006d42]"></span>
-                <span className="text-[11px] font-bold text-[#007145] tracking-wider uppercase">
+                <span className="text-[11px] font-bold text-[#007145] dark:text-[#52e89f] tracking-wider uppercase">
                   Live GTFS GPS Active
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-600 bg-slate-200 px-2 py-0.5 rounded-full font-semibold">
+                <span className="text-[11px] text-slate-600 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full font-semibold hidden sm:inline">
                   {currentTime}
                 </span>
                 <button
-                  onClick={() => setIsPanelCollapsed(true)}
-                  className="hidden lg:flex p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition"
-                  title="Collapse Panel for Fullscreen Map"
+                  id="btn-minimise-route-tracker"
+                  onClick={() => {
+                    setIsPanelCollapsed(true);
+                    if (window.innerWidth < 1024) {
+                      setMobileTab('map');
+                    }
+                    showToast('Route tracker minimised • Floating tracker is permanently active on map');
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#1a2538] hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#a83301] text-xs font-bold transition shadow-xs border border-slate-200 dark:border-slate-700 cursor-pointer"
+                  title="Minimise Route Tracker (compact bar stays permanently visible on screen)"
                 >
-                  <span className="material-symbols-outlined text-[18px]">first_page</span>
+                  <span className="material-symbols-outlined text-[16px] text-[#a83301]">unfold_less</span>
+                  <span>Minimise</span>
                 </button>
               </div>
             </div>
 
-            <h1 className="text-[17px] text-[#171c23] font-extrabold tracking-tight">
+            <h1 className="text-[17px] text-[#171c23] dark:text-white font-extrabold tracking-tight">
               Namaste, where are you travelling?
             </h1>
-            <p className="text-[12px] text-[#59413a] font-medium">
+            <p className="text-[12px] text-[#59413a] dark:text-slate-400 font-medium">
               आज आप कहाँ की यात्रा कर रहे हैं?
             </p>
 
@@ -317,7 +442,7 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
                     onSelectRoute(clean);
                   }
                 }}
-                className="w-full h-10 pl-9 pr-9 rounded-xl bg-white text-[#171c23] text-[13px] shadow-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#a83301] transition-all"
+                className="w-full h-10 pl-9 pr-9 rounded-xl bg-white dark:bg-[#1a2538] text-[#171c23] dark:text-white text-[13px] shadow-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#a83301] transition-all"
                 placeholder="Search Route 502, 729, AIIMS, Kashmere Gate..."
               />
               {searchInput && (
@@ -344,7 +469,7 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
                     className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm transition-all cursor-pointer ${
                       isActive
                         ? 'bg-[#a83301] text-white'
-                        : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                        : 'bg-white dark:bg-[#1a2538] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     {route}
@@ -384,22 +509,63 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-                    isBookmarked
-                      ? 'bg-amber-100 text-amber-600'
-                      : 'bg-[#f0f4fd] text-slate-400 hover:text-amber-600'
-                  }`}
-                  title="Bookmark Route"
-                >
-                  <span
-                    className="material-symbols-outlined text-[18px]"
-                    style={{ fontVariationSettings: isBookmarked ? "'FILL' 1" : "'FILL' 0" }}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => {
+                      setIsPanelCollapsed(true);
+                      if (window.innerWidth < 1024) {
+                        setMobileTab('map');
+                      }
+                      showToast('Route tracker minimised • Floating tracker is permanently active on map');
+                    }}
+                    className="h-8 px-2.5 rounded-xl bg-[#f0f4fd] hover:bg-slate-200 text-slate-700 hover:text-[#a83301] transition cursor-pointer flex items-center gap-1 text-xs font-bold border border-slate-200"
+                    title="Minimise to permanently visible floating tracker"
                   >
-                    bookmark
-                  </span>
-                </button>
+                    <span className="material-symbols-outlined text-[16px] text-[#a83301]">close_fullscreen</span>
+                    <span className="hidden sm:inline text-[11px]">Minimise</span>
+                  </button>
+
+                  <button
+                    onClick={() => setIsBookmarked(!isBookmarked)}
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                      isBookmarked
+                        ? 'bg-amber-100 text-amber-600'
+                        : 'bg-[#f0f4fd] text-slate-400 hover:text-amber-600'
+                    }`}
+                    title="Bookmark Route"
+                  >
+                    <span
+                      className="material-symbols-outlined text-[18px]"
+                      style={{ fontVariationSettings: isBookmarked ? "'FILL' 1" : "'FILL' 0" }}
+                    >
+                      bookmark
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      openSetAlertModal(
+                        selectedBus || routeBuses[0] || null,
+                        null,
+                        activeRouteId
+                      )
+                    }
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
+                      isRouteAlerted(activeRouteId)
+                        ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                        : 'bg-[#f0f4fd] dark:bg-slate-800 text-slate-500 hover:text-amber-600 border-slate-200 dark:border-slate-700'
+                    }`}
+                    title={
+                      isRouteAlerted(activeRouteId)
+                        ? 'Arrival alert active for this route'
+                        : 'Set arrival proximity alert for this route'
+                    }
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      notifications_active
+                    </span>
+                  </button>
+                </div>
               </div>
 
               {/* Live Bus Progress Tracker */}
@@ -454,6 +620,67 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
                     </span>
                   </div>
                 )}
+
+                {/* Fleet of Buses on this Route: Show all one by one in a line with numbers */}
+                {routeBuses.length > 0 && (
+                  <div className="mt-3 pt-2.5 border-t border-slate-100">
+                    <div className="flex items-center justify-between text-[11px] mb-1.5">
+                      <span className="font-bold text-slate-700 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px] text-[#a83301]">directions_bus</span>
+                        <span>Buses on Route {activeRouteId} ({routeBuses.length}):</span>
+                      </span>
+                      <span className="text-[10px] text-[#a83301] font-semibold">click to track</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                      {routeBuses.map((b, idx) => {
+                        const isSelected = selectedBus?.id === b.id;
+                        return (
+                          <button
+                            key={b.id}
+                            onClick={() => {
+                              onSelectBus(b);
+                              setLocalFlyTo({ lat: b.lat, lng: b.lng, zoom: 16 });
+                              if (window.innerWidth < 1024) {
+                                setMobileTab('map');
+                              }
+                            }}
+                            className={`group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold transition cursor-pointer shrink-0 border ${
+                              isSelected
+                                ? 'bg-[#a83301] text-white border-[#a83301] shadow-xs'
+                                : 'bg-white hover:bg-amber-50 text-slate-800 border-slate-200 hover:border-[#a83301]'
+                            }`}
+                            title={`Focus Bus ${b.id} (${b.speedKmH} km/h, ${b.type.toUpperCase()})`}
+                          >
+                            <span
+                              className={`w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center ${
+                                isSelected
+                                  ? 'bg-white text-[#a83301]'
+                                  : 'bg-slate-800 text-white group-hover:bg-[#a83301]'
+                              }`}
+                            >
+                              #{idx + 1}
+                            </span>
+                            <span className="font-mono">{b.id}</span>
+                            <span
+                              className={`text-[9px] px-1 py-0.2 rounded font-semibold ${
+                                isSelected
+                                  ? 'bg-white/20 text-white'
+                                  : b.type === 'ev'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {b.type.toUpperCase()}
+                            </span>
+                            <span className={isSelected ? 'text-white/80' : 'text-slate-400 font-normal'}>
+                              {b.speedKmH} km/h
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -474,6 +701,128 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
                 <span className="material-symbols-outlined text-[18px] text-blue-600">my_location</span>
                 <span>Locate My GPS</span>
               </button>
+            </div>
+
+            {/* ========================================================================= */}
+            {/* AI-BASED ETA PREDICTIONS PANEL (TRAFFIC + HISTORICAL TRANSIT TIMES)       */}
+            {/* ========================================================================= */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md border border-indigo-500/30">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-200 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
+                    <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[12px] font-black tracking-wide text-white">
+                        AI Traffic & Transit ETA
+                      </span>
+                      <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                        Gemini 3.8
+                      </span>
+                      {aiEtaResult?.overallConfidencePercent && isAiEtaEnabled && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                          {aiEtaResult.overallConfidencePercent}% Confidence
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-indigo-200 truncate">
+                      {currentTargetBus
+                        ? `Live predictions for ${currentTargetBus.id} (${currentTargetBus.type.toUpperCase()})`
+                        : `Corridor Route ${activeRouteId} Transit Model`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => {
+                      setAiEtaRefreshKey((k) => k + 1);
+                      showToast('Recalculating AI ETA predictions with latest telemetry...');
+                    }}
+                    disabled={isAiEtaLoading || !currentTargetBus}
+                    className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer disabled:opacity-50"
+                    title="Recalculate AI ETA with Gemini"
+                  >
+                    <span
+                      className={`material-symbols-outlined text-[16px] block ${
+                        isAiEtaLoading ? 'animate-spin text-amber-300' : ''
+                      }`}
+                    >
+                      sync
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => setIsAiEtaEnabled(!isAiEtaEnabled)}
+                    className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition cursor-pointer border ${
+                      isAiEtaEnabled
+                        ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                        : 'bg-white/5 border-white/20 text-slate-400'
+                    }`}
+                  >
+                    {isAiEtaEnabled ? 'AI Active' : 'AI Paused'}
+                  </button>
+                </div>
+              </div>
+
+              {isAiEtaEnabled && aiEtaResult && (
+                <div className="space-y-2 pt-2 border-t border-white/10 text-[11px]">
+                  {/* Traffic Summary & Corridor Assessment */}
+                  <p className="text-slate-200 text-[11px] leading-relaxed">
+                    {aiEtaResult.trafficSummary}
+                  </p>
+
+                  {/* Historical Factors Applied Badges */}
+                  {aiEtaResult.historicalFactorsApplied && aiEtaResult.historicalFactorsApplied.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      {aiEtaResult.historicalFactorsApplied.slice(0, 3).map((factor, fIdx) => (
+                        <span
+                          key={fIdx}
+                          className="px-2 py-0.5 rounded-full bg-white/10 text-indigo-100 text-[9px] font-medium border border-white/5"
+                        >
+                          ✓ {factor}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Next Stop AI Comparison Strip */}
+                  {aiEtaResult.predictedStops?.[0] && (
+                    <div className="mt-1.5 p-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-[10px] flex-wrap gap-1">
+                      <span className="text-indigo-200 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[13px] text-amber-300">timer</span>
+                        <span>Next Stop: <strong>{aiEtaResult.predictedStops[0].name}</strong></span>
+                      </span>
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <span className="text-white">
+                          {aiEtaResult.predictedStops[0].predictedClockTime} ({aiEtaResult.predictedStops[0].predictedEtaMins}m)
+                        </span>
+                        {aiEtaResult.predictedStops[0].delayDeltaMinutes !== 0 && (
+                          <span
+                            className={`px-1.5 py-0.2 rounded text-[9px] ${
+                              aiEtaResult.predictedStops[0].delayDeltaMinutes > 0
+                                ? 'bg-amber-400/20 text-amber-300'
+                                : 'bg-emerald-400/20 text-emerald-300'
+                            }`}
+                          >
+                            {aiEtaResult.predictedStops[0].delayDeltaMinutes > 0
+                              ? `+${aiEtaResult.predictedStops[0].delayDeltaMinutes}m traffic`
+                              : `${aiEtaResult.predictedStops[0].delayDeltaMinutes}m fast`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {isAiEtaLoading && !aiEtaResult && (
+                <div className="py-2 flex items-center gap-2 text-indigo-200 text-[11px]">
+                  <span className="w-3.5 h-3.5 border-2 border-amber-300 border-t-transparent rounded-full animate-spin"></span>
+                  <span>Synthesizing live telemetry and historical traffic models...</span>
+                </div>
+              )}
             </div>
 
             {/* Route Stop Stepper Progression (Interactive Timeline) */}
@@ -636,30 +985,76 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
                             <span className="text-[11px] font-bold text-slate-400">
                               Departed
                             </span>
-                          ) : (
-                            <div className="flex flex-col items-end">
-                              {etaDisplayMode === 'both' ? (
-                                <>
-                                  <span className={`text-[11px] font-mono font-extrabold ${isCurrent ? 'text-[#006d42]' : 'text-slate-900'}`}>
-                                    {stop.etaClockTime || (stop.etaMins ? `${stop.etaMins}m` : '--')}
-                                  </span>
-                                  {stop.etaMins !== undefined && (
-                                    <span className="text-[10px] font-semibold text-slate-500">
-                                      +{stop.etaMins} min
+                          ) : (() => {
+                            const aiStop = aiStopsMap.get(stop.name.toLowerCase().trim());
+                            const displayMins = aiStop ? aiStop.predictedEtaMins : stop.etaMins;
+                            const displayClock = aiStop ? aiStop.predictedClockTime : stop.etaClockTime;
+
+                            return (
+                              <div className="flex flex-col items-end">
+                                <div className="flex items-center gap-1">
+                                  {aiStop && isAiEtaEnabled && (
+                                    <span
+                                      className="material-symbols-outlined text-[12px] text-amber-500"
+                                      title={`AI ETA predicted with historical traffic model (${aiStop.delayReason || 'On-time'})`}
+                                    >
+                                      auto_awesome
                                     </span>
                                   )}
-                                </>
-                              ) : etaDisplayMode === 'clock' ? (
-                                <span className={`text-[11px] font-mono font-extrabold ${isCurrent ? 'text-[#006d42]' : 'text-slate-900'}`}>
-                                  {stop.etaClockTime || (stop.etaMins ? `${stop.etaMins}m` : '--')}
-                                </span>
-                              ) : (
-                                <span className={`text-[11px] font-mono font-extrabold ${isCurrent ? 'text-[#006d42]' : 'text-slate-900'}`}>
-                                  {stop.etaMins !== undefined ? `+${stop.etaMins}m` : '--'}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                                  {etaDisplayMode === 'both' ? (
+                                    <>
+                                      <span
+                                        className={`text-[11px] font-mono font-extrabold ${
+                                          isCurrent ? 'text-[#006d42]' : 'text-slate-900'
+                                        }`}
+                                      >
+                                        {displayClock || (displayMins ? `${displayMins}m` : '--')}
+                                      </span>
+                                    </>
+                                  ) : etaDisplayMode === 'clock' ? (
+                                    <span
+                                      className={`text-[11px] font-mono font-extrabold ${
+                                        isCurrent ? 'text-[#006d42]' : 'text-slate-900'
+                                      }`}
+                                    >
+                                      {displayClock || (displayMins ? `${displayMins}m` : '--')}
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className={`text-[11px] font-mono font-extrabold ${
+                                        isCurrent ? 'text-[#006d42]' : 'text-slate-900'
+                                      }`}
+                                    >
+                                      {displayMins !== undefined ? `+${displayMins}m` : '--'}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* ETA Minute delta and Delay Factor */}
+                                {etaDisplayMode === 'both' && displayMins !== undefined && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-[10px] font-semibold text-slate-500">
+                                      +{displayMins} min
+                                    </span>
+                                    {aiStop && aiStop.delayDeltaMinutes !== 0 && (
+                                      <span
+                                        className={`text-[8px] font-bold px-1 rounded ${
+                                          aiStop.delayDeltaMinutes > 0
+                                            ? 'bg-amber-100 text-amber-800'
+                                            : 'bg-emerald-100 text-emerald-800'
+                                        }`}
+                                        title={aiStop.delayReason}
+                                      >
+                                        {aiStop.delayDeltaMinutes > 0
+                                          ? `+${aiStop.delayDeltaMinutes}m`
+                                          : `${aiStop.delayDeltaMinutes}m`}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* Stop Alarm Trigger */}
@@ -760,6 +1155,8 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
               onSelectRoute={onSelectRoute}
               onSelectHub={onSelectHub}
               triggerNearestStandCount={triggerNearestStandCount}
+              mapType={mapType}
+              routeProgression={currentProgression}
             />
           </div>
 
@@ -773,130 +1170,296 @@ export const LiveMapView: React.FC<LiveMapViewProps> = ({
             allBuses={buses}
           />
 
-          {/* Top Floating Filter Pills Strip */}
-          <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2 pointer-events-none">
-            <div className="pointer-events-auto hidden sm:flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200">
+          {/* Top Floating Filter & Dispatch Bar (Top Left) */}
+          <div className="absolute top-3 left-3 right-16 sm:right-auto z-30 flex flex-wrap items-center gap-2 pointer-events-none">
+            {/* Real-time dispatch notice */}
+            <div className="pointer-events-auto hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-sm border border-slate-200/90 dark:border-slate-800 text-slate-800 dark:text-slate-200">
+              <span className="w-2 h-2 rounded-full bg-[#006d42] animate-pulse shrink-0"></span>
+              <span className="text-[11px] font-bold">Delhi Live API</span>
+              <span className="text-slate-300 dark:text-slate-700">|</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+                {routeBuses.length} on Route {activeRouteId}
+              </span>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="pointer-events-auto flex items-center gap-1 p-1 rounded-xl bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-sm border border-slate-200/90 dark:border-slate-800">
               <button
                 onClick={() => setFilterType('all')}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
                   filterType === 'all'
-                    ? 'bg-[#a83301] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-[#a83301] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <span className="material-symbols-outlined text-[15px]">done</span>
-                All Active ({buses.length.toLocaleString()})
+                <span>All</span>
+                <span className="text-[10px] opacity-75">({buses.length.toLocaleString()})</span>
               </button>
 
               <button
                 onClick={() => setFilterType('ev')}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
                   filterType === 'ev'
-                    ? 'bg-[#006d42] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-[#006d42] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <span className="material-symbols-outlined text-emerald-600 text-[15px]">electric_bolt</span>
-                AC Electric Only
+                <span className="material-symbols-outlined text-[14px] text-emerald-600 dark:text-emerald-400">electric_bolt</span>
+                <span>EV</span>
               </button>
 
               <button
                 onClick={() => setFilterType('ladies')}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap hidden sm:flex ${
                   filterType === 'ladies'
-                    ? 'bg-pink-600 text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-pink-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <span className="material-symbols-outlined text-pink-600 text-[15px]">female</span>
-                Ladies Special
+                <span className="material-symbols-outlined text-[14px] text-pink-600 dark:text-pink-400">female</span>
+                <span>Ladies</span>
               </button>
 
               <button
                 onClick={() => setFilterType('lowfloor')}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap hidden sm:flex ${
                   filterType === 'lowfloor'
-                    ? 'bg-[#1a637c] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-[#1a637c] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <span className="material-symbols-outlined text-cyan-700 text-[15px]">accessible</span>
-                Low-Floor
+                <span className="material-symbols-outlined text-[14px] text-cyan-700 dark:text-cyan-400">accessible</span>
+                <span>Low-Floor</span>
               </button>
             </div>
 
-            {/* Map Layer Mode Toggle */}
-            <div className="pointer-events-auto flex items-center gap-2">
-              <div className="p-1 rounded-2xl bg-white/95 backdrop-blur-md shadow-md flex items-center border border-slate-200">
-                <button
-                  onClick={() => setMapType('transit')}
-                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold cursor-pointer transition ${
-                    mapType === 'transit' ? 'bg-slate-200 text-slate-900' : 'text-slate-500'
-                  }`}
-                >
-                  Transit / नक्शा
-                </button>
-                <button
-                  onClick={() => setMapType('satellite')}
-                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold cursor-pointer transition ${
-                    mapType === 'satellite' ? 'bg-slate-200 text-slate-900' : 'text-slate-500'
-                  }`}
-                >
-                  Satellite
-                </button>
-              </div>
+            {/* Map Layer Mode Toggle (Transit / Satellite) */}
+            <div className="pointer-events-auto p-1 rounded-xl bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-sm flex items-center border border-slate-200/90 dark:border-slate-800">
+              <button
+                onClick={() => setMapType('transit')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition whitespace-nowrap ${
+                  mapType === 'transit' ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Transit
+              </button>
+              <button
+                onClick={() => setMapType('satellite')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition whitespace-nowrap ${
+                  mapType === 'satellite' ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Satellite
+              </button>
             </div>
           </div>
 
-          {/* Top Real-Time Dispatch Notice */}
-          <div className="hidden md:flex absolute top-4 left-4 z-30 items-center gap-2 px-3.5 py-2 rounded-full bg-white/90 backdrop-blur-md shadow-sm border border-slate-200/80 text-slate-800 pointer-events-auto">
-            <span className="w-2 h-2 rounded-full bg-[#006d42] animate-pulse"></span>
-            <span className="text-[11px] font-bold">Delhi TransGov Live API</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-[11px] text-slate-500">
-              {routeBuses.length} active buses on Route {activeRouteId}
-            </span>
-          </div>
-
-          {/* Floating Live Corridor Card at Bottom */}
+          {/* Permanently Visible Floating Route Tracker Dock at Screen Bottom */}
           <div className="absolute bottom-4 left-4 right-4 lg:left-auto lg:right-4 lg:w-auto max-w-xl z-30 pointer-events-auto">
-            <div className="p-3 rounded-2xl bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgba(30,35,42,0.12)] border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="w-10 h-10 rounded-xl bg-[#93f3ba] text-[#006d42] flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-[24px]">traffic</span>
+            {isBottomTrackerMinimised ? (
+              /* Minimized Compact View (Permanently visible pill on screen) */
+              <div
+                id="permanent-minimized-route-tracker"
+                onClick={() => setIsBottomTrackerMinimised(false)}
+                className="p-2.5 px-3.5 rounded-2xl bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-[0_8px_30px_rgba(30,35,42,0.14)] border border-slate-200/90 dark:border-slate-800 flex items-center justify-between gap-3 text-xs cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 transition-all animate-in fade-in duration-150 group"
+                title="Click to expand Route Tracker"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#006d42] animate-pulse shrink-0"></span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowRoutePickerInTracker((p) => !p);
+                      setIsBottomTrackerMinimised(false);
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-[#a83301] text-white font-extrabold text-[11px] shrink-0 hover:bg-[#ca4a1c] transition flex items-center gap-1"
+                    title="Change tracked route"
+                  >
+                    <span>Route {activeRouteId}</span>
+                    <span className="material-symbols-outlined text-[13px]">arrow_drop_down</span>
+                  </button>
+                  <span className="text-[11px] text-slate-700 dark:text-slate-200 font-bold truncate">
+                    Next: <span className="text-[#006d42] dark:text-[#52e89f]">{currentProgression.nextPoint}</span>
+                  </span>
+                  <span className="text-[11px] font-extrabold text-[#a83301] dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800 shrink-0">
+                    {currentProgression.nextPointEtaMins}m
+                  </span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold text-[#171c23]">
-                      Route {activeRouteId} Corridor
-                    </span>
-                    <span className="inline-block w-2 h-2 rounded-full bg-[#006d42]"></span>
-                    <span className="text-[11px] text-[#006d42] font-bold">Normal Flow</span>
+
+                <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    id="btn-expand-permanent-tracker"
+                    onClick={() => setIsBottomTrackerMinimised(false)}
+                    className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-[#a83301] hover:text-white text-slate-700 dark:text-slate-300 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs"
+                    title="Maximise Route Tracker"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">expand_less</span>
+                    <span>Maximise</span>
+                  </button>
+
+                  <button
+                    onClick={handleFindNearest}
+                    className="p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold border border-emerald-200 dark:border-emerald-800 transition cursor-pointer"
+                    title="Find Nearest Bus Stand"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">near_me</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Expanded View with Specific Route Selector & Controls */
+              <div className="p-3.5 rounded-2xl bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-[0_8px_30px_rgba(30,35,42,0.12)] border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5 text-xs animate-in fade-in duration-150">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="w-10 h-10 rounded-xl bg-[#93f3ba] text-[#006d42] flex items-center justify-center shrink-0 shadow-xs">
+                      <span className="material-symbols-outlined text-[24px]">traffic</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Interactive Route Switcher Badge */}
+                        <div className="relative">
+                          <button
+                            onClick={() => setShowRoutePickerInTracker((p) => !p)}
+                            className="px-2.5 py-1 rounded-xl bg-[#ca4a1c] hover:bg-[#a83301] text-white text-[12px] font-black tracking-wide flex items-center gap-1 cursor-pointer shadow-xs transition"
+                            title="Click to select another bus route to track"
+                          >
+                            <span>Route {activeRouteId}</span>
+                            <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
+                          </button>
+                        </div>
+
+                        <span className="text-[13px] font-bold text-[#171c23] dark:text-white">
+                          Tracker
+                        </span>
+                        <span className="inline-block w-2 h-2 rounded-full bg-[#006d42] animate-pulse"></span>
+                        <span className="text-[11px] text-[#006d42] dark:text-[#52e89f] font-bold">
+                          {routeBuses.length} active live
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                        Next Stop: <strong className="text-slate-800 dark:text-slate-200">{currentProgression.nextPoint}</strong> • ETA:{' '}
+                        <strong className="text-[#a83301] dark:text-amber-400">{currentProgression.nextPointEtaMins} mins</strong>
+                        {currentProgression.nextPointClockTime && (
+                          <span className="ml-1 text-slate-400 dark:text-slate-500 font-mono">({currentProgression.nextPointClockTime})</span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Next: <strong>{currentProgression.nextPoint}</strong> • ETA: <strong>{currentProgression.nextPointEtaMins} mins</strong>
-                  </p>
+
+                  <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-end">
+                    {/* Switch Route Button */}
+                    <button
+                      onClick={() => setShowRoutePickerInTracker((p) => !p)}
+                      className="px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-900 dark:text-amber-300 text-[11px] font-extrabold border border-amber-200 dark:border-amber-800 transition-all flex items-center gap-1 cursor-pointer"
+                      title="Switch to track any specific bus route"
+                    >
+                      <span className="material-symbols-outlined text-[15px] text-amber-700 dark:text-amber-400">tune</span>
+                      <span>Change Route</span>
+                    </button>
+
+                    {/* Timeline / Stops Button */}
+                    <button
+                      onClick={() => {
+                        setIsPanelCollapsed(false);
+                        setMobileTab('timeline');
+                      }}
+                      className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1 cursor-pointer"
+                      title="View all stops and timeline"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">format_list_bulleted</span>
+                      <span>Stops ({timelineStops.length})</span>
+                    </button>
+
+                    {/* Nearest Stand Button */}
+                    <button
+                      onClick={handleFindNearest}
+                      className="px-2.5 py-1.5 rounded-xl bg-[#a83301] text-white text-[11px] font-bold shadow-sm shadow-[#a83301]/20 hover:bg-[#ca4a1c] transition-all flex items-center gap-1 cursor-pointer"
+                      title="Find Nearest Bus Stand"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">near_me</span>
+                      <span className="hidden sm:inline">Nearest Stand</span>
+                    </button>
+
+                    {/* Minimise Button */}
+                    <button
+                      id="btn-minimise-bottom-tracker"
+                      onClick={() => setIsBottomTrackerMinimised(true)}
+                      className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 text-[11px] font-bold border border-slate-200 transition-all flex items-center cursor-pointer"
+                      title="Minimise route tracker to compact bar"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">expand_more</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
-                <button
-                  onClick={() => setMobileTab('timeline')}
-                  className="lg:hidden px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 transition-all flex items-center gap-1 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[15px]">format_list_bulleted</span>
-                  <span>Stops</span>
-                </button>
+                {/* Specific Route Quick Selector Popover / Drawer */}
+                {showRoutePickerInTracker && (
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-150">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[15px] text-[#ca4a1c]">alt_route</span>
+                        Select specific bus route to track:
+                      </span>
+                      <button
+                        onClick={() => setShowRoutePickerInTracker(false)}
+                        className="text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                      >
+                        Close
+                      </button>
+                    </div>
 
-                <button
-                  onClick={handleFindNearest}
-                  className="px-3.5 py-2 rounded-xl bg-[#a83301] text-white text-[12px] font-bold shadow-md shadow-[#a83301]/20 hover:bg-[#ca4a1c] transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[17px]">near_me</span>
-                  <span>Nearest Stand</span>
-                </button>
+                    {/* Filter input */}
+                    <div className="relative mb-2">
+                      <input
+                        type="text"
+                        value={trackerRouteQuery}
+                        onChange={(e) => setTrackerRouteQuery(e.target.value)}
+                        placeholder="Type route number (e.g. 729, 419, 840, OMS, 505)..."
+                        className="w-full h-8 pl-8 pr-3 rounded-lg bg-slate-50 dark:bg-[#1a2538] border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ca4a1c] focus:bg-white dark:focus:bg-[#1a2538]"
+                        autoFocus
+                      />
+                      <span className="material-symbols-outlined absolute left-2 top-2 text-slate-400 text-[16px]">
+                        search
+                      </span>
+                    </div>
+
+                    {/* Fast Route Chips Grid */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-h-32 flex-wrap">
+                      {availableAllRoutes
+                        .filter((r) => !trackerRouteQuery.trim() || r.routeId.toLowerCase().includes(trackerRouteQuery.toLowerCase().trim()))
+                        .slice(0, 16)
+                        .map((r) => {
+                          const isCurrent = r.routeId.toLowerCase() === activeRouteId.toLowerCase();
+                          return (
+                            <button
+                              key={r.routeId}
+                              onClick={() => {
+                                onSelectRoute(r.routeId);
+                                setShowRoutePickerInTracker(false);
+                                setTrackerRouteQuery('');
+                                showToast(`Now tracking Route ${r.routeId} with ${r.liveCount} live buses`);
+                              }}
+                              className={`px-2.5 py-1 rounded-xl text-[11px] font-extrabold transition cursor-pointer flex items-center gap-1 shrink-0 ${
+                                isCurrent
+                                  ? 'bg-[#ca4a1c] text-white shadow-xs'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                              }`}
+                              title={r.name || `Route ${r.routeId}`}
+                            >
+                              <span>{r.routeId}</span>
+                              {r.liveCount > 0 && (
+                                <span className={`text-[9px] px-1 rounded-full ${isCurrent ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
+                                  {r.liveCount}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </main>
       </div>

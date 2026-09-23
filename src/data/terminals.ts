@@ -1,5 +1,7 @@
 import { TransitHub } from '../types';
 
+export type BusStandInfo = TransitHub;
+
 /**
  * Complete database of Delhi Transport Corporation (DTC) Bus Stands,
  * Major Inter-State Bus Terminals (ISBTs), Fleet Depots, and Key Transit Nodes.

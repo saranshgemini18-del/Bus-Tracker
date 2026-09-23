@@ -1,5 +1,6 @@
 export interface DTCBus {
   id: string; // vehicle plate e.g. "DL51EV2595"
+  vehicle_id?: string; // vehicle registration plate alias
   routeId: string; // commercial public display route e.g. "354", "502", "740", "840"
   rawRouteId?: string; // internal GTFS ID e.g. "1707"
   tripId: string;
@@ -57,7 +58,11 @@ export interface TransitHub {
   description: string;
   zone?: string;
   majorRoutes?: string[];
+  routes?: string[];
   distanceKm?: number;
+  hindi?: string;
+  category?: string;
+  code?: string;
 }
 
 export interface BreadcrumbPoint {
@@ -65,3 +70,28 @@ export interface BreadcrumbPoint {
   lng: number;
   time: number;
 }
+
+export interface StopAiEta {
+  name: string;
+  predictedEtaMins: number;
+  predictedClockTime: string;
+  baselineEtaMins?: number;
+  delayDeltaMinutes: number; // positive = delayed, negative = faster
+  delayReason?: string;
+  trafficImpact: 'free_flow' | 'moderate' | 'heavy_delay';
+}
+
+export interface AiEtaResult {
+  busId: string;
+  routeId: string;
+  overallConfidencePercent: number;
+  trafficSummary: string;
+  historicalFactorsApplied: string[];
+  congestionTrend: 'improving' | 'stable' | 'worsening';
+  nextStopDelayMinutes: number;
+  predictedStops: StopAiEta[];
+  calculatedAt: string;
+  isAiPowered: boolean;
+}
+
+export type { RouteStopStep, TelemetrySummary, BusProgression } from './utils/routeResolver';

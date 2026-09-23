@@ -80,7 +80,7 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
   });
 
   return (
-    <div className="w-full min-h-[calc(100vh-80px)] bg-[#f8f9ff] py-8 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-10">
+    <div className="w-full bg-[#f8f9ff] dark:bg-[#0b0f17] text-[#171c23] dark:text-[#f1f5f9] py-8 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-10 transition-colors">
       {/* Ambient Glow Header with Search & Trending Tags */}
       <div className="p-8 rounded-3xl bg-gradient-to-br from-[#171c23] via-[#2c3138] to-[#171c23] text-white shadow-xl relative overflow-hidden">
         <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-[#a83301]/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -139,57 +139,57 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
 
       {/* Visual Photographic & Stat Anchors (3 Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="p-5 rounded-2xl bg-white shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#121a27] shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-[#006d42] flex items-center justify-center font-black shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-[#006d42] dark:text-[#52e89f] flex items-center justify-center font-black shrink-0">
               <span className="material-symbols-outlined text-[26px]">cell_tower</span>
             </div>
             <div>
-              <span className="text-[11px] text-slate-400 font-bold uppercase">Telematics</span>
-              <h3 className="font-extrabold text-[#171c23] text-base">6,400+ GPS Buses</h3>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase">Telematics</span>
+              <h3 className="font-extrabold text-[#171c23] dark:text-white text-base">6,400+ GPS Buses</h3>
             </div>
           </div>
-          <p className="text-xs text-slate-600 mt-3">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-3">
             Live telemetry synced with Delhi Open Transit Data (OTD) for sub-second tracking.
           </p>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#006d42]">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-[#006d42] dark:text-[#52e89f]">
             <span>OTD Gateway Online</span>
-            <span className="w-2 h-2 rounded-full bg-[#006d42] animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-[#006d42] dark:bg-[#52e89f] animate-pulse"></span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#121a27] shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center font-black shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-400 flex items-center justify-center font-black shrink-0">
               <span className="material-symbols-outlined text-[26px]">volunteer_activism</span>
             </div>
             <div>
-              <span className="text-[11px] text-slate-400 font-bold uppercase">Women Safety</span>
-              <h3 className="font-extrabold text-[#171c23] text-base">Universal Pink Ticket</h3>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase">Women Safety</span>
+              <h3 className="font-extrabold text-[#171c23] dark:text-white text-base">Universal Pink Ticket</h3>
             </div>
           </div>
-          <p className="text-xs text-slate-600 mt-3">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-3">
             Over 1.5 billion zero-cost rides safely completed with trained bus marshals on duty.
           </p>
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-pink-700">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs font-bold text-pink-700 dark:text-pink-400">
             <span>Free On-Board Pass</span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#121a27] shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#ffdbd0] text-[#a83301] flex items-center justify-center font-black shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#ffdbd0] dark:bg-[#ca4a1c]/25 text-[#a83301] dark:text-[#ff7849] flex items-center justify-center font-black shrink-0">
               <span className="material-symbols-outlined text-[26px]">contactless</span>
             </div>
             <div>
-              <span className="text-[11px] text-slate-400 font-bold uppercase">Smart Transit</span>
-              <h3 className="font-extrabold text-[#171c23] text-base">Metro Card & UPI</h3>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase">Smart Transit</span>
+              <h3 className="font-extrabold text-[#171c23] dark:text-white text-base">Metro Card & UPI</h3>
             </div>
           </div>
-          <p className="text-xs text-slate-600 mt-3">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-3">
             Integrated multi-modal ticketing. Use DMRC Smart Cards or One Delhi QR on any route.
           </p>
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-[#a83301]">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs font-bold text-[#a83301] dark:text-[#ff7849]">
             <span>10% Instant Rebate</span>
           </div>
         </div>
@@ -197,8 +197,8 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
 
       {/* Knowledge Pillars (5 Cards) */}
       <div className="space-y-4">
-        <h2 className="text-xl font-extrabold text-[#171c23] flex items-center gap-2">
-          <span className="material-symbols-outlined text-[#a83301]">menu_book</span>
+        <h2 className="text-xl font-extrabold text-[#171c23] dark:text-white flex items-center gap-2">
+          <span className="material-symbols-outlined text-[#a83301] dark:text-[#ff7849]">menu_book</span>
           Knowledge Pillars
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
@@ -217,14 +217,14 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
                 className={`p-4 rounded-2xl text-left transition-all border cursor-pointer ${
                   isSelected
                     ? 'bg-[#ca4a1c] text-white border-[#ca4a1c] shadow-md'
-                    : 'bg-white hover:bg-slate-50 text-[#171c23] border-slate-200 shadow-sm'
+                    : 'bg-white dark:bg-[#121a27] hover:bg-slate-50 dark:hover:bg-[#1a2538] text-[#171c23] dark:text-white border-slate-200 dark:border-slate-800 shadow-sm'
                 }`}
               >
-                <span className={`material-symbols-outlined text-[24px] ${isSelected ? 'text-white' : 'text-[#a83301]'}`}>
+                <span className={`material-symbols-outlined text-[24px] ${isSelected ? 'text-white' : 'text-[#a83301] dark:text-[#ff7849]'}`}>
                   {pillar.icon}
                 </span>
                 <h4 className="font-extrabold text-xs mt-2 leading-tight">{pillar.label}</h4>
-                <span className={`text-[10px] mt-1 block font-semibold ${isSelected ? 'text-white/80' : 'text-slate-400'}`}>
+                <span className={`text-[10px] mt-1 block font-semibold ${isSelected ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
                   {pillar.count}
                 </span>
               </button>
@@ -237,13 +237,13 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-extrabold text-[#171c23]">Frequently Asked Questions</h2>
-            <p className="text-xs text-slate-500">अक्सर पूछे जाने वाले सवाल</p>
+            <h2 className="text-xl font-extrabold text-[#171c23] dark:text-white">Frequently Asked Questions</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">अक्सर पूछे जाने वाले सवाल</p>
           </div>
           {activeCategory !== 'all' && (
             <button
               onClick={() => setActiveCategory('all')}
-              className="text-xs font-bold text-[#a83301] hover:underline cursor-pointer"
+              className="text-xs font-bold text-[#a83301] dark:text-[#ff7849] hover:underline cursor-pointer"
             >
               Clear Category Filter
             </button>
@@ -256,18 +256,18 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
             return (
               <div
                 key={faq.id}
-                className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden transition-all"
+                className="rounded-2xl bg-white dark:bg-[#121a27] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-all"
               >
                 <button
                   onClick={() => setExpandedFaqId(isExpanded ? null : faq.id)}
-                  className="w-full p-4 text-left flex items-start justify-between gap-4 hover:bg-slate-50 transition cursor-pointer"
+                  className="w-full p-4 text-left flex items-start justify-between gap-4 hover:bg-slate-50 dark:hover:bg-[#162132] transition cursor-pointer"
                 >
                   <div>
-                    <h3 className="text-sm font-extrabold text-[#171c23]">{faq.q}</h3>
-                    <p className="text-xs text-[#59413a] font-medium mt-0.5">{faq.qHindi}</p>
+                    <h3 className="text-sm font-extrabold text-[#171c23] dark:text-white">{faq.q}</h3>
+                    <p className="text-xs text-[#59413a] dark:text-slate-400 font-medium mt-0.5">{faq.qHindi}</p>
                   </div>
                   <span
-                    className={`material-symbols-outlined text-[#a83301] transition-transform duration-200 shrink-0 mt-1 ${
+                    className={`material-symbols-outlined text-[#a83301] dark:text-[#ff7849] transition-transform duration-200 shrink-0 mt-1 ${
                       isExpanded ? 'rotate-180' : ''
                     }`}
                   >
@@ -276,7 +276,7 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100 bg-[#f8f9ff]/60">
+                  <div className="px-4 pb-4 pt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800 bg-[#f8f9ff]/60 dark:bg-[#162030]/60">
                     {faq.a}
                   </div>
                 )}
@@ -319,12 +319,12 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
       </div>
 
       {/* Interactive Helpful Feedback */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 text-center flex flex-col sm:flex-row items-center justify-center gap-4">
-        <span className="text-xs font-bold text-slate-700">
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#121a27] border border-slate-200 dark:border-slate-800 text-center flex flex-col sm:flex-row items-center justify-center gap-4">
+        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
           Did you find what you were looking for? (क्या यह जानकारी उपयोगी थी?)
         </span>
         {feedbackGiven ? (
-          <span className="text-xs font-bold text-[#006d42] flex items-center gap-1">
+          <span className="text-xs font-bold text-[#006d42] dark:text-[#52e89f] flex items-center gap-1">
             <span className="material-symbols-outlined text-[16px]">check_circle</span>
             Thank you for your feedback!
           </span>
@@ -332,13 +332,13 @@ export const HelpAndSupportView: React.FC<HelpAndSupportViewProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFeedbackGiven('yes')}
-              className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-emerald-100 hover:text-[#006d42] text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+              className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-950/80 hover:text-[#006d42] dark:hover:text-[#52e89f] text-slate-800 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px]">thumb_up</span> Yes
             </button>
             <button
               onClick={() => setFeedbackGiven('no')}
-              className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-rose-100 hover:text-rose-700 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+              className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-950/80 hover:text-rose-700 dark:hover:text-rose-400 text-slate-800 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px]">thumb_down</span> No
             </button>

@@ -9,6 +9,8 @@ export interface DelhiRouteInfo {
   lastPoint: string;
   operator?: string;
   description?: string;
+  name?: string;
+  stops?: string[];
 }
 
 export const DELHI_ROUTE_REGISTRY: Record<string, DelhiRouteInfo> = {

@@ -2,12 +2,26 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { DTCBus, TransitHub } from '../../types';
 import { ALL_DTC_BUS_STANDS } from '../../data/terminals';
 import { calculateDistanceKm } from '../../utils/geo';
+import { DTC_KNOWN_ROUTES } from '../../data/dtcRoutes';
+import { DELHI_ROUTE_REGISTRY } from '../../data/delhiRouteRegistry';
+import { Bell } from 'lucide-react';
+import { useBusAlerts } from '../../context/AlertContext';
 
 interface NearbyStopsViewProps {
   buses: DTCBus[];
   onSelectRoute: (routeId: string) => void;
   onNavigateTab: (tab: string) => void;
   onSelectHub?: (hub: TransitHub) => void;
+  onSelectBus?: (bus: DTCBus) => void;
+}
+
+export interface StopRouteInfo {
+  route: string;
+  etaMins: number;
+  type: 'ev' | 'cng';
+  buses: DTCBus[];
+  startPoint: string;
+  lastPoint: string;
 }
 
 interface ComputedStop {
@@ -19,7 +33,7 @@ interface ComputedStop {
   walkMinutes: number;
   metroInterchange?: string;
   amenities: string[];
-  routes: Array<{ route: string; etaMins: number; type: 'ev' | 'cng' }>;
+  routes: StopRouteInfo[];
   lat: number;
   lng: number;
   isTerminal: boolean;
@@ -30,6 +44,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
   onSelectRoute,
   onNavigateTab,
   onSelectHub,
+  onSelectBus,
 }) => {
   const [mobileTab, setMobileTab] = useState<'list' | 'radar'>('list');
   const [selectedRadius, setSelectedRadius] = useState<'500m' | '1km' | '2km'>('1km');
@@ -37,6 +52,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStopId, setSelectedStopId] = useState<string>('');
   const [radarViewMode, setRadarViewMode] = useState<'paths' | 'transit'>('paths');
+  const { openSetAlertModal, isRouteAlerted } = useBusAlerts();
 
   // Commuter GPS coordinates (starts at Central Delhi / AIIMS, updates via real browser GPS)
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number }>({
@@ -115,29 +131,55 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
 
         // Find active buses within 2.5km of this stand
         const closeBuses = buses.filter(
-          (b) => calculateDistanceKm(stand.lat, stand.lng, b.lat, b.lng) <= 2.5
+          (b) => calculateDistanceKm(stand.lat, stand.lng, b.lat, b.lng) <= 3.0
         );
 
-        // Group into distinct routes with estimated arrival times
-        const routesMap = new Map<string, { route: string; etaMins: number; type: 'ev' | 'cng' }>();
-        closeBuses.slice(0, 8).forEach((b) => {
-          if (!routesMap.has(b.routeId)) {
-            const bDist = calculateDistanceKm(stand.lat, stand.lng, b.lat, b.lng);
-            const speed = Math.max(15, b.speedKmH || 20);
-            const eta = Math.max(1, Math.round((bDist / speed) * 60));
-            routesMap.set(b.routeId, {
-              route: b.routeId,
+        // Group into distinct routes with estimated arrival times and buses list
+        const routesMap = new Map<string, StopRouteInfo>();
+        closeBuses.forEach((b) => {
+          const r = (b.routeId || 'Transit').trim().toUpperCase();
+          const bDist = calculateDistanceKm(stand.lat, stand.lng, b.lat, b.lng);
+          const speed = Math.max(15, b.speedKmH || 20);
+          const eta = Math.max(1, Math.round((bDist / speed) * 60));
+
+          if (!routesMap.has(r)) {
+            const known = DTC_KNOWN_ROUTES[r];
+            const registry = DELHI_ROUTE_REGISTRY[r];
+            routesMap.set(r, {
+              route: r,
               etaMins: eta,
               type: b.type === 'ev' ? 'ev' : 'cng',
+              buses: [b],
+              startPoint: known?.startPoint || registry?.startPoint || 'Origin Terminal',
+              lastPoint: known?.lastPoint || registry?.lastPoint || 'Destination Terminal',
             });
+          } else {
+            const existing = routesMap.get(r)!;
+            existing.buses.push(b);
+            if (eta < existing.etaMins) {
+              existing.etaMins = eta;
+            }
           }
         });
 
-        // If no live bus nearby, add default popular DTC routes serving this node
+        // If no live bus nearby, add default popular DTC routes serving this corridor
         if (routesMap.size === 0) {
-          routesMap.set('502', { route: '502', etaMins: 4, type: 'ev' });
-          routesMap.set('729', { route: '729', etaMins: 9, type: 'cng' });
-          routesMap.set('419', { route: '419', etaMins: 14, type: 'ev' });
+          const defaultRoutes = ['502', '729', '419'];
+          defaultRoutes.forEach((defR, dIdx) => {
+            const sysBuses = buses.filter(
+              (b) => b.routeId && b.routeId.trim().toUpperCase() === defR
+            );
+            const known = DTC_KNOWN_ROUTES[defR];
+            const registry = DELHI_ROUTE_REGISTRY[defR];
+            routesMap.set(defR, {
+              route: defR,
+              etaMins: (dIdx + 1) * 4,
+              type: defR === '729' ? 'cng' : 'ev',
+              buses: sysBuses.slice(0, 3),
+              startPoint: known?.startPoint || registry?.startPoint || 'Origin Terminal',
+              lastPoint: known?.lastPoint || registry?.lastPoint || 'Destination Terminal',
+            });
+          });
         }
 
         const routes = Array.from(routesMap.values()).slice(0, 4);
@@ -188,8 +230,22 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
             walkMinutes: Math.max(1, Math.round(dM / 75)),
             amenities: ['Shelter & Bench', 'LED Display'],
             routes: [
-              { route: '502', etaMins: 5, type: 'ev' },
-              { route: '729', etaMins: 11, type: 'cng' },
+              {
+                route: '502',
+                etaMins: 5,
+                type: 'ev',
+                buses: buses.filter((b) => b.routeId === '502').slice(0, 3),
+                startPoint: 'Mehrauli Terminal',
+                lastPoint: 'Old Delhi Railway Station',
+              },
+              {
+                route: '729',
+                etaMins: 11,
+                type: 'cng',
+                buses: buses.filter((b) => b.routeId === '729').slice(0, 3),
+                startPoint: 'Mori Gate Terminal',
+                lastPoint: 'Kapashera Border',
+              },
             ],
             lat: stand.lat,
             lng: stand.lng,
@@ -245,16 +301,16 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-80px)] min-h-[500px] overflow-hidden flex flex-col bg-[#FAF8F5]">
+    <div className="relative w-full h-full min-h-[500px] overflow-hidden flex flex-col bg-[#FAF8F5] dark:bg-[#0b0f17] text-[#171c23] dark:text-[#f1f5f9] transition-colors">
       {/* Mobile Top View-Switcher Bar (< lg screens) */}
-      <div className="lg:hidden flex items-center justify-between px-3 py-2 bg-white border-b border-slate-200 z-30 shrink-0">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+      <div className="lg:hidden flex items-center justify-between px-3 py-2 bg-white dark:bg-[#121a27] border-b border-slate-200 dark:border-slate-800 z-30 shrink-0">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
           <button
             onClick={() => setMobileTab('list')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               mobileTab === 'list'
                 ? 'bg-[#a83301] text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">list</span>
@@ -265,7 +321,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
             className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               mobileTab === 'radar'
                 ? 'bg-[#a83301] text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">radar</span>
@@ -276,7 +332,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
         <button
           onClick={handleRelocateGPS}
           disabled={isLocating}
-          className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold flex items-center gap-1 border border-blue-200 cursor-pointer"
+          className="px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-xs font-bold flex items-center gap-1 border border-blue-200 dark:border-blue-800 cursor-pointer"
         >
           <span className={`material-symbols-outlined text-[16px] ${isLocating ? 'animate-spin' : ''}`}>
             my_location
@@ -292,22 +348,22 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
         <aside
           className={`${
             mobileTab === 'list' ? 'flex' : 'hidden'
-          } lg:flex w-full lg:w-[420px] xl:w-[460px] shrink-0 h-full bg-[#ffffff] shadow-[4px_0_24px_rgba(30,35,42,0.06)] z-20 flex-col overflow-hidden border-r border-slate-200`}
+          } lg:flex w-full lg:w-[420px] xl:w-[460px] shrink-0 h-full bg-[#ffffff] dark:bg-[#121a27] shadow-[4px_0_24px_rgba(30,35,42,0.06)] z-20 flex-col overflow-hidden border-r border-slate-200 dark:border-slate-800`}
         >
           {/* Current Location Anchor Card */}
-          <div className="p-4 bg-[#f0f4fd] border-b border-slate-200 shrink-0">
+          <div className="p-4 bg-[#f0f4fd] dark:bg-[#182334] border-b border-slate-200 dark:border-slate-800 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#006d42] animate-ping"></span>
                 <span className="w-2 h-2 -ml-2 rounded-full bg-[#006d42]"></span>
-                <span className="text-[11px] font-bold text-[#007145] uppercase tracking-wide">
+                <span className="text-[11px] font-bold text-[#007145] dark:text-[#52e89f] uppercase tracking-wide">
                   {isGpsLive ? 'Live Commuter GPS Active' : 'Delhi Transit GPS Reference'}
                 </span>
               </div>
               <button
                 onClick={handleRelocateGPS}
                 disabled={isLocating}
-                className="text-[11px] font-bold text-[#a83301] flex items-center gap-1 hover:underline cursor-pointer"
+                className="text-[11px] font-bold text-[#a83301] dark:text-[#ff7849] flex items-center gap-1 hover:underline cursor-pointer"
               >
                 <span className={`material-symbols-outlined text-[15px] ${isLocating ? 'animate-spin' : ''}`}>
                   my_location
@@ -321,10 +377,10 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
                 <span className="material-symbols-outlined text-[20px]">pin_drop</span>
               </div>
               <div>
-                <h2 className="text-[14px] font-extrabold text-[#171c23] leading-tight">
+                <h2 className="text-[14px] font-extrabold text-[#171c23] dark:text-white leading-tight">
                   {gpsLocationName}
                 </h2>
-                <p className="text-[11px] text-[#59413a] font-medium">
+                <p className="text-[11px] text-[#59413a] dark:text-slate-400 font-medium">
                   {userCoords.lat.toFixed(4)}° N, {userCoords.lng.toFixed(4)}° E • 3,465 DTC Stands Synced
                 </p>
               </div>
@@ -339,7 +395,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
                   className={`flex-1 py-1.5 px-2 rounded-xl text-[12px] font-bold text-center transition-all cursor-pointer ${
                     selectedRadius === r
                       ? 'bg-[#a83301] text-white shadow-sm'
-                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                      : 'bg-white dark:bg-[#1a2538] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#202f47]'
                   }`}
                 >
                   {r}
@@ -349,7 +405,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
 
             {/* Search Input */}
             <div className="mt-3 relative">
-              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#59413a] text-[18px]">
+              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#59413a] dark:text-slate-400 text-[18px]">
                 search
               </span>
               <input
@@ -357,12 +413,12 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search nearby bus stand (e.g. AIIMS, Mori Gate)..."
-                className="w-full h-9 pl-9 pr-8 rounded-xl bg-white text-[13px] border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#a83301]"
+                className="w-full h-9 pl-9 pr-8 rounded-xl bg-white dark:bg-[#1a2538] text-[13px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#a83301]"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-700"
+                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
                 </button>
@@ -385,7 +441,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition cursor-pointer ${
                     filterTag === tag
                       ? 'bg-[#ca4a1c] text-white'
-                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                      : 'bg-white dark:bg-[#1a2538] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#202f47]'
                   }`}
                 >
                   {label}
@@ -395,11 +451,11 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
           </div>
 
           {/* List of Nearby Bus Stops */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f9ff]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f9ff] dark:bg-[#0b0f17]">
             {filteredStops.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
+              <div className="p-8 text-center bg-white dark:bg-[#121a27] rounded-2xl border border-slate-200 dark:border-slate-800">
                 <span className="material-symbols-outlined text-4xl text-slate-400">directions_bus</span>
-                <p className="mt-2 font-bold text-slate-700 text-sm">No bus stands found in this radius</p>
+                <p className="mt-2 font-bold text-slate-700 dark:text-slate-200 text-sm">No bus stands found in this radius</p>
                 <p className="text-xs text-slate-500 mt-1">Try expanding to 1km or 2km radius.</p>
                 <button
                   onClick={() => setSelectedRadius('2km')}
@@ -422,31 +478,31 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
                     }}
                     className={`p-3.5 rounded-2xl transition-all cursor-pointer border ${
                       isSelected
-                        ? 'bg-white ring-2 ring-[#a83301] shadow-[0_4px_16px_rgba(168,51,1,0.12)] border-[#a83301]'
-                        : 'bg-white hover:bg-slate-50 border-slate-200/80 shadow-sm'
+                        ? 'bg-white dark:bg-[#182334] ring-2 ring-[#a83301] shadow-[0_4px_16px_rgba(168,51,1,0.12)] border-[#a83301]'
+                        : 'bg-white dark:bg-[#182334] hover:bg-slate-50 dark:hover:bg-[#1f2e42] border-slate-200/80 dark:border-slate-700/80 shadow-sm'
                     }`}
                   >
                     {/* Header: Name, Distance, Walking ETA */}
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="text-[13px] font-extrabold text-[#171c23] leading-snug">
+                        <h3 className="text-[13px] font-extrabold text-[#171c23] dark:text-white leading-snug">
                           {stop.name}
                         </h3>
-                        <p className="text-[11px] text-[#59413a] font-medium">{stop.hindiName}</p>
+                        <p className="text-[11px] text-[#59413a] dark:text-slate-400 font-medium">{stop.hindiName}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-[#ffdbd0] text-[#842500] text-[11px] font-bold">
+                        <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-[#ffdbd0] dark:bg-[#ca4a1c]/25 text-[#842500] dark:text-[#ff9d7d] text-[11px] font-bold">
                           <span className="material-symbols-outlined text-[13px]">directions_walk</span>
                           {stop.walkMinutes} min
                         </span>
-                        <p className="text-[10px] text-slate-400 mt-0.5">{stop.distanceMeters}m away</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{stop.distanceMeters}m away</p>
                       </div>
                     </div>
 
                     {/* Metro & Amenity Tags */}
                     <div className="mt-2 flex flex-wrap gap-1">
                       {stop.metroInterchange && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[10px] font-bold border border-amber-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold border border-amber-200 dark:border-amber-800">
                           <span className="material-symbols-outlined text-[12px]">train</span>
                           {stop.metroInterchange}
                         </span>
@@ -454,48 +510,123 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
                       {stop.amenities.map((am, i) => (
                         <span
                           key={i}
-                          className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-medium"
+                          className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-medium"
                         >
                           {am}
                         </span>
                       ))}
                     </div>
 
-                    {/* Upcoming Live Buses at this Stop */}
-                    <div className="mt-2.5 pt-2 border-t border-slate-100">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Approaching Buses
-                      </span>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    {/* Upcoming Live Buses at this Stop: Grouped by Route with numbered clickable buses */}
+                    <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        <span>Approaching Buses & Routes</span>
+                        <span className="text-[#a83301] dark:text-[#ff7849] lowercase font-semibold">click bus to track</span>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
                         {stop.routes.map((rt, i) => (
                           <div
                             key={i}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onSelectRoute(rt.route);
-                              onNavigateTab('live-map');
-                            }}
-                            className="px-2.5 py-0.5 rounded-xl bg-[#f0f4fd] hover:bg-[#a83301] hover:text-white text-[#171c23] flex items-center gap-1.5 text-[11px] font-bold transition group border border-slate-200/60"
+                            className="p-2 rounded-xl bg-slate-50/80 dark:bg-[#121a27] hover:bg-slate-50 dark:hover:bg-[#162030] border border-slate-200/70 dark:border-slate-800/80 flex flex-col gap-1.5 transition"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#006d42] group-hover:bg-white"></span>
-                            <span>{rt.route}</span>
-                            <span className="text-[#a83301] group-hover:text-white font-extrabold">
-                              {rt.etaMins}m
-                            </span>
+                            {/* Route Header Row */}
+                            <div className="flex items-center justify-between gap-1.5">
+                              <button
+                                onClick={(e) => {
+                                   e.stopPropagation();
+                                  onSelectRoute(rt.route);
+                                  onNavigateTab('live-map');
+                                }}
+                                className="group px-2 py-0.5 rounded-lg bg-emerald-700 hover:bg-[#a83301] text-white flex items-center gap-1.5 text-[11px] font-extrabold transition cursor-pointer shadow-2xs"
+                                title={`View Route ${rt.route} details and live progression on map`}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 group-hover:bg-white animate-pulse"></span>
+                                <span>Route {rt.route}</span>
+                                <span className="font-mono text-[10px] opacity-90">~{rt.etaMins}m</span>
+                              </button>
+
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[150px]">
+                                  {rt.startPoint} ➔ {rt.lastPoint}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openSetAlertModal(
+                                      rt.buses[0] || null,
+                                      {
+                                        id: stop.id,
+                                        name: stop.name,
+                                        hindi: stop.hindiName,
+                                        lat: stop.lat,
+                                        lng: stop.lng,
+                                        type: stop.isTerminal ? 'Terminal' : 'Depot',
+                                        zone: '',
+                                        description: stop.name,
+                                      },
+                                      rt.route
+                                    );
+                                  }}
+                                  className={`p-1 rounded-lg transition cursor-pointer shrink-0 ${
+                                    isRouteAlerted(rt.route)
+                                      ? 'bg-amber-500 text-white shadow-xs'
+                                      : 'text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50'
+                                  }`}
+                                  title={`Set arrival alert for Route ${rt.route} at ${stop.name}`}
+                                >
+                                  <Bell className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Buses in same route shown one by one in a line with numbers */}
+                            {rt.buses.length > 0 ? (
+                              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                                {rt.buses.map((bus, bIdx) => (
+                                  <button
+                                    key={bus.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (onSelectBus) onSelectBus(bus);
+                                      onSelectRoute(rt.route);
+                                      onNavigateTab('live-map');
+                                    }}
+                                    className="group inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-[#182334] hover:bg-amber-50 dark:hover:bg-[#202f47] border border-slate-200 dark:border-slate-700 hover:border-[#a83301] shadow-2xs text-[11px] font-bold text-slate-800 dark:text-slate-200 transition cursor-pointer shrink-0"
+                                    title={`Click to track Bus ${bus.id} (${bus.speedKmH} km/h)`}
+                                  >
+                                    <span className="w-4 h-4 rounded-full bg-slate-800 dark:bg-slate-700 text-white text-[9px] font-black flex items-center justify-center group-hover:bg-[#a83301]">
+                                      #{bIdx + 1}
+                                    </span>
+                                    <span className="font-mono text-slate-900 dark:text-slate-100 group-hover:text-[#a83301]">
+                                      {bus.id}
+                                    </span>
+                                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-normal">
+                                      {bus.speedKmH} km/h
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 italic">
+                                Scheduled frequent service
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
                     </div>
 
                     {/* Action Bar */}
-                    <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+                    <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectRoute(stop.routes[0]?.route || '502');
                           onNavigateTab('live-map');
                         }}
-                        className="text-[11px] font-bold text-[#a83301] hover:underline flex items-center gap-0.5"
+                        className="text-[11px] font-bold text-[#a83301] dark:text-[#ff7849] hover:underline flex items-center gap-0.5"
                       >
                         <span>View on Live Map</span>
                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -519,7 +650,7 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
           </div>
 
           {/* Footer Info Pill */}
-          <div className="p-3 bg-white border-t border-slate-200 text-center text-[11px] text-slate-500 shrink-0">
+          <div className="p-3 bg-white dark:bg-[#121a27] border-t border-slate-200 dark:border-slate-800 text-center text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
             <span>Powered by official Delhi Open Transit GTFS (3,465 bus stands).</span>
           </div>
         </aside>
@@ -530,22 +661,22 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
         <main
           className={`${
             mobileTab === 'radar' ? 'flex' : 'hidden'
-          } lg:flex flex-1 relative h-full bg-[#FAF8F5] overflow-hidden select-none flex-col`}
+          } lg:flex flex-1 relative h-full bg-[#FAF8F5] dark:bg-[#0b0f17] overflow-hidden select-none flex-col`}
         >
           {/* Top Floating Banner */}
           <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none flex-wrap gap-2">
-            <div className="pointer-events-auto flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md shadow-md border border-slate-200 text-slate-900 text-xs font-bold">
+            <div className="pointer-events-auto flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-md border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-[#006d42] animate-pulse"></span>
               <span>{selectedRadius} Walking Radar</span>
-              <span className="text-slate-300">•</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
               <span>{filteredStops.length} Stops Found</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-[#a83301]">
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="text-[#a83301] dark:text-[#ff7849]">
                 Closest: {activeStop ? `${activeStop.distanceMeters}m (${activeStop.walkMinutes} min)` : '0m'}
               </span>
             </div>
 
-            <div className="pointer-events-auto flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200">
+            <div className="pointer-events-auto flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-md border border-slate-200 dark:border-slate-800">
               <button
                 onClick={() => setRadarViewMode('paths')}
                 className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
@@ -664,23 +795,50 @@ export const NearbyStopsView: React.FC<NearbyStopsViewProps> = ({
           {/* Active Stop Floating Bottom Action Card */}
           {activeStop && (
             <div className="absolute bottom-4 left-4 right-4 lg:left-auto lg:right-4 lg:w-96 z-30 pointer-events-auto">
-              <div className="p-3.5 rounded-2xl bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgba(30,35,42,0.12)] border border-slate-200">
+              <div className="p-3.5 rounded-2xl bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md shadow-[0_8px_30px_rgba(30,35,42,0.12)] border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="font-extrabold text-[13px] text-[#171c23]">{activeStop.name}</h4>
-                    <p className="text-[11px] text-[#59413a]">
+                    <h4 className="font-extrabold text-[13px] text-[#171c23] dark:text-white">{activeStop.name}</h4>
+                    <p className="text-[11px] text-[#59413a] dark:text-slate-400">
                       {activeStop.distanceMeters} meters away • ~{activeStop.walkMinutes} min walk
                     </p>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
                     {activeStop.routes.length} Active Routes
                   </span>
                 </div>
 
-                <div className="mt-3 flex items-center gap-2">
+                {/* Show routes with clickable buses */}
+                <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto pr-0.5 no-scrollbar">
+                  {activeStop.routes.slice(0, 2).map((rt, idx) => (
+                    <div key={idx} className="p-1.5 bg-slate-50 dark:bg-[#1a2538] rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                      <div className="flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-emerald-700 dark:text-emerald-400">Route {rt.route}</span>
+                        <span className="text-slate-400 dark:text-slate-400 font-normal truncate max-w-[130px]">{rt.startPoint} ➔ {rt.lastPoint}</span>
+                      </div>
+                      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar mt-1">
+                        {rt.buses.map((b, bIdx) => (
+                          <button
+                            key={b.id}
+                            onClick={() => {
+                              if (onSelectBus) onSelectBus(b);
+                              onSelectRoute(rt.route);
+                              onNavigateTab('live-map');
+                            }}
+                            className="px-1.5 py-0.5 rounded bg-white dark:bg-[#121a27] hover:bg-amber-50 dark:hover:bg-[#202f47] border border-slate-200 dark:border-slate-700 text-[10px] font-mono font-bold text-slate-800 dark:text-slate-200 shrink-0 cursor-pointer"
+                          >
+                            #{bIdx + 1} {b.id}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleStartWalk(activeStop)}
-                    className="flex-1 py-2 rounded-xl bg-[#a83301] text-white text-xs font-bold hover:bg-[#ca4a1c] transition flex items-center justify-center gap-1 shadow-sm"
+                    className="flex-1 py-2 rounded-xl bg-[#a83301] text-white text-xs font-bold hover:bg-[#ca4a1c] transition flex items-center justify-center gap-1 shadow-sm cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[16px]">map</span>
                     <span>Track on Live Map</span>

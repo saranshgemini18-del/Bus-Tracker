@@ -153,6 +153,38 @@ export function calculateTelemetryEtasForStopSequence(
     };
   });
 
+  // Interpolate missing coordinates along the path so every stop has valid lat/lng
+  for (let i = 0; i < stopCount; i++) {
+    if (!stopsData[i].coords) {
+      let prevIdx = i - 1;
+      while (prevIdx >= 0 && !stopsData[prevIdx].coords) prevIdx--;
+      let nextIdx = i + 1;
+      while (nextIdx < stopCount && !stopsData[nextIdx].coords) nextIdx++;
+
+      if (prevIdx >= 0 && nextIdx < stopCount) {
+        const ratio = (i - prevIdx) / (nextIdx - prevIdx);
+        const pCoords = stopsData[prevIdx].coords!;
+        const nCoords = stopsData[nextIdx].coords!;
+        stopsData[i].coords = {
+          lat: pCoords.lat + (nCoords.lat - pCoords.lat) * ratio,
+          lng: pCoords.lng + (nCoords.lng - pCoords.lng) * ratio,
+        };
+      } else if (prevIdx >= 0) {
+        stopsData[i].coords = {
+          lat: stopsData[prevIdx].coords!.lat + 0.005,
+          lng: stopsData[prevIdx].coords!.lng + 0.005,
+        };
+      } else if (nextIdx < stopCount) {
+        stopsData[i].coords = {
+          lat: stopsData[nextIdx].coords!.lat - 0.005,
+          lng: stopsData[nextIdx].coords!.lng - 0.005,
+        };
+      } else {
+        stopsData[i].coords = { lat: 28.6139, lng: 77.2090 };
+      }
+    }
+  }
+
   // Calculate segment distances between consecutive stops
   const segmentDistances: number[] = [];
   let totalRouteDistKm = 0;
@@ -392,6 +424,78 @@ export function calculateTelemetryEtasForStopSequence(
 }
 
 /**
+ * Normalizes route IDs by removing directional suffixes (_UP, _DOWN, _DN, (UP), (DOWN), leading zeros, and spaces)
+ */
+export function normalizeRouteId(raw: string): string {
+  if (!raw) return '';
+  let s = String(raw).trim();
+  // Remove leading zeros: 0502 -> 502, 073 -> 73 (except if single '0')
+  s = s.replace(/^0+([1-9]\d*)/, '$1');
+  // Remove directional suffixes: _UP, _DOWN, _DN, (UP), (DOWN), " UP", " DOWN", " DN"
+  s = s.replace(/[\s_-]+(up|down|dn)\b/gi, '').trim();
+  s = s.replace(/\s*\((up|down|dn)\)/gi, '').trim();
+  // Remove night service suffix
+  s = s.replace(/\s*\(ns\)/gi, '').trim();
+  // Remove EXT suffix
+  s = s.replace(/[\s_-]*ext\b/gi, '').trim();
+  // Normalize spaces in parentheses: TMS (+) -> TMS(+), OMS (-) -> OMS(-)
+  s = s.replace(/\s*\(\s*([+-])\s*\)/g, '($1)');
+  return s;
+}
+
+/**
+ * Helper to find intermediate stops between two terminals ordered along the corridor
+ */
+function findCorridorStops(originName: string, destName: string, maxStops = 5): string[] {
+  const oCoords = getStopCoords(originName);
+  const tCoords = getStopCoords(destName);
+  if (!oCoords || !tCoords) return [];
+
+  const minLat = Math.min(oCoords.lat, tCoords.lat) - 0.02;
+  const maxLat = Math.max(oCoords.lat, tCoords.lat) + 0.02;
+  const minLng = Math.min(oCoords.lng, tCoords.lng) - 0.02;
+  const maxLng = Math.max(oCoords.lng, tCoords.lng) + 0.02;
+
+  // Vector from origin to terminus
+  const vLat = tCoords.lat - oCoords.lat;
+  const vLng = tCoords.lng - oCoords.lng;
+  const vLenSq = vLat * vLat + vLng * vLng;
+
+  const candidates = ALL_DTC_BUS_STANDS.filter((s) => {
+    if (s.name === originName || s.name === destName) return false;
+    return s.lat >= minLat && s.lat <= maxLat && s.lng >= minLng && s.lng <= maxLng;
+  });
+
+  if (vLenSq === 0 || candidates.length === 0) return [];
+
+  // Project each candidate along the vector (0 = at origin, 1 = at destination)
+  const scored = candidates.map((s) => {
+    const proj = ((s.lat - oCoords.lat) * vLat + (s.lng - oCoords.lng) * vLng) / vLenSq;
+    // Perpendicular distance from line
+    const perpLat = s.lat - (oCoords.lat + proj * vLat);
+    const perpLng = s.lng - (oCoords.lng + proj * vLng);
+    const perpDist = Math.sqrt(perpLat * perpLat + perpLng * perpLng);
+    return { name: s.name, proj, perpDist };
+  }).filter((item) => item.proj > 0.05 && item.proj < 0.95 && item.perpDist < 0.035);
+
+  // Sort strictly by projection along route corridor so sequence is in physical order
+  scored.sort((a, b) => a.proj - b.proj);
+
+  // Pick evenly spaced stops
+  if (scored.length <= maxStops) {
+    return scored.map((s) => s.name);
+  }
+
+  const result: string[] = [];
+  const step = scored.length / maxStops;
+  for (let i = 0; i < maxStops; i++) {
+    const idx = Math.min(scored.length - 1, Math.floor(i * step));
+    result.push(scored[idx].name);
+  }
+  return result;
+}
+
+/**
  * Resolves full route timeline, stops, and live telemetry ETAs for any selected route
  */
 export function resolveRouteProgression(
@@ -400,10 +504,23 @@ export function resolveRouteProgression(
   isReversed: boolean = false
 ): BusProgression {
   const clean = (routeId || '').trim();
-  const routeBuses = buses.filter((b) => b.routeId.toLowerCase() === clean.toLowerCase());
+  const normalized = normalizeRouteId(clean);
+
+  // Match all buses operating on this route regardless of directional suffix (e.g. 502, 502_UP, 502_DOWN)
+  const routeBuses = buses.filter((b) => {
+    const bNorm = normalizeRouteId(b.routeId);
+    return (
+      bNorm.toLowerCase() === normalized.toLowerCase() ||
+      b.routeId.toLowerCase() === clean.toLowerCase() ||
+      (b.rawRouteId && normalizeRouteId(b.rawRouteId).toLowerCase() === normalized.toLowerCase())
+    );
+  });
 
   // 1. Check verified DTC known routes
-  const known = DTC_KNOWN_ROUTES[clean];
+  const known = DTC_KNOWN_ROUTES[clean] || DTC_KNOWN_ROUTES[normalized] || Object.entries(DTC_KNOWN_ROUTES).find(
+    ([k]) => k.toLowerCase() === clean.toLowerCase() || k.toLowerCase() === normalized.toLowerCase()
+  )?.[1];
+
   if (known) {
     const rawSequence = [known.startPoint, ...known.viaStops, known.lastPoint];
     const {
@@ -420,7 +537,7 @@ export function resolveRouteProgression(
     const terminus = isReversed ? known.startPoint : known.lastPoint;
 
     return {
-      routeId: clean,
+      routeId: normalized || clean,
       startPoint: origin,
       nextPoint: nextStopName,
       nextPointDistanceKm: nextStopDistanceKm,
@@ -438,51 +555,23 @@ export function resolveRouteProgression(
   }
 
   // 2. Check master Delhi Route Registry (thousands of mapped routes)
-  const registryEntry = Object.values(DELHI_ROUTE_REGISTRY).find(
-    (r) => r.displayRoute.toLowerCase() === clean.toLowerCase()
-  );
+  const registryEntry =
+    DELHI_ROUTE_REGISTRY[clean] ||
+    DELHI_ROUTE_REGISTRY[normalized] ||
+    Object.values(DELHI_ROUTE_REGISTRY).find(
+      (r) =>
+        r.displayRoute.toLowerCase() === clean.toLowerCase() ||
+        r.displayRoute.toLowerCase() === normalized.toLowerCase()
+    );
 
   if (registryEntry) {
     const origin = isReversed ? registryEntry.lastPoint : registryEntry.startPoint;
     const terminus = isReversed ? registryEntry.startPoint : registryEntry.lastPoint;
 
-    // Build intermediate sequence between origin and terminus using nearby DTC bus stands
-    const oCoords = getStopCoords(origin);
-    const tCoords = getStopCoords(terminus);
-    const viaStops: string[] = [];
-
-    if (oCoords && tCoords) {
-      // Find 3-5 stands that lie geographically between origin and terminus
-      const minLat = Math.min(oCoords.lat, tCoords.lat);
-      const maxLat = Math.max(oCoords.lat, tCoords.lat);
-      const minLng = Math.min(oCoords.lng, tCoords.lng);
-      const maxLng = Math.max(oCoords.lng, tCoords.lng);
-
-      const candidates = ALL_DTC_BUS_STANDS.filter(
-        (s) =>
-          s.lat >= minLat - 0.02 &&
-          s.lat <= maxLat + 0.02 &&
-          s.lng >= minLng - 0.02 &&
-          s.lng <= maxLng + 0.02 &&
-          s.name !== origin &&
-          s.name !== terminus
-      );
-
-      // Sort by proximity along vector
-      candidates.sort((a, b) => {
-        const dA = calculateDistanceKm(oCoords.lat, oCoords.lng, a.lat, a.lng);
-        const dB = calculateDistanceKm(oCoords.lat, oCoords.lng, b.lat, b.lng);
-        return dA - dB;
-      });
-
-      // Sample evenly
-      const step = Math.max(1, Math.floor(candidates.length / 5));
-      for (let i = 0; i < candidates.length && viaStops.length < 5; i += step) {
-        viaStops.push(candidates[i].name);
-      }
-    }
-
+    // Build intermediate sequence between origin and terminus in true physical order
+    const viaStops = findCorridorStops(origin, terminus, 5);
     const rawSequence = [origin, ...viaStops, terminus];
+
     const {
       orderedStops,
       nextStopName,
@@ -494,7 +583,7 @@ export function resolveRouteProgression(
     } = calculateTelemetryEtasForStopSequence(rawSequence, routeBuses, undefined, false);
 
     return {
-      routeId: clean,
+      routeId: registryEntry.displayRoute || normalized || clean,
       startPoint: origin,
       nextPoint: nextStopName,
       nextPointDistanceKm: nextStopDistanceKm,
@@ -528,7 +617,7 @@ export function resolveRouteProgression(
   } = calculateTelemetryEtasForStopSequence(rawSequence, routeBuses, undefined, false);
 
   return {
-    routeId: clean || 'Transit',
+    routeId: normalized || clean || 'Transit',
     startPoint: origin,
     nextPoint: nextStopName,
     nextPointDistanceKm: nextStopDistanceKm,
@@ -554,8 +643,25 @@ export function resolveBusProgression(
   forceReversed?: boolean
 ): BusProgression {
   const cleanRouteId = (bus.routeId || '').trim();
-  const routeBuses = allBuses.filter((b) => b.routeId.toLowerCase() === cleanRouteId.toLowerCase());
-  const known = DTC_KNOWN_ROUTES[cleanRouteId];
+  const normalizedRouteId = normalizeRouteId(cleanRouteId);
+
+  // Match all buses on this route
+  const routeBuses = allBuses.filter((b) => {
+    const bNorm = normalizeRouteId(b.routeId);
+    return (
+      bNorm.toLowerCase() === normalizedRouteId.toLowerCase() ||
+      b.routeId.toLowerCase() === cleanRouteId.toLowerCase() ||
+      (b.rawRouteId && normalizeRouteId(b.rawRouteId).toLowerCase() === normalizedRouteId.toLowerCase())
+    );
+  });
+
+  // 1. Check verified DTC known routes
+  const known =
+    DTC_KNOWN_ROUTES[cleanRouteId] ||
+    DTC_KNOWN_ROUTES[normalizedRouteId] ||
+    Object.entries(DTC_KNOWN_ROUTES).find(
+      ([k]) => k.toLowerCase() === cleanRouteId.toLowerCase() || k.toLowerCase() === normalizedRouteId.toLowerCase()
+    )?.[1];
 
   if (known) {
     const forwardSequence = [known.startPoint, ...known.viaStops, known.lastPoint];
@@ -565,6 +671,14 @@ export function resolveBusProgression(
     let isForward = true;
     if (forceReversed !== undefined) {
       isForward = !forceReversed;
+    } else if (bus.originTerminal && bus.destinationTerminal) {
+      // Check if telemetry terminal matches known terminus
+      const destLower = bus.destinationTerminal.toLowerCase();
+      if (destLower.includes(known.startPoint.toLowerCase())) {
+        isForward = false;
+      } else if (destLower.includes(known.lastPoint.toLowerCase())) {
+        isForward = true;
+      }
     } else if (startCoords && lastCoords) {
       const distToStart = calculateDistanceKm(bus.lat, bus.lng, startCoords.lat, startCoords.lng);
       const distToLast = calculateDistanceKm(bus.lat, bus.lng, lastCoords.lat, lastCoords.lng);
@@ -603,7 +717,7 @@ export function resolveBusProgression(
     } = calculateTelemetryEtasForStopSequence(activeSequence, routeBuses, bus, false);
 
     return {
-      routeId: cleanRouteId,
+      routeId: normalizedRouteId || cleanRouteId,
       startPoint: origin,
       nextPoint: nextStopName,
       nextPointDistanceKm: nextStopDistanceKm,
@@ -620,13 +734,82 @@ export function resolveBusProgression(
     };
   }
 
-  // Fallback: Dynamic Auto-Resolver for any other route
+  // 2. Check master Delhi Route Registry (11,000+ routes)
+  const registryEntry =
+    DELHI_ROUTE_REGISTRY[cleanRouteId] ||
+    DELHI_ROUTE_REGISTRY[normalizedRouteId] ||
+    (bus.rawRouteId ? DELHI_ROUTE_REGISTRY[bus.rawRouteId] : undefined) ||
+    Object.values(DELHI_ROUTE_REGISTRY).find(
+      (r) =>
+        r.displayRoute.toLowerCase() === cleanRouteId.toLowerCase() ||
+        r.displayRoute.toLowerCase() === normalizedRouteId.toLowerCase()
+    );
+
+  if (registryEntry) {
+    const startCoords = getStopCoords(registryEntry.startPoint);
+    const lastCoords = getStopCoords(registryEntry.lastPoint);
+
+    let isForward = true;
+    if (forceReversed !== undefined) {
+      isForward = !forceReversed;
+    } else if (bus.destinationTerminal) {
+      const destLower = bus.destinationTerminal.toLowerCase();
+      if (destLower.includes(registryEntry.startPoint.toLowerCase())) {
+        isForward = false;
+      } else if (destLower.includes(registryEntry.lastPoint.toLowerCase())) {
+        isForward = true;
+      }
+    } else if (startCoords && lastCoords) {
+      const distToStart = calculateDistanceKm(bus.lat, bus.lng, startCoords.lat, startCoords.lng);
+      const distToLast = calculateDistanceKm(bus.lat, bus.lng, lastCoords.lat, lastCoords.lng);
+      isForward = distToStart <= distToLast;
+    }
+
+    const activeOrigin = isForward ? registryEntry.startPoint : registryEntry.lastPoint;
+    const activeTerminus = isForward ? registryEntry.lastPoint : registryEntry.startPoint;
+
+    // Find stops strictly along the corridor between activeOrigin and activeTerminus
+    const corridorStops = findCorridorStops(activeOrigin, activeTerminus, 5);
+    const fullSequence = [activeOrigin, ...corridorStops, activeTerminus];
+
+    const {
+      orderedStops,
+      nextStopName,
+      nextStopDistanceKm,
+      nextStopEtaMins,
+      nextStopClockTime,
+      progressPercent,
+      telemetrySummary,
+    } = calculateTelemetryEtasForStopSequence(fullSequence, routeBuses, bus, false);
+
+    return {
+      routeId: registryEntry.displayRoute || normalizedRouteId || cleanRouteId,
+      startPoint: activeOrigin,
+      nextPoint: nextStopName,
+      nextPointDistanceKm: nextStopDistanceKm,
+      nextPointFormattedDistance: formatDistance(nextStopDistanceKm),
+      nextPointEtaMins: nextStopEtaMins,
+      nextPointClockTime: nextStopClockTime,
+      lastPoint: activeTerminus,
+      currentDirection: `Towards ${activeTerminus}`,
+      orderedStops,
+      progressPercent,
+      routeDescription: registryEntry.description || `Delhi Bus Route ${cleanRouteId} (${registryEntry.operator || 'DTC'})`,
+      isReversed: !isForward,
+      telemetrySummary,
+    };
+  }
+
+  // 3. Fallback: Dynamic Auto-Resolver based on vehicle's actual telemetry & nearest stands
   let originName = bus.originTerminal || '';
   let destName = bus.destinationTerminal || '';
 
   if (!originName || !destName) {
     const hubsWithRoute = DELHI_HUBS.filter(
-      (h) => h.majorRoutes?.includes(cleanRouteId) || (bus.rawRouteId && h.majorRoutes?.includes(bus.rawRouteId))
+      (h) =>
+        h.majorRoutes?.includes(cleanRouteId) ||
+        h.majorRoutes?.includes(normalizedRouteId) ||
+        (bus.rawRouteId && h.majorRoutes?.includes(bus.rawRouteId))
     );
 
     if (hubsWithRoute.length >= 2) {
@@ -634,40 +817,32 @@ export function resolveBusProgression(
       destName = hubsWithRoute[1].name;
     } else if (hubsWithRoute.length === 1) {
       originName = hubsWithRoute[0].name;
-      destName = originName.includes('ISBT') ? 'Shivaji Stadium Terminal' : 'Kashmere Gate ISBT';
+      destName = originName.includes('ISBT') ? 'Central Secretariat Terminal' : 'Kashmere Gate ISBT';
     } else {
-      if (bus.lng < 77.10) {
-        originName = 'Uttam Nagar Terminal';
-        destName = 'Shivaji Stadium Terminal';
-      } else if (bus.lng > 77.26) {
-        originName = 'Anand Vihar ISBT';
-        destName = 'Shivaji Stadium Terminal';
-      } else if (bus.lat > 28.68) {
-        originName = 'Azadpur Terminal';
-        destName = 'Central Secretariat Terminal';
-      } else {
-        originName = 'Kashmere Gate ISBT';
-        destName = 'Nehru Place Bus Terminal';
-      }
+      // Find two nearest distinct hubs based on bus's live location
+      const sortedHubs = [...DELHI_HUBS].sort((a, b) => {
+        const dA = calculateDistanceKm(bus.lat, bus.lng, a.lat, a.lng);
+        const dB = calculateDistanceKm(bus.lat, bus.lng, b.lat, b.lng);
+        return dA - dB;
+      });
+      originName = sortedHubs[0]?.name || 'Central Secretariat Terminal';
+      destName = sortedHubs[1]?.name || 'Connaught Place';
     }
   }
 
-  // Find 2-3 closest bus stands to form an itinerary
-  const sortedStands = [...ALL_DTC_BUS_STANDS].sort((a, b) => {
-    const dA = calculateDistanceKm(bus.lat, bus.lng, a.lat, a.lng);
-    const dB = calculateDistanceKm(bus.lat, bus.lng, b.lat, b.lng);
-    return dA - dB;
-  });
-
-  const nextStand = sortedStands[0]?.name || 'Connaught Place';
-  const intermediateStand = sortedStands[1]?.name || 'ITO';
-
-  const rawSequence = [originName, nextStand, intermediateStand, destName];
-  // Deduplicate
-  const uniqueSequence = Array.from(new Set(rawSequence));
-  if (uniqueSequence.length < 3) {
-    uniqueSequence.splice(1, 0, 'AIIMS / Safdarjung');
+  // Find corridor stands between origin and destination
+  let corridorStops = findCorridorStops(originName, destName, 4);
+  if (corridorStops.length === 0) {
+    const sortedStands = [...ALL_DTC_BUS_STANDS].sort((a, b) => {
+      const dA = calculateDistanceKm(bus.lat, bus.lng, a.lat, a.lng);
+      const dB = calculateDistanceKm(bus.lat, bus.lng, b.lat, b.lng);
+      return dA - dB;
+    });
+    corridorStops = [sortedStands[0]?.name || 'Connaught Place', sortedStands[1]?.name || 'ITO'];
   }
+
+  const rawSequence = [originName, ...corridorStops, destName];
+  const uniqueSequence = Array.from(new Set(rawSequence));
 
   const {
     orderedStops,
@@ -680,7 +855,7 @@ export function resolveBusProgression(
   } = calculateTelemetryEtasForStopSequence(uniqueSequence, routeBuses, bus, false);
 
   return {
-    routeId: cleanRouteId || 'Delhi Transit',
+    routeId: normalizedRouteId || cleanRouteId || 'Delhi Transit',
     startPoint: originName,
     nextPoint: nextStopName,
     nextPointDistanceKm: nextStopDistanceKm,
@@ -691,9 +866,10 @@ export function resolveBusProgression(
     currentDirection: `Towards ${destName}`,
     orderedStops,
     progressPercent,
-    routeDescription: `Delhi City Bus Route ${cleanRouteId}`,
+    routeDescription: `Delhi City Bus Route ${normalizedRouteId || cleanRouteId}`,
     isReversed: false,
     telemetrySummary,
   };
 }
+
 

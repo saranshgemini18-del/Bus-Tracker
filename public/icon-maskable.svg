@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGradMask" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ca4a1c" />
+      <stop offset="100%" stop-color="#8a2500" />
+    </linearGradient>
+    <linearGradient id="busGradMask" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+    <filter id="shadowMask" x="-10%" y="-10%" width="120%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Full-bleed background for maskable icon -->
+  <rect width="512" height="512" fill="url(#bgGradMask)" />
+
+  <!-- Centered contents scaled to 78% for Android maskable safe zone -->
+  <g transform="translate(56, 56) scale(0.78)">
+    <!-- GPS Beacon Rings -->
+    <circle cx="256" cy="100" r="44" fill="none" stroke="#52e89f" stroke-width="6" opacity="0.3" />
+    <circle cx="256" cy="100" r="28" fill="none" stroke="#52e89f" stroke-width="6" opacity="0.6" />
+    <circle cx="256" cy="100" r="14" fill="#52e89f" />
+
+    <!-- Bus body with shadow -->
+    <g filter="url(#shadowMask)">
+      <!-- Main bus chassis -->
+      <rect x="116" y="140" width="280" height="260" rx="36" fill="url(#busGradMask)" />
+      
+      <!-- Windshield -->
+      <rect x="140" y="164" width="232" height="110" rx="18" fill="#1e293b" />
+      
+      <!-- Route LED display -->
+      <rect x="160" y="174" width="192" height="24" rx="6" fill="#0f172a" />
+      <rect x="170" y="181" width="56" height="10" rx="3" fill="#fbbf24" />
+      <circle cx="330" cy="186" r="4" fill="#22c55e" />
+
+      <!-- Center windshield pillar -->
+      <line x1="256" y1="202" x2="256" y2="264" stroke="#334155" stroke-width="4" />
+
+      <!-- Green EV DTC Stripe -->
+      <rect x="116" y="296" width="280" height="18" fill="#006d42" />
+
+      <!-- Grille -->
+      <rect x="206" y="332" width="100" height="24" rx="6" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2" />
+      <text x="256" y="348" font-family="monospace, sans-serif" font-weight="bold" font-size="12" fill="#334155" text-anchor="middle">DL 1P DTC</text>
+
+      <!-- Headlights -->
+      <circle cx="156" cy="344" r="14" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+      <circle cx="356" cy="344" r="14" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+
+      <!-- Bumper bar -->
+      <rect x="136" y="380" width="240" height="16" rx="8" fill="#334155" />
+
+      <!-- Left & Right Wheels -->
+      <rect x="132" y="394" width="48" height="26" rx="8" fill="#0f172a" />
+      <rect x="332" y="394" width="48" height="26" rx="8" fill="#0f172a" />
+      <rect x="142" y="402" width="28" height="14" rx="4" fill="#475569" />
+      <rect x="342" y="402" width="28" height="14" rx="4" fill="#475569" />
+    </g>
+  </g>
+</svg>

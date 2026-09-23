@@ -1,0 +1,64 @@
+{
+  "id": "/",
+  "name": "DTC Live Bus Tracker • दिल्ली बस ट्रैकर",
+  "short_name": "DTC Tracker",
+  "description": "Real-time tracking for Delhi Transport Corporation (DTC) and DIMTS buses using Delhi Open Transit Data (OTD) live GPS telemetry.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f8f9ff",
+  "theme_color": "#ca4a1c",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["transportation", "travel", "navigation", "utilities"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Live Map & Fleet Tracking",
+      "short_name": "Live Map",
+      "description": "View live buses moving in real-time across Delhi NCR",
+      "url": "/live-map",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Nearest Bus Stands",
+      "short_name": "Nearby Stops",
+      "description": "Find closest DTC bus stops and incoming arrival times",
+      "url": "/nearby-bus-stops",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Fares & E-Pass Calculator",
+      "short_name": "Fare & Pass",
+      "description": "Check fare charts, Pink Tickets, and DTC pass costs",
+      "url": "/fare-and-pass",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

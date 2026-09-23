@@ -25,7 +25,9 @@ import {
   ChevronDown,
   ChevronUp,
   Activity,
+  Bell,
 } from 'lucide-react';
+import { useBusAlerts } from '../context/AlertContext';
 
 interface BusDetailModalProps {
   bus: DTCBus | null;
@@ -46,6 +48,7 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [showStopsList, setShowStopsList] = useState(false);
+  const { openSetAlertModal, isBusAlerted } = useBusAlerts();
 
   // Compute live route progression: Starting Point, Next Point, and Last Point with real-time telemetry
   const progression = useMemo(() => {
@@ -91,7 +94,7 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
   return (
     <div
       id="bus-detail-panel"
-      className="fixed inset-x-3 bottom-3 md:inset-auto md:right-6 md:top-20 md:w-[440px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 z-[500] overflow-hidden transition-all duration-150 animate-in fade-in slide-in-from-bottom-3 md:slide-in-from-right-4 max-h-[88vh] flex flex-col"
+      className="fixed inset-x-3 bottom-3 md:inset-auto md:right-6 md:top-20 md:w-[440px] bg-white/95 dark:bg-[#121a27]/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-[500] overflow-hidden transition-all duration-150 animate-in fade-in slide-in-from-bottom-3 md:slide-in-from-right-4 max-h-[88vh] flex flex-col"
     >
       {/* Header Banner */}
       <div
@@ -139,7 +142,7 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
       </div>
 
       {/* Scrollable Body */}
-      <div className="p-4 space-y-3 overflow-y-auto text-slate-800 text-sm flex-1">
+      <div className="p-4 space-y-3 overflow-y-auto text-slate-800 dark:text-slate-100 text-sm flex-1">
         {/* ========================================================================= */}
         {/* DIGITAL AMBER LED DESTINATION DISPLAY BOARD (AS SEEN ON DELHI BUSES)      */}
         {/* ========================================================================= */}
@@ -191,10 +194,10 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
           </div>
 
           {/* Delhi One Verified Status */}
-          <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-indigo-900 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
+          <div className="p-2.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Delhi One App</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Delhi One App</div>
               <div className="text-xs font-extrabold truncate">Verified OTD GPS</div>
             </div>
           </div>
@@ -203,13 +206,13 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
         {/* ========================================================================= */}
         {/* CORE REQUIREMENT: STARTING POINT, NEXT POINT, AND LAST POINT OF BUS       */}
         {/* ========================================================================= */}
-        <div className="p-3.5 rounded-xl bg-gradient-to-br from-slate-50 to-emerald-50/40 border border-emerald-200/80 shadow-sm space-y-3">
-          <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-              <Navigation className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="p-3.5 rounded-xl bg-gradient-to-br from-slate-50 to-emerald-50/40 dark:from-[#1a2538] dark:to-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 shadow-sm space-y-3">
+          <div className="flex items-center justify-between border-b border-emerald-100 dark:border-emerald-900/60 pb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+              <Navigation className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               Live Route Progression
             </span>
-            <span className="text-[11px] font-semibold text-slate-500">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               {progression.currentDirection}
             </span>
           </div>
@@ -217,50 +220,50 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
           {/* 3 Key Stops: Starting Point -> Next Point -> Last Point */}
           <div className="space-y-2.5 relative">
             {/* Connecting Vertical Line */}
-            <div className="absolute left-[13px] top-3 bottom-3 w-0.5 bg-slate-200 -z-0"></div>
+            <div className="absolute left-[13px] top-3 bottom-3 w-0.5 bg-slate-200 dark:bg-slate-700 -z-0"></div>
 
             {/* 1. STARTING POINT */}
             <div className="flex items-start gap-3 relative z-10">
-              <div className="w-7 h-7 rounded-full bg-emerald-100 border-2 border-emerald-500 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-xs shadow-sm">
+              <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border-2 border-emerald-500 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 font-bold text-xs shadow-sm">
                 🟢
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
                   Starting Point (Origin Terminal)
                 </div>
-                <div className="text-sm font-bold text-slate-900 truncate">
+                <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
                   {progression.startPoint}
                 </div>
               </div>
             </div>
 
             {/* 2. NEXT POINT (PROMINENT HIGHLIGHT WITH LIVE TELEMETRY ETA & CLOCK TIME) */}
-            <div className="flex items-start gap-3 relative z-10 bg-amber-50/95 border-2 border-amber-300 p-2.5 rounded-xl shadow-sm">
+            <div className="flex items-start gap-3 relative z-10 bg-amber-50/95 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700 p-2.5 rounded-xl shadow-sm">
               <div className="w-7 h-7 rounded-full bg-amber-400 border-2 border-amber-600 text-amber-900 flex items-center justify-center shrink-0 font-bold text-xs shadow-md animate-pulse">
                 <Radio className="w-4 h-4 text-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1 flex-wrap">
-                  <span className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-1">
+                  <span className="text-[10px] font-extrabold text-amber-900 dark:text-amber-200 uppercase tracking-wider flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span>
                     Next Stop (Live Telemetry)
                   </span>
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-black bg-amber-200 text-amber-950 px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-amber-800" />
+                    <span className="text-[10px] font-black bg-amber-200 dark:bg-amber-900 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-amber-800 dark:text-amber-300" />
                       {progression.nextPointClockTime ? `${progression.nextPointClockTime} (${progression.nextPointEtaMins}m)` : `~${progression.nextPointEtaMins} min`}
                     </span>
                   </div>
                 </div>
-                <div className="text-sm font-black text-slate-900 leading-snug mt-0.5">
+                <div className="text-sm font-black text-slate-900 dark:text-white leading-snug mt-0.5">
                   {progression.nextPoint}
                 </div>
-                <div className="text-xs text-slate-600 mt-1 flex items-center gap-2 flex-wrap">
-                  <span>Distance: <strong className="text-slate-800">{progression.nextPointFormattedDistance}</strong></span>
+                <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
+                  <span>Distance: <strong className="text-slate-800 dark:text-slate-200">{progression.nextPointFormattedDistance}</strong></span>
                   {isSpeedAvailable && (
                     <>
                       <span>•</span>
-                      <span>Speed: <strong className="text-slate-800">{speedFormatted}</strong></span>
+                      <span>Speed: <strong className="text-slate-800 dark:text-slate-200">{speedFormatted}</strong></span>
                     </>
                   )}
                   {progression.telemetrySummary?.congestionLevel && (
@@ -269,10 +272,10 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
                       <span
                         className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold ${
                           progression.telemetrySummary.congestionLevel === 'smooth'
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
                             : progression.telemetrySummary.congestionLevel === 'congested'
-                            ? 'bg-rose-100 text-rose-800'
-                            : 'bg-amber-100 text-amber-800'
+                            ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
+                            : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
                         }`}
                       >
                         {progression.telemetrySummary.congestionLevel === 'smooth'
@@ -289,14 +292,14 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
 
             {/* 3. LAST POINT */}
             <div className="flex items-start gap-3 relative z-10">
-              <div className="w-7 h-7 rounded-full bg-rose-100 border-2 border-rose-500 text-rose-700 flex items-center justify-center shrink-0 font-bold text-xs shadow-sm">
+              <div className="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-950/60 border-2 border-rose-500 text-rose-700 dark:text-rose-300 flex items-center justify-center shrink-0 font-bold text-xs shadow-sm">
                 🏁
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">
+                <div className="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider">
                   Last Point (Destination Terminal)
                 </div>
-                <div className="text-sm font-bold text-slate-900 truncate">
+                <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
                   {progression.lastPoint}
                 </div>
               </div>
@@ -304,14 +307,14 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
           </div>
 
           {/* Route Progress Bar */}
-          <div className="pt-2 border-t border-emerald-100">
-            <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+          <div className="pt-2 border-t border-emerald-100 dark:border-emerald-900/60">
+            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-1">
               <span>Journey Completion</span>
-              <span className="font-bold font-mono text-emerald-700">
+              <span className="font-bold font-mono text-emerald-700 dark:text-emerald-400">
                 {progression.progressPercent}%
               </span>
             </div>
-            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
               <div
                 className="bg-emerald-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${progression.progressPercent}%` }}
@@ -321,18 +324,18 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
 
           {/* Real-time Telemetry Stats Pill Strip */}
           {progression.telemetrySummary && (
-            <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-emerald-100 text-[11px]">
-              <div className="p-1.5 rounded-lg bg-white/80 border border-emerald-100 text-center">
-                <span className="block text-[9px] uppercase font-bold text-slate-400">Route Buses</span>
-                <span className="font-extrabold text-slate-800">{progression.telemetrySummary.activeBusesOnRoute} Active</span>
+            <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-emerald-100 dark:border-emerald-900/60 text-[11px]">
+              <div className="p-1.5 rounded-lg bg-white/80 dark:bg-[#121a27]/80 border border-emerald-100 dark:border-emerald-900/40 text-center">
+                <span className="block text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500">Route Buses</span>
+                <span className="font-extrabold text-slate-800 dark:text-slate-200">{progression.telemetrySummary.activeBusesOnRoute} Active</span>
               </div>
-              <div className="p-1.5 rounded-lg bg-white/80 border border-emerald-100 text-center">
-                <span className="block text-[9px] uppercase font-bold text-slate-400">Corridor Speed</span>
-                <span className="font-extrabold text-slate-800">{progression.telemetrySummary.averageSpeedKmH} km/h</span>
+              <div className="p-1.5 rounded-lg bg-white/80 dark:bg-[#121a27]/80 border border-emerald-100 dark:border-emerald-900/40 text-center">
+                <span className="block text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500">Corridor Speed</span>
+                <span className="font-extrabold text-slate-800 dark:text-slate-200">{progression.telemetrySummary.averageSpeedKmH} km/h</span>
               </div>
-              <div className="p-1.5 rounded-lg bg-white/80 border border-emerald-100 text-center">
-                <span className="block text-[9px] uppercase font-bold text-slate-400">Trip Est.</span>
-                <span className="font-extrabold text-slate-800">~{progression.telemetrySummary.estimatedFullTripMinutes}m</span>
+              <div className="p-1.5 rounded-lg bg-white/80 dark:bg-[#121a27]/80 border border-emerald-100 dark:border-emerald-900/40 text-center">
+                <span className="block text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500">Trip Est.</span>
+                <span className="font-extrabold text-slate-800 dark:text-slate-200">~{progression.telemetrySummary.estimatedFullTripMinutes}m</span>
               </div>
             </div>
           )}
@@ -426,41 +429,41 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
         {/* ========================================================================= */}
         {/* DELHI GOVT FARE & PINK TICKET INFO (FROM ONE DELHI APP)                   */}
         {/* ========================================================================= */}
-        <div className="p-3 rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 flex items-center justify-between">
+        <div className="p-3 rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border border-pink-200 dark:border-pink-900/60 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-pink-500 text-white flex items-center justify-center font-black shadow-sm">
               <Ticket className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-pink-700">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-pink-700 dark:text-pink-300">
                 Delhi Pink Ticket (Gulabi Pass)
               </div>
-              <div className="text-xs font-extrabold text-pink-950">
+              <div className="text-xs font-extrabold text-pink-950 dark:text-pink-200">
                 100% Free Travel for Women & Transgender
               </div>
             </div>
           </div>
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-200/80 text-pink-900 border border-pink-300">
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-200/80 dark:bg-pink-900/80 text-pink-900 dark:text-pink-100 border border-pink-300 dark:border-pink-800">
             ₹0 Fare
           </span>
         </div>
 
         {/* Depot & Vehicle Specs Grid */}
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div className="flex items-center gap-1 text-slate-400 font-medium text-[10px] uppercase tracking-wider">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#1a2538] border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-medium text-[10px] uppercase tracking-wider">
               <Building2 className="w-3 h-3 text-indigo-500" /> Assigned Home Depot
             </div>
-            <div className="font-bold text-slate-800 mt-0.5 truncate">
+            <div className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 truncate">
               {bus.depotName || 'Delhi DTC Depot'}
             </div>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div className="flex items-center gap-1 text-slate-400 font-medium text-[10px] uppercase tracking-wider">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#1a2538] border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-medium text-[10px] uppercase tracking-wider">
               <Bus className="w-3 h-3 text-emerald-500" /> Bus Specification
             </div>
-            <div className="font-bold text-slate-800 mt-0.5 truncate">
+            <div className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 truncate">
               {bus.busModel || (isEV ? 'Electric AC Low-Floor' : 'CNG Low-Floor')}
             </div>
           </div>
@@ -469,37 +472,37 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
         {/* Telemetry Metrics Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           {/* Speed */}
-          <div id="bus-current-speed-card" className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+          <div id="bus-current-speed-card" className="p-3 rounded-xl bg-slate-50 dark:bg-[#1a2538] border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
               <span className="flex items-center gap-1.5">
-                <Gauge className="w-3.5 h-3.5 text-indigo-600" /> Current Speed
+                <Gauge className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Current Speed
               </span>
               {isSpeedAvailable && currentSpeedKmH !== null && (
                 <span
                   className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                     currentSpeedKmH > 0
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-amber-100 text-amber-700'
+                      ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                      : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
                   }`}
                 >
                   {currentSpeedKmH > 0 ? 'Moving' : 'At Stop'}
                 </span>
               )}
             </div>
-            <div className="mt-1 font-black text-lg text-slate-900 flex items-baseline gap-1.5">
+            <div className="mt-1 font-black text-lg text-slate-900 dark:text-white flex items-baseline gap-1.5">
               {isSpeedAvailable ? (
                 <>
-                  <span id="bus-speed-kmh-value" className="font-mono text-xl font-black text-slate-900">
+                  <span id="bus-speed-kmh-value" className="font-mono text-xl font-black text-slate-900 dark:text-white">
                     {speedFormatted}
                   </span>
                   {currentSpeedKmH === 0 && (
-                    <span className="text-xs font-normal text-slate-500">
+                    <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
                       (Idling)
                     </span>
                   )}
                 </>
               ) : (
-                <span className="text-sm font-semibold text-slate-400">
+                <span className="text-sm font-semibold text-slate-400 dark:text-slate-500">
                   Not available
                 </span>
               )}
@@ -507,62 +510,78 @@ export const BusDetailModal: React.FC<BusDetailModalProps> = ({
           </div>
 
           {/* Heading */}
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-              <Compass className="w-3.5 h-3.5 text-emerald-600" /> Bearing / Heading
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#1a2538] border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+              <Compass className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Bearing / Heading
             </div>
-            <div className="mt-1 font-black text-lg text-slate-900">
+            <div className="mt-1 font-black text-lg text-slate-900 dark:text-white">
               {bus.bearing > 0 ? `${bus.bearing}°` : 'Nominal'}
             </div>
           </div>
         </div>
 
         {/* Live GPS Coordinates & Google Maps Link */}
-        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#1a2538] border border-slate-200 dark:border-slate-700 space-y-2">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
             <span className="flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-rose-500" /> Live GPS Coordinates
             </span>
-            <span className="text-[11px] font-mono text-slate-400">
+            <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
               {bus.ageSeconds < 5 ? 'Live ping' : `${bus.ageSeconds}s ago`}
             </span>
           </div>
 
-          <div className="font-mono text-xs font-semibold text-slate-700 bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+          <div className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-[#121a27] p-2 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <span>
               {bus.lat.toFixed(5)}, {bus.lng.toFixed(5)}
             </span>
             <button
               id="copy-coords-btn"
               onClick={handleCopyCoords}
-              className="text-emerald-600 hover:text-emerald-700 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+              className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : 'Copy'}
             </button>
           </div>
 
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
             <a
               id="open-google-maps-link"
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
             >
               <ExternalLink className="w-3 h-3" /> View in Google Maps
             </a>
 
-            {onFollowBus && (
+            <div className="flex items-center gap-2">
               <button
-                id="follow-bus-btn"
-                onClick={() => onFollowBus(bus)}
-                className={`text-xs font-semibold px-2.5 py-1 rounded-md transition cursor-pointer ${
-                  isFollowing ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                type="button"
+                onClick={() => openSetAlertModal(bus, null, bus.routeId)}
+                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow-xs ${
+                  isBusAlerted(bus.id)
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-900 border border-amber-300 dark:border-amber-700'
                 }`}
+                title="Alert me when this bus approaches my stop"
               >
-                {isFollowing ? 'Tracking Bus ✓' : 'Follow on Map'}
+                <Bell className={`w-3.5 h-3.5 ${isBusAlerted(bus.id) ? 'animate-bounce' : ''}`} />
+                <span>{isBusAlerted(bus.id) ? 'Alert Active ✓' : 'Set Arrival Alert'}</span>
               </button>
-            )}
+
+              {onFollowBus && (
+                <button
+                  id="follow-bus-btn"
+                  onClick={() => onFollowBus(bus)}
+                  className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg transition cursor-pointer ${
+                    isFollowing ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  {isFollowing ? 'Tracking Bus ✓' : 'Follow on Map'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

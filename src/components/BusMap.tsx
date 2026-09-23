@@ -6,10 +6,13 @@ import {
   useMap,
   InfoWindow,
 } from '@vis.gl/react-google-maps';
-import { DTCBus, TransitHub, BreadcrumbPoint } from '../types';
+import { DTCBus, TransitHub, BreadcrumbPoint, BusProgression, RouteStopStep } from '../types';
 import { DELHI_HUBS, ALL_DTC_BUS_STANDS, findNearestStandFromAll } from '../data/terminals';
 import { calculateDistanceKm, formatDistance } from '../utils/geo';
-import { resolveBusProgression } from '../utils/routeResolver';
+import { resolveBusProgression, resolveRouteProgression, normalizeRouteId } from '../utils/routeResolver';
+import { DTC_KNOWN_ROUTES } from '../data/dtcRoutes';
+import { DELHI_ROUTE_REGISTRY } from '../data/delhiRouteRegistry';
+import { BusStandDetailModal } from './BusStandDetailModal';
 import {
   Compass,
   Navigation,
@@ -23,6 +26,9 @@ import {
   Gauge,
   ExternalLink,
   ArrowRight,
+  Plus,
+  Minus,
+  ChevronRight,
 } from 'lucide-react';
 
 const GOOGLE_MAPS_API_KEY =
@@ -31,7 +37,7 @@ const GOOGLE_MAPS_API_KEY =
 interface BusMapProps {
   buses: DTCBus[];
   selectedBus: DTCBus | null;
-  onSelectBus: (bus: DTCBus) => void;
+  onSelectBus: (bus: DTCBus | null) => void;
   flyToTarget: { lat: number; lng: number; zoom?: number } | null;
   busTrail: BreadcrumbPoint[];
   showHubs: boolean;
@@ -40,6 +46,8 @@ interface BusMapProps {
   onSelectRoute?: (routeId: string) => void;
   onSelectHub?: (hub: TransitHub) => void;
   triggerNearestStandCount?: number;
+  mapType?: 'transit' | 'satellite';
+  routeProgression?: BusProgression | null;
 }
 
 interface HoveredBusInfo {
@@ -52,6 +60,7 @@ interface NearestStandState {
   hub: TransitHub;
   distanceKm: number;
   nearbyBusCount: number;
+  nearbyBuses: DTCBus[];
   referenceName: string;
   userCoords?: { lat: number; lng: number };
 }
@@ -65,6 +74,13 @@ interface RenderedBusItem {
 
 interface RenderedHubItem {
   hub: TransitHub;
+  cx: number;
+  cy: number;
+  radius: number;
+}
+
+interface RenderedRouteStopItem {
+  stop: RouteStopStep;
   cx: number;
   cy: number;
   radius: number;
@@ -86,10 +102,11 @@ function HighPerformanceBusCanvas({
   nearestStand,
   onSelectHub,
   userLocation,
+  routeProgression,
 }: {
   buses: DTCBus[];
   selectedBus: DTCBus | null;
-  onSelectBus: (bus: DTCBus) => void;
+  onSelectBus: (bus: DTCBus | null) => void;
   showHubs: boolean;
   selectedRoute?: string;
   busTrail: BreadcrumbPoint[];
@@ -97,6 +114,7 @@ function HighPerformanceBusCanvas({
   nearestStand: NearestStandState | null;
   onSelectHub?: (hub: TransitHub) => void;
   userLocation?: { lat: number; lng: number } | null;
+  routeProgression?: BusProgression | null;
 }) {
   const map = useMap();
   const overlayRef = useRef<google.maps.OverlayView | null>(null);
@@ -108,11 +126,13 @@ function HighPerformanceBusCanvas({
   const selectedRouteRef = useRef<string | undefined>(selectedRoute);
   const nearestStandRef = useRef<NearestStandState | null>(nearestStand);
   const userLocationRef = useRef<{ lat: number; lng: number } | null | undefined>(userLocation);
+  const routeProgressionRef = useRef<BusProgression | null | undefined>(routeProgression);
   const animFrameRef = useRef<number | null>(null);
 
   // Cached screen positions populated during draw() for instant sub-millisecond hit-testing
   const renderedBusesRef = useRef<RenderedBusItem[]>([]);
   const renderedHubsRef = useRef<RenderedHubItem[]>([]);
+  const renderedRouteStopsRef = useRef<RenderedRouteStopItem[]>([]);
 
   busesRef.current = buses;
   selectedBusRef.current = selectedBus;
@@ -121,6 +141,7 @@ function HighPerformanceBusCanvas({
   selectedRouteRef.current = selectedRoute;
   nearestStandRef.current = nearestStand;
   userLocationRef.current = userLocation;
+  routeProgressionRef.current = routeProgression;
 
   // Redraw trigger
   const requestRedraw = useCallback(() => {
@@ -141,164 +162,136 @@ function HighPerformanceBusCanvas({
 
     let canvas: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D | null = null;
-    let mouseMoveRaf: number | null = null;
 
     overlay.onAdd = function () {
       canvas = document.createElement('canvas');
       canvas.style.position = 'absolute';
       canvas.style.top = '0';
       canvas.style.left = '0';
-      canvas.style.pointerEvents = 'auto'; // allow mouse/touch events for click & hover
+      // Crucial: pointerEvents none allows all native map gestures (pan, zoom, pinch, double-click)
+      canvas.style.pointerEvents = 'none';
       canvas.style.cursor = 'default';
       canvasRef.current = canvas;
 
       ctx = canvas.getContext('2d', { alpha: true });
 
       const panes = this.getPanes();
-      if (panes && panes.overlayMouseTarget) {
-        panes.overlayMouseTarget.appendChild(canvas);
+      if (panes && panes.overlayLayer) {
+        panes.overlayLayer.appendChild(canvas);
+      }
+    };
+
+    // Sub-millisecond hit test against pre-calculated screen coordinates
+    const findBusAtCanvasPixel = (x: number, y: number, hitRadius = 18): DTCBus | null => {
+      const rendered = renderedBusesRef.current;
+      let closest: DTCBus | null = null;
+      let minDistSq = hitRadius * hitRadius;
+
+      for (let i = 0; i < rendered.length; i++) {
+        const item = rendered[i];
+        const dx = item.cx - x;
+        const dy = item.cy - y;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq < minDistSq) {
+          minDistSq = distSq;
+          closest = item.bus;
+        }
+      }
+      return closest;
+    };
+
+    const findHubAtCanvasPixel = (x: number, y: number, hitRadius = 16): TransitHub | null => {
+      const rendered = renderedHubsRef.current;
+      let closest: TransitHub | null = null;
+      let minDistSq = hitRadius * hitRadius;
+
+      for (let i = 0; i < rendered.length; i++) {
+        const item = rendered[i];
+        const dx = item.cx - x;
+        const dy = item.cy - y;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq < minDistSq) {
+          minDistSq = distSq;
+          closest = item.hub;
+        }
+      }
+      return closest;
+    };
+
+    // Clean Google Maps native click listener
+    const clickListener = map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng || !overlayRef.current || !canvasRef.current) return;
+      const projection = overlayRef.current.getProjection();
+      if (!projection) return;
+
+      const minX = parseFloat(canvasRef.current.style.left) || 0;
+      const minY = parseFloat(canvasRef.current.style.top) || 0;
+
+      const divPixel = projection.fromLatLngToDivPixel(e.latLng);
+      if (!divPixel) return;
+
+      const canvasX = divPixel.x - minX;
+      const canvasY = divPixel.y - minY;
+
+      // 1. Check if user clicked directly on a bus icon
+      const hitBus = findBusAtCanvasPixel(canvasX, canvasY, 18);
+      if (hitBus) {
+        onSelectBus(hitBus);
+        return;
       }
 
-      // Event coordinate helper
-      const getEventCoords = (e: MouseEvent | Touch) => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-          clientX: e.clientX,
-          clientY: e.clientY,
-        };
-      };
+      // 2. Check if user clicked directly on a hub / stand icon
+      const hitHub = findHubAtCanvasPixel(canvasX, canvasY, 16);
+      if (hitHub && onSelectHub) {
+        onSelectHub(hitHub);
+        return;
+      }
 
-      // Sub-millisecond hit test against pre-calculated screen coordinates
-      const findBusAtPixel = (x: number, y: number, hitRadius = 26): DTCBus | null => {
-        const rendered = renderedBusesRef.current;
-        let closest: DTCBus | null = null;
-        let minDistSq = hitRadius * hitRadius;
+      // 3. User clicked empty map space: dismiss any active bus / route modal
+      onSelectBus(null);
+    });
 
-        for (let i = 0; i < rendered.length; i++) {
-          const item = rendered[i];
-          const dx = item.cx - x;
-          const dy = item.cy - y;
-          const distSq = dx * dx + dy * dy;
+    let mouseMoveThrottled = false;
+    const mouseMoveListener = map.addListener('mousemove', (e: google.maps.MapMouseEvent) => {
+      if (mouseMoveThrottled) return;
+      mouseMoveThrottled = true;
+      requestAnimationFrame(() => {
+        mouseMoveThrottled = false;
+        if (!e.latLng || !overlayRef.current || !canvasRef.current) return;
+        const projection = overlayRef.current.getProjection();
+        if (!projection) return;
 
-          if (distSq < minDistSq) {
-            minDistSq = distSq;
-            closest = item.bus;
-          }
-        }
+        const minX = parseFloat(canvasRef.current.style.left) || 0;
+        const minY = parseFloat(canvasRef.current.style.top) || 0;
 
-        // Coordinate fallback if clicked near a bus
-        if (!closest && overlayRef.current) {
-          const projection = overlayRef.current.getProjection();
-          if (projection && canvasRef.current) {
-            const minX = parseFloat(canvasRef.current.style.left) || 0;
-            const minY = parseFloat(canvasRef.current.style.top) || 0;
-            const clickLatLng = projection.fromDivPixelToLatLng(
-              new google.maps.Point(x + minX, y + minY)
-            );
-            if (clickLatLng) {
-              const cLat = clickLatLng.lat();
-              const cLng = clickLatLng.lng();
-              const currentBuses = busesRef.current;
-              let bestDistSq = 0.004 * 0.004; // ~400 meters
-              for (let j = 0; j < currentBuses.length; j++) {
-                const b = currentBuses[j];
-                const dLat = b.lat - cLat;
-                const dLng = b.lng - cLng;
-                const distSq = dLat * dLat + dLng * dLng;
-                if (distSq < bestDistSq) {
-                  bestDistSq = distSq;
-                  closest = b;
-                }
-              }
-            }
-          }
-        }
+        const divPixel = projection.fromLatLngToDivPixel(e.latLng);
+        if (!divPixel) return;
 
-        return closest;
-      };
+        const canvasX = divPixel.x - minX;
+        const canvasY = divPixel.y - minY;
 
-      const findHubAtPixel = (x: number, y: number, hitRadius = 20): TransitHub | null => {
-        const rendered = renderedHubsRef.current;
-        let closest: TransitHub | null = null;
-        let minDistSq = hitRadius * hitRadius;
-
-        for (let i = 0; i < rendered.length; i++) {
-          const item = rendered[i];
-          const dx = item.cx - x;
-          const dy = item.cy - y;
-          const distSq = dx * dx + dy * dy;
-
-          if (distSq < minDistSq) {
-            minDistSq = distSq;
-            closest = item.hub;
-          }
-        }
-        return closest;
-      };
-
-      // Desktop Click
-      canvas.addEventListener('click', (e) => {
-        const { x, y } = getEventCoords(e);
-        const hitBus = findBusAtPixel(x, y, 28);
+        const hitBus = findBusAtCanvasPixel(canvasX, canvasY, 14);
         if (hitBus) {
-          onSelectBus(hitBus);
-          return;
-        }
+          const mapDiv = map.getDiv();
+          const rect = mapDiv.getBoundingClientRect();
+          const screenX = rect.left + canvasX;
+          const screenY = rect.top + canvasY;
 
-        const hitHub = findHubAtPixel(x, y, 20);
-        if (hitHub && onSelectHub) {
-          onSelectHub(hitHub);
-        }
-      });
-
-      // Mobile / Touch tap
-      canvas.addEventListener(
-        'touchend',
-        (e) => {
-          if (e.changedTouches && e.changedTouches.length === 1) {
-            const touch = e.changedTouches[0];
-            const { x, y } = getEventCoords(touch);
-            const hitBus = findBusAtPixel(x, y, 32); // generous touch radius
-            if (hitBus) {
-              onSelectBus(hitBus);
-            }
-          }
-        },
-        { passive: true }
-      );
-
-      // Throttled mousemove via requestAnimationFrame for silky 60fps tracking
-      canvas.addEventListener('mousemove', (e) => {
-        if (mouseMoveRaf) return;
-        mouseMoveRaf = requestAnimationFrame(() => {
-          mouseMoveRaf = null;
-          const { x, y, clientX, clientY } = getEventCoords(e);
-          const hit = findBusAtPixel(x, y, 20);
-          if (hit) {
-            canvas.style.cursor = 'pointer';
-            setHoveredBus({ bus: hit, x: clientX, y: clientY });
+          map.setOptions({ draggableCursor: 'pointer' });
+          setHoveredBus({ bus: hitBus, x: screenX, y: screenY });
+        } else {
+          const hitHub = findHubAtCanvasPixel(canvasX, canvasY, 14);
+          if (hitHub) {
+            map.setOptions({ draggableCursor: 'pointer' });
           } else {
-            const hitHub = findHubAtPixel(x, y, 16);
-            if (hitHub) {
-              canvas.style.cursor = 'pointer';
-            } else {
-              canvas.style.cursor = 'default';
-            }
-            setHoveredBus(null);
+            map.setOptions({ draggableCursor: null });
           }
-        });
-      });
-
-      canvas.addEventListener('mouseleave', () => {
-        if (mouseMoveRaf) {
-          cancelAnimationFrame(mouseMoveRaf);
-          mouseMoveRaf = null;
+          setHoveredBus(null);
         }
-        setHoveredBus(null);
       });
-    };
+    });
 
     overlay.draw = function () {
       const projection = this.getProjection();
@@ -452,6 +445,175 @@ function HighPerformanceBusCanvas({
           ctx.stroke();
         }
       }
+
+      // 2.5 Draw Active Route Corridor Polyline and Stops (when a route or bus is active)
+      const currentProgression = routeProgressionRef.current;
+      const newRenderedRouteStops: RenderedRouteStopItem[] = [];
+
+      if (currentProgression && currentProgression.orderedStops && currentProgression.orderedStops.length > 1) {
+        const stops = currentProgression.orderedStops.filter(
+          (s: RouteStopStep) => typeof s.lat === 'number' && typeof s.lng === 'number' && !isNaN(s.lat) && !isNaN(s.lng)
+        );
+
+        if (stops.length > 1) {
+          const isElectric = currentProgression.routeId.includes('EV') || (currentSelected && currentSelected.type === 'ev');
+          const primaryColor = isElectric ? '#006d42' : '#ca4a1c';
+          const glowColor = isElectric ? 'rgba(0, 109, 66, 0.22)' : 'rgba(202, 74, 28, 0.22)';
+
+          // Outer route corridor glow
+          ctx.beginPath();
+          ctx.strokeStyle = glowColor;
+          ctx.lineWidth = 10;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          let pathStarted = false;
+          for (const stop of stops) {
+            const p = projection.fromLatLngToDivPixel(new google.maps.LatLng(stop.lat!, stop.lng!));
+            if (!p) continue;
+            const x = p.x - minX;
+            const y = p.y - minY;
+            if (!pathStarted) {
+              ctx.moveTo(x, y);
+              pathStarted = true;
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+
+          // Sharp core transit route line
+          ctx.beginPath();
+          ctx.strokeStyle = primaryColor;
+          ctx.lineWidth = 4.5;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          pathStarted = false;
+          for (const stop of stops) {
+            const p = projection.fromLatLngToDivPixel(new google.maps.LatLng(stop.lat!, stop.lng!));
+            if (!p) continue;
+            const x = p.x - minX;
+            const y = p.y - minY;
+            if (!pathStarted) {
+              ctx.moveTo(x, y);
+              pathStarted = true;
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+
+          // Subtle dashed white center stripe
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([8, 8]);
+          pathStarted = false;
+          for (const stop of stops) {
+            const p = projection.fromLatLngToDivPixel(new google.maps.LatLng(stop.lat!, stop.lng!));
+            if (!p) continue;
+            const x = p.x - minX;
+            const y = p.y - minY;
+            if (!pathStarted) {
+              ctx.moveTo(x, y);
+              pathStarted = true;
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Draw stop nodes along corridor
+          for (let i = 0; i < stops.length; i++) {
+            const stop = stops[i];
+            const p = projection.fromLatLngToDivPixel(new google.maps.LatLng(stop.lat!, stop.lng!));
+            if (!p) continue;
+            const cx = p.x - minX;
+            const cy = p.y - minY;
+
+            const isTerminal = stop.isStart || stop.isLast;
+            const r = isTerminal ? 7.5 : stop.isCurrentNext ? 6 : 4;
+            newRenderedRouteStops.push({ stop, cx, cy, radius: r + 8 });
+
+            if (isTerminal) {
+              // Terminal halo
+              ctx.beginPath();
+              ctx.arc(cx, cy, 14, 0, 2 * Math.PI);
+              ctx.fillStyle = stop.isStart ? 'rgba(0, 109, 66, 0.18)' : 'rgba(220, 38, 38, 0.18)';
+              ctx.fill();
+
+              // Terminal circle
+              ctx.beginPath();
+              ctx.arc(cx, cy, 7.5, 0, 2 * Math.PI);
+              ctx.fillStyle = stop.isStart ? '#006d42' : '#dc2626';
+              ctx.fill();
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 2.5;
+              ctx.stroke();
+
+              // Label
+              ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
+              const label = `${stop.isStart ? 'ORIGIN' : 'TERMINUS'}: ${stop.name}`;
+              const metrics = ctx.measureText(label);
+              const boxW = metrics.width + 12;
+              const boxH = 18;
+              const boxX = cx - boxW / 2;
+              const boxY = cy - 24;
+
+              ctx.fillStyle = stop.isStart ? '#006d42' : '#dc2626';
+              ctx.beginPath();
+              if (ctx.roundRect) {
+                ctx.roundRect(boxX, boxY, boxW, boxH, 4);
+              } else {
+                ctx.rect(boxX, boxY, boxW, boxH);
+              }
+              ctx.fill();
+
+              ctx.fillStyle = '#ffffff';
+              ctx.textAlign = 'center';
+              ctx.fillText(label, cx, boxY + 13);
+            } else if (stop.isCurrentNext) {
+              // Next approaching stop (pulsing golden aura)
+              ctx.beginPath();
+              ctx.arc(cx, cy, 12, 0, 2 * Math.PI);
+              ctx.fillStyle = 'rgba(245, 158, 11, 0.25)';
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+              ctx.fillStyle = '#f59e0b';
+              ctx.fill();
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+
+              ctx.font = 'bold 10px system-ui, -apple-system, sans-serif';
+              ctx.fillStyle = '#78350f';
+              ctx.textAlign = 'center';
+              ctx.fillText(`NEXT: ${stop.name}`, cx, cy - 9);
+            } else {
+              // Regular intermediate stop
+              ctx.beginPath();
+              ctx.arc(cx, cy, 4, 0, 2 * Math.PI);
+              ctx.fillStyle = '#ffffff';
+              ctx.fill();
+              ctx.strokeStyle = '#1e293b';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+
+              if (zoom >= 13) {
+                ctx.font = '500 9px system-ui, -apple-system, sans-serif';
+                ctx.fillStyle = '#334155';
+                ctx.textAlign = 'center';
+                ctx.fillText(stop.name, cx, cy - 7);
+              }
+            }
+          }
+        }
+      }
+      renderedRouteStopsRef.current = newRenderedRouteStops;
 
       // 3. Draw Transit Hubs / Bus Stands if toggled on
       const newRenderedHubs: RenderedHubItem[] = [];
@@ -611,10 +773,6 @@ function HighPerformanceBusCanvas({
     };
 
     overlay.onRemove = function () {
-      if (mouseMoveRaf) {
-        cancelAnimationFrame(mouseMoveRaf);
-        mouseMoveRaf = null;
-      }
       if (canvas && canvas.parentNode) {
         canvas.parentNode.removeChild(canvas);
       }
@@ -624,6 +782,9 @@ function HighPerformanceBusCanvas({
     overlay.setMap(map);
 
     return () => {
+      google.maps.event.removeListener(clickListener);
+      google.maps.event.removeListener(mouseMoveListener);
+      map.setOptions({ draggableCursor: null });
       overlay.setMap(null);
       overlayRef.current = null;
     };
@@ -651,9 +812,23 @@ function MapCameraController({
 }) {
   const map = useMap();
   const lastFittedRoute = useRef<string | null>(null);
+  const lastAppliedTarget = useRef<{ lat: number; lng: number; zoom?: number } | null>(null);
 
   useEffect(() => {
     if (!map || !flyToTarget) return;
+
+    // Avoid overriding user's manual zoom or pan if flyToTarget coordinates haven't changed
+    const prev = lastAppliedTarget.current;
+    if (
+      prev &&
+      Math.abs(prev.lat - flyToTarget.lat) < 0.00001 &&
+      Math.abs(prev.lng - flyToTarget.lng) < 0.00001 &&
+      prev.zoom === flyToTarget.zoom
+    ) {
+      return;
+    }
+    lastAppliedTarget.current = flyToTarget;
+
     map.panTo({ lat: flyToTarget.lat, lng: flyToTarget.lng });
     if (flyToTarget.zoom && map.getZoom() !== flyToTarget.zoom) {
       map.setZoom(flyToTarget.zoom);
@@ -674,6 +849,124 @@ function MapCameraController({
   return null;
 }
 
+/**
+ * Interactive Toolbar placed directly inside Google Maps context.
+ * Features dedicated Zoom-In (Enlarge) and Zoom-Out (Diminish) controls,
+ * Center on Delhi, GPS Location, Hubs toggle, and Nearest Stand finder.
+ */
+function MapInteractiveToolbar({
+  onFindNearestStand,
+  isFindingNearest,
+  showHubs,
+  onToggleHubs,
+  onCenterDelhi,
+  onLocateMe,
+}: {
+  onFindNearestStand: () => void;
+  isFindingNearest: boolean;
+  showHubs: boolean;
+  onToggleHubs: () => void;
+  onCenterDelhi: () => void;
+  onLocateMe: () => void;
+}) {
+  const map = useMap();
+
+  const handleZoomIn = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!map) return;
+    map.setZoom((map.getZoom() || 12) + 1);
+  };
+
+  const handleZoomOut = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!map) return;
+    map.setZoom((map.getZoom() || 12) - 1);
+  };
+
+  return (
+    <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 flex flex-col items-center gap-2 pointer-events-auto">
+      {/* Nearest Bus Stand Action Button */}
+      <button
+        id="btn-nearest-bus-stand"
+        onClick={(e) => {
+          e.stopPropagation();
+          onFindNearestStand();
+        }}
+        disabled={isFindingNearest}
+        className="w-9 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md border border-emerald-500 transition-all cursor-pointer flex items-center justify-center group"
+        title="Find Nearest DTC Bus Stand"
+      >
+        {isFindingNearest ? (
+          <Loader2 className="w-4 h-4 animate-spin text-white" />
+        ) : (
+          <MapPin className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+        )}
+      </button>
+
+      {/* Map View & Zoom Helpers */}
+      <div className="flex flex-col gap-0.5 bg-white/95 backdrop-blur-md p-1 rounded-xl shadow-md border border-slate-200">
+        <button
+          id="map-zoom-in-btn"
+          onClick={handleZoomIn}
+          title="Enlarge Map (Zoom In +)"
+          className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-700 transition cursor-pointer flex items-center justify-center group"
+        >
+          <Plus className="w-4 h-4 text-slate-800 group-hover:scale-110 transition-transform" />
+        </button>
+
+        <button
+          id="map-zoom-out-btn"
+          onClick={handleZoomOut}
+          title="Diminish Map (Zoom Out -)"
+          className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-700 transition cursor-pointer flex items-center justify-center group border-b border-slate-100"
+        >
+          <Minus className="w-4 h-4 text-slate-800 group-hover:scale-110 transition-transform" />
+        </button>
+
+        <button
+          id="map-center-delhi-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onCenterDelhi();
+          }}
+          title="Center on Central Delhi (Connaught Place)"
+          className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-700 transition cursor-pointer flex items-center justify-center"
+        >
+          <Compass className="w-4 h-4 text-emerald-600" />
+        </button>
+
+        <button
+          id="map-locate-me-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onLocateMe();
+          }}
+          title="Locate My GPS Position"
+          className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-700 transition cursor-pointer flex items-center justify-center"
+        >
+          <Navigation className="w-4 h-4 text-blue-600" />
+        </button>
+
+        <button
+          id="map-toggle-hubs-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleHubs();
+          }}
+          title={showHubs ? 'Hide Bus Stands / Terminals' : 'Show All Bus Stands / Terminals'}
+          className={`w-8 h-8 rounded-lg transition cursor-pointer flex items-center justify-center ${
+            showHubs
+              ? 'bg-amber-500 text-white shadow-xs'
+              : 'hover:bg-slate-100 text-slate-700'
+          }`}
+        >
+          <Landmark className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export const BusMap: React.FC<BusMapProps> = ({
   buses,
   selectedBus,
@@ -686,6 +979,8 @@ export const BusMap: React.FC<BusMapProps> = ({
   onSelectRoute,
   onSelectHub,
   triggerNearestStandCount,
+  mapType = 'transit',
+  routeProgression,
 }) => {
   const [hoveredBus, setHoveredBus] = useState<HoveredBusInfo | null>(null);
   const [nearestStand, setNearestStand] = useState<NearestStandState | null>(null);
@@ -704,16 +999,17 @@ export const BusMap: React.FC<BusMapProps> = ({
     const computeNearest = (userLat: number, userLng: number, isGps: boolean) => {
       const { hub: closest, distanceKm: minDistance } = findNearestStandFromAll(userLat, userLng);
 
-      const nearbyBuses = buses.filter(
-        (b) => calculateDistanceKm(closest.lat, closest.lng, b.lat, b.lng) <= 2.5
-      ).length;
+      const closeBusesList = buses.filter(
+        (b) => calculateDistanceKm(closest.lat, closest.lng, b.lat, b.lng) <= 3.0
+      );
 
       setUserLocation({ lat: userLat, lng: userLng });
 
       setNearestStand({
         hub: closest,
         distanceKm: minDistance,
-        nearbyBusCount: nearbyBuses,
+        nearbyBusCount: closeBusesList.length,
+        nearbyBuses: closeBusesList,
         referenceName: isGps ? 'Your GPS Location' : 'Central Delhi',
         userCoords: { lat: userLat, lng: userLng },
       });
@@ -743,6 +1039,48 @@ export const BusMap: React.FC<BusMapProps> = ({
       computeNearest(28.6297, 77.2142, false);
     }
   }, [buses]);
+
+  // Group nearby buses at nearest stand by route for sequential numbered listing
+  const nearestStandRoutes = useMemo<
+    Array<{ routeId: string; buses: DTCBus[]; startPoint: string; lastPoint: string }>
+  >(() => {
+    if (!nearestStand) return [];
+    const busesList = nearestStand.nearbyBuses || [];
+    const grouped: Record<string, DTCBus[]> = {};
+    busesList.forEach((b) => {
+      const r = (b.routeId || 'Transit').trim().toUpperCase();
+      if (!grouped[r]) grouped[r] = [];
+      grouped[r].push(b);
+    });
+
+    // Also include majorRoutes of the hub if any were not in nearby buses
+    if (nearestStand.hub.majorRoutes) {
+      nearestStand.hub.majorRoutes.slice(0, 3).forEach((r) => {
+        const cleanR = r.trim().toUpperCase();
+        if (!grouped[cleanR]) {
+          const sysBuses = buses.filter(
+            (b) => b.routeId && b.routeId.trim().toUpperCase() === cleanR
+          );
+          if (sysBuses.length > 0) {
+            grouped[cleanR] = sysBuses.slice(0, 4);
+          }
+        }
+      });
+    }
+
+    return Object.entries(grouped)
+      .map(([routeId, routeBuses]) => {
+        const known = DTC_KNOWN_ROUTES[routeId];
+        const registry = DELHI_ROUTE_REGISTRY[routeId];
+        return {
+          routeId,
+          buses: routeBuses,
+          startPoint: known?.startPoint || registry?.startPoint || 'Origin Terminal',
+          lastPoint: known?.lastPoint || registry?.lastPoint || 'Destination Terminal',
+        };
+      })
+      .slice(0, 5);
+  }, [nearestStand, buses]);
 
   // Listen for trigger from parent (e.g. FilterBar button)
   useEffect(() => {
@@ -788,10 +1126,12 @@ export const BusMap: React.FC<BusMapProps> = ({
     );
   };
 
-  const activeProgression = useMemo(
-    () => (selectedBus ? resolveBusProgression(selectedBus) : null),
-    [selectedBus?.id, selectedBus?.lat, selectedBus?.lng, selectedBus?.routeId]
-  );
+  const activeProgression = useMemo(() => {
+    if (routeProgression) return routeProgression;
+    if (selectedBus) return resolveBusProgression(selectedBus, buses);
+    if (selectedRoute) return resolveRouteProgression(selectedRoute, buses);
+    return null;
+  }, [routeProgression, selectedBus, selectedRoute, buses]);
 
   return (
     <div className="relative w-full h-full min-h-[520px] rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm bg-slate-100 flex flex-col font-sans">
@@ -801,9 +1141,10 @@ export const BusMap: React.FC<BusMapProps> = ({
           defaultZoom={12}
           minZoom={9}
           maxZoom={19}
+          mapTypeId={mapType === 'satellite' ? 'hybrid' : 'roadmap'}
           gestureHandling="greedy"
           disableDefaultUI={false}
-          zoomControl={true}
+          zoomControl={false}
           mapTypeControl={false}
           streetViewControl={false}
           fullscreenControl={false}
@@ -820,8 +1161,12 @@ export const BusMap: React.FC<BusMapProps> = ({
             busTrail={busTrail}
             setHoveredBus={setHoveredBus}
             nearestStand={nearestStand}
-            onSelectHub={onSelectHub}
+            onSelectHub={(hub) => {
+              setSelectedHubPopup(hub);
+              if (onSelectHub) onSelectHub(hub);
+            }}
             userLocation={userLocation}
+            routeProgression={activeProgression}
           />
 
           {/* Camera animator */}
@@ -829,6 +1174,16 @@ export const BusMap: React.FC<BusMapProps> = ({
             flyToTarget={activeFlyTo}
             selectedRoute={selectedRoute}
             buses={buses}
+          />
+
+          {/* Interactive Map Toolbar (Zoom in/out, Center, GPS, Hubs, Nearest Stand) */}
+          <MapInteractiveToolbar
+            onFindNearestStand={handleFindNearestStand}
+            isFindingNearest={isFindingNearest}
+            showHubs={showHubs}
+            onToggleHubs={onToggleHubs}
+            onCenterDelhi={handleCenterDelhi}
+            onLocateMe={handleLocateMe}
           />
         </Map>
       </APIProvider>
@@ -858,113 +1213,165 @@ export const BusMap: React.FC<BusMapProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* NEAREST BUS STAND FLOATING BANNER                                         */}
+      {/* NEAREST BUS STAND FLOATING BANNER (WITH CLICKABLE BUS NUMBERS & ROUTES)   */}
       {/* ========================================================================= */}
       {nearestStand && (
         <div
           id="nearest-stand-banner"
-          className="absolute top-3 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-auto sm:max-w-lg z-20 bg-white/95 backdrop-blur-md px-4 py-3 rounded-xl border border-emerald-300 shadow-xl flex items-center justify-between gap-3 text-xs"
+          className="absolute top-20 left-3 right-16 sm:top-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-auto sm:max-w-xl z-20 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-emerald-300 shadow-xl flex flex-col gap-2.5 text-xs animate-in fade-in duration-200"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+          {/* Header Row */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold shadow-xs">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase font-black text-emerald-700 tracking-wider flex items-center gap-1.5">
+                  <span>Nearest Bus Stand</span>
+                  <span className="text-slate-400">•</span>
+                  <span className="text-slate-500 font-normal">{nearestStand.referenceName}</span>
+                </div>
+                <div className="font-extrabold text-slate-900 text-sm leading-tight flex items-center gap-1.5 flex-wrap">
+                  <span>{nearestStand.hub.name}</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600">
+                    {formatDistance(nearestStand.distanceKm)} away
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider flex items-center gap-1.5">
-                <span>Nearest Bus Stand</span>
-                <span className="text-slate-400">•</span>
-                <span className="text-slate-500 font-normal">{nearestStand.referenceName}</span>
-              </div>
-              <div className="font-bold text-slate-900 text-sm">{nearestStand.hub.name}</div>
-              <div className="text-slate-600 text-[11px] flex flex-wrap items-center gap-2 mt-0.5">
-                <span>Distance: <strong className="text-slate-900">{formatDistance(nearestStand.distanceKm)}</strong></span>
-                <span>•</span>
-                <span className="text-emerald-700 font-semibold">{nearestStand.nearbyBusCount} active buses within 2.5 km</span>
-              </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => setSelectedHubPopup(nearestStand.hub)}
+                className="px-2.5 py-1.5 rounded-lg bg-[#a83301] hover:bg-[#842500] text-white font-bold text-[11px] shadow-xs transition cursor-pointer flex items-center gap-1"
+                title="View all routes and buses for this stand"
+              >
+                <span>Stand Details</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${nearestStand.hub.lat},${nearestStand.hub.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] shadow-xs transition"
+                title="Get Walking / Driving Directions"
+              >
+                <span>Directions</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <button
+                id="close-nearest-stand-banner-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setNearestStand(null);
+                }}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-700 font-bold text-[11px] transition cursor-pointer flex items-center gap-1 border border-slate-200 shadow-2xs group shrink-0"
+                title="Close Nearest Bus Stand"
+              >
+                <X className="w-3.5 h-3.5 text-slate-500 group-hover:text-red-600 transition-colors" />
+                <span>Close</span>
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${nearestStand.hub.lat},${nearestStand.hub.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] shadow-sm transition"
-            >
-              <span>Directions</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-            <button
-              id="close-nearest-stand-banner-btn"
-              onClick={() => setNearestStand(null)}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-              title="Dismiss"
-            >
-              <X className="w-4 h-4" />
-            </button>
+          {/* Connected Routes & Live Buses List */}
+          <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-slate-700 flex items-center gap-1">
+                <Bus className="w-3.5 h-3.5 text-[#a83301]" />
+                <span>Approaching Buses by Route (Click bus to track):</span>
+              </span>
+              <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.2 rounded-full border border-emerald-200">
+                {nearestStand.nearbyBuses?.length || nearestStand.nearbyBusCount} live nearby
+              </span>
+            </div>
+
+            {/* List of routes with clickable bus numbers */}
+            {nearestStandRoutes.length === 0 ? (
+              <div className="p-2 bg-slate-50 rounded-xl text-slate-500 text-[11px] flex items-center justify-between">
+                <span>DTC frequent service on this corridor</span>
+                <button
+                  onClick={() => setSelectedHubPopup(nearestStand.hub)}
+                  className="font-bold text-[#a83301] underline ml-2 cursor-pointer"
+                >
+                  View Connected Routes
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-0.5 no-scrollbar">
+                {nearestStandRoutes.map((group) => (
+                  <div
+                    key={group.routeId}
+                    className="p-2 rounded-xl bg-slate-50/90 border border-slate-200/80 flex flex-col gap-1.5"
+                  >
+                    {/* Route line & endpoints */}
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        onClick={() => {
+                          if (onSelectRoute) onSelectRoute(group.routeId);
+                        }}
+                        className="group inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-700 hover:bg-[#a83301] text-white font-extrabold text-[11px] transition cursor-pointer"
+                        title={`Select Route ${group.routeId} to view details and full timeline on map`}
+                      >
+                        <span>Route {group.routeId}</span>
+                        <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+
+                      <span className="text-[10px] text-slate-500 truncate max-w-[200px]">
+                        {group.startPoint} ➔ {group.lastPoint}
+                      </span>
+                    </div>
+
+                    {/* Buses in same route shown one by one in a line with numbers */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                      {group.buses.map((bus, bIdx) => (
+                        <button
+                          key={bus.id}
+                          onClick={() => {
+                            if (onSelectRoute) onSelectRoute(bus.routeId);
+                            onSelectBus(bus);
+                          }}
+                          className="group inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white hover:bg-amber-50 border border-slate-200 hover:border-[#a83301] shadow-2xs text-[11px] font-bold text-slate-800 transition cursor-pointer shrink-0"
+                          title={`Click to track Bus ${bus.id} (${bus.speedKmH} km/h)`}
+                        >
+                          <span className="w-4 h-4 rounded-full bg-slate-800 text-white text-[9px] font-black flex items-center justify-center group-hover:bg-[#a83301]">
+                            #{bIdx + 1}
+                          </span>
+                          <span className="font-mono text-slate-900 group-hover:text-[#a83301]">
+                            {bus.id}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-normal">
+                            {bus.speedKmH} km/h
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Banner Dismiss / Close Footer Action */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+              <span className="text-slate-400 text-[10px]">
+                Delhi Open Transit Data • Real-time Stand Info
+              </span>
+              <button
+                id="close-nearest-stand-banner-footer-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setNearestStand(null);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-700 font-bold text-[11px] transition cursor-pointer flex items-center gap-1 border border-slate-200"
+              >
+                <X className="w-3 h-3 text-slate-500" />
+                <span>Close Nearest Stand</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
-
-      {/* ========================================================================= */}
-      {/* MAP CONTROLS (TOP RIGHT)                                                 */}
-      {/* ========================================================================= */}
-      <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-2">
-        {/* Nearest Bus Stand Action Button */}
-        <button
-          id="btn-nearest-bus-stand"
-          onClick={handleFindNearestStand}
-          disabled={isFindingNearest}
-          className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-xs shadow-md border border-emerald-500 transition-all cursor-pointer group"
-          title="Find closest DTC bus stand to your location"
-        >
-          {isFindingNearest ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin text-white" />
-              <span>Locating Stand...</span>
-            </>
-          ) : (
-            <>
-              <MapPin className="w-4 h-4 text-emerald-200 group-hover:scale-110 transition-transform" />
-              <span>Nearest Bus Stand</span>
-            </>
-          )}
-        </button>
-
-        {/* Map View Helpers */}
-        <div className="flex flex-col gap-1 bg-white/95 backdrop-blur p-1 rounded-xl shadow-md border border-slate-200">
-          <button
-            id="map-center-delhi-btn"
-            onClick={handleCenterDelhi}
-            title="Center on Central Delhi (Connaught Place)"
-            className="p-2 rounded-lg hover:bg-slate-100 text-slate-700 transition cursor-pointer"
-          >
-            <Compass className="w-4 h-4 text-emerald-600" />
-          </button>
-
-          <button
-            id="map-locate-me-btn"
-            onClick={handleLocateMe}
-            title="Locate My GPS Position"
-            className="p-2 rounded-lg hover:bg-slate-100 text-slate-700 transition cursor-pointer"
-          >
-            <Navigation className="w-4 h-4 text-blue-600" />
-          </button>
-
-          <button
-            id="map-toggle-hubs-btn"
-            onClick={onToggleHubs}
-            title={showHubs ? 'Hide Bus Stands / Terminals' : 'Show All Bus Stands / Terminals'}
-            className={`p-2 rounded-lg transition cursor-pointer ${
-              showHubs
-                ? 'bg-amber-500 text-white shadow-sm'
-                : 'hover:bg-slate-100 text-slate-700'
-            }`}
-          >
-            <Landmark className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
 
       {/* ========================================================================= */}
       {/* MAP LEGEND (BOTTOM LEFT)                                                 */}
@@ -1019,6 +1426,17 @@ export const BusMap: React.FC<BusMapProps> = ({
                 <Gauge className="w-3 h-3" />
                 {selectedBus.speedKmH} km/h
               </span>
+              <button
+                id="close-selected-bus-dock-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectBus(null);
+                }}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                title="Dismiss details"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
@@ -1046,6 +1464,24 @@ export const BusMap: React.FC<BusMapProps> = ({
             </div>
           )}
         </div>
+      )}
+      {/* Bus Stand Details Modal */}
+      {selectedHubPopup && (
+        <BusStandDetailModal
+          hub={selectedHubPopup}
+          buses={buses}
+          userCoords={userLocation}
+          onClose={() => setSelectedHubPopup(null)}
+          onSelectBus={(bus) => {
+            onSelectBus(bus);
+            if (onSelectRoute) onSelectRoute(bus.routeId);
+            setInternalFlyTo({ lat: bus.lat, lng: bus.lng, zoom: 16 });
+          }}
+          onSelectRoute={(routeId) => {
+            if (onSelectRoute) onSelectRoute(routeId);
+            setSelectedHubPopup(null);
+          }}
+        />
       )}
     </div>
   );
