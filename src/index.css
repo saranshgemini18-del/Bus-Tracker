@@ -3,45 +3,45 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #a83301;
+  --color-primary: #6366f1; /* Indigo 500 */
   --color-on-primary: #ffffff;
-  --color-primary-container: #ca4a1c;
-  --color-on-primary-container: #fffbff;
-  --color-primary-fixed: #ffdbd0;
-  --color-primary-fixed-dim: #ffb59d;
-  --color-on-primary-fixed: #390b00;
-  --color-on-primary-fixed-variant: #842500;
+  --color-primary-container: #818cf8; /* Indigo 400 */
+  --color-on-primary-container: #e0e7ff; /* Indigo 100 */
+  --color-primary-fixed: #e0e7ff;
+  --color-primary-fixed-dim: #c7d2fe;
+  --color-on-primary-fixed: #312e81; /* Indigo 900 */
+  --color-on-primary-fixed-variant: #4338ca; /* Indigo 700 */
 
-  --color-secondary: #006d42;
+  --color-secondary: #ec4899; /* Pink 500 */
   --color-on-secondary: #ffffff;
-  --color-secondary-container: #93f3ba;
-  --color-on-secondary-container: #007145;
-  --color-secondary-fixed: #96f6bd;
-  --color-secondary-fixed-dim: #7adaa2;
-  --color-on-secondary-fixed: #002111;
+  --color-secondary-container: #f472b6; /* Pink 400 */
+  --color-on-secondary-container: #fce7f3; /* Pink 100 */
+  --color-secondary-fixed: #fce7f3;
+  --color-secondary-fixed-dim: #fbcfe8;
+  --color-on-secondary-fixed: #831843; /* Pink 900 */
 
-  --color-tertiary: #1a637c;
+  --color-tertiary: #14b8a6; /* Teal 500 */
   --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #3a7c96;
-  --color-on-tertiary-container: #fbfdff;
-  --color-tertiary-fixed: #bde9ff;
-  --color-tertiary-fixed-dim: #90cfec;
-  --color-on-tertiary-fixed: #001f2a;
+  --color-tertiary-container: #2dd4bf; /* Teal 400 */
+  --color-on-tertiary-container: #ccfbf1; /* Teal 100 */
+  --color-tertiary-fixed: #ccfbf1;
+  --color-tertiary-fixed-dim: #99f6e4;
+  --color-on-tertiary-fixed: #134e4a; /* Teal 900 */
 
-  --color-surface: #f8f9ff;
-  --color-surface-dim: #d6dae4;
-  --color-surface-bright: #f8f9ff;
+  --color-surface: #f9fafb; /* Gray 50 */
+  --color-surface-dim: #e5e7eb; /* Gray 200 */
+  --color-surface-bright: #ffffff;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f0f4fd;
-  --color-surface-container: #eaeef8;
-  --color-surface-container-high: #e4e8f2;
-  --color-surface-container-highest: #dee2ec;
-  --color-surface-variant: #dee2ec;
+  --color-surface-container-low: #f3f4f6; /* Gray 100 */
+  --color-surface-container: #e5e7eb; /* Gray 200 */
+  --color-surface-container-high: #d1d5db; /* Gray 300 */
+  --color-surface-container-highest: #9ca3af; /* Gray 400 */
+  --color-surface-variant: #d1d5db;
 
-  --color-on-surface: #171c23;
-  --color-on-surface-variant: #59413a;
-  --color-on-background: #171c23;
-  --color-background: #f8f9ff;
+  --color-on-surface: #111827; /* Gray 900 */
+  --color-on-surface-variant: #4b5563; /* Gray 600 */
+  --color-on-background: #111827; /* Gray 900 */
+  --color-background: #f3f4f6; /* Gray 100 */
 
   --color-outline: #8d7168;
   --color-outline-variant: #e1bfb5;
@@ -116,26 +116,34 @@ html.dark {
 }
 
 html.dark body {
-  background-color: #0b0f17;
-  color: #f1f5f9;
+  background-color: #111827; /* Gray 900 */
+  color: #f9fafb; /* Gray 50 */
 }
 
 .dark {
-  --color-surface: #0f141c;
-  --color-surface-dim: #090d14;
-  --color-surface-bright: #171f2b;
-  --color-surface-container-lowest: #0c1017;
-  --color-surface-container-low: #131922;
-  --color-surface-container: #18202b;
-  --color-surface-container-high: #202b3a;
-  --color-surface-container-highest: #283547;
-  --color-surface-variant: #283547;
-  --color-on-surface: #f1f5f9;
-  --color-on-surface-variant: #cbd5e1;
-  --color-background: #0b0f17;
-  --color-on-background: #f1f5f9;
-  --color-outline: #475569;
-  --color-outline-variant: #334155;
+  --color-primary: #818cf8; /* Indigo 400 */
+  --color-primary-container: #4f46e5; /* Indigo 600 */
+  --color-on-primary-container: #e0e7ff; /* Indigo 100 */
+
+  --color-secondary: #f472b6; /* Pink 400 */
+  --color-secondary-container: #db2777; /* Pink 600 */
+  --color-on-secondary-container: #fce7f3; /* Pink 100 */
+
+  --color-surface: #1f2937; /* Gray 800 */
+  --color-surface-dim: #111827; /* Gray 900 */
+  --color-surface-bright: #374151; /* Gray 700 */
+  --color-surface-container-lowest: #030712; /* Gray 950 */
+  --color-surface-container-low: #111827; /* Gray 900 */
+  --color-surface-container: #1f2937; /* Gray 800 */
+  --color-surface-container-high: #374151; /* Gray 700 */
+  --color-surface-container-highest: #4b5563; /* Gray 600 */
+  --color-surface-variant: #4b5563;
+  --color-on-surface: #f9fafb; /* Gray 50 */
+  --color-on-surface-variant: #9ca3af; /* Gray 400 */
+  --color-background: #111827; /* Gray 900 */
+  --color-on-background: #f9fafb; /* Gray 50 */
+  --color-outline: #4b5563; /* Gray 600 */
+  --color-outline-variant: #374151; /* Gray 700 */
 }
 
 
